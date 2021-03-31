@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 	"github.com/shima-park/agollo"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
 )
 
 // NewAgolloServer 创建一个新的 AgolloServer
@@ -15,9 +17,9 @@ func NewAgolloServer() *AgolloServer {
 
 // Worker 工作者接口
 type Worker struct {
-	AgolloClient *agollo.Agollo
+	AgolloClient agollo.Agollo
 	Cluster string
-	Consul_addr string
+	ConsulAddr string
 }
 
 // AgolloServer server 服务
@@ -37,25 +39,25 @@ func (s *AgolloServer) AddWorker(worker Worker) {
 // Run 运行 server
 func (s *AgolloServer) Run() {
 	for _, worker := range s.workers {
-		errorCh := worker.Agollo_client.Start()
-		watchCh := worker.Agollo_client.Watch()
+		errorCh := worker.AgolloClient.Start()
+		watchCh := worker.AgolloClient.Watch()
 		go func(worker Worker) {
 			for {
 				select {
-				case <-ctx.Done():
-				    ccommon.CLoger.Runtime.Infof(worker.Cluster, "watch quit...")
+				case <-s.ctx.Done():
+				    ccommon.CLogger.Runtime.Infof(worker.Cluster, "watch quit...")
 				    return
 				case err := <-errorCh:
-					ccommon.CLoger.Runtime.Errorf("Error:", err)
+					ccommon.CLogger.Runtime.Errorf("Error:", err)
 				case update := <-watchCh:
 					for path, value := range update.NewValue {
 						v, _ := value.(string)
-						err := common.writeOne(worker.Consul_addr, path, v)
+						err := cconsul.WriteOne(worker.ConsulAddr, path, v)
 						if err != nil {
-							ccommon.CLoger.Runtime.Errorf("consul_addr[%s], err[%v]\n", worker.Consul_addr, err)
+							ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", worker.ConsulAddr, err)
 						}
 					}
-					ccommon.CLoger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
+					ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
 						worker.Cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
 				}
 			}
