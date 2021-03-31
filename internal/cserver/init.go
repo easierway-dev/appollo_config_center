@@ -48,7 +48,7 @@ func Init() {
 				work := &Worker{
 					Agollo_client:  aClient,
 					Cluster:        cluster,
-					Consul_addr:    consulAddr
+					Consul_addr:    consulAddr,
 				}
 				server.AddWorker(work)
 			} else {
