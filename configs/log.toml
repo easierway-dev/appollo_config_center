@@ -1,0 +1,5 @@
+[runtime_log]
+ path = "./log/runtime.log" # 若不设置，直接输出stdout
+ level = "debug" # [info|warn|debug|fatal] 默认 debug
+ report_caller = true  # 是否记录调用文件&行数，TimeFormatter有效
+ format = "RuntimeFormatter" # [TimeFormatter|AccessFormatter|RuntimeFormatter] 默认 AccessFormatter, AccessFormatter与RuntimeFormatter会打印文件&行号
