@@ -4,7 +4,7 @@ import (
         "os"
         "log"
 	"github.com/spf13/viper"
-        "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+        "appollo_config_center/internal/ccommon"
 )
 
 
@@ -48,7 +48,7 @@ func Init() {
 				work := &Worker{
 					Agollo_client:  aClient,
 					Cluster:        cluster,
-					Consul_addr:    consulAddr
+					Consul_addr:    consulAddr,
 				}
 				server.AddWorker(work)
 			} else {

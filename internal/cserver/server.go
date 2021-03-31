@@ -3,6 +3,7 @@ package cserver
 import (
 	"context"
 	"sync"
+	"github.com/shima-park/agollo"
 )
 
 // NewAgolloServer 创建一个新的 AgolloServer
@@ -13,8 +14,8 @@ func NewAgolloServer() *AgolloServer {
 }
 
 // Worker 工作者接口
-type Worker interface {
-	Agollo_client *agollo
+type Worker struct {
+	AgolloClient *agollo.Agollo
 	Cluster string
 	Consul_addr string
 }

@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
+	"appollo_config_center/internal/cserver"
 	"net/http"
 	_ "net/http/pprof"
 )
