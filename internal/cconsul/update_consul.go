@@ -5,16 +5,16 @@ import (
 	"os"
 )
 
-func writeOne(addr, path, value string) error {
-	client, err := newClient(addr)
+func WriteOne(addr, path, value string) error {
+	client, err := NewClient(addr)
 	if err != nil {
 		println(err)
 		os.Exit(-1)
 	}
-	return writeData(client, path, value)
+	return WriteData(client, path, value)
 }
 
-func newClient(addr string) (*api.Client, error) {
+func NewClient(addr string) (*api.Client, error) {
 	conf := api.DefaultConfig()
 	if addr != "" {
 		conf.Address = addr
@@ -26,7 +26,7 @@ func newClient(addr string) (*api.Client, error) {
 	return client, nil
 }
 
-func writeData(client *api.Client, path, value string) error {
+func WriteData(client *api.Client, path, value string) error {
 	kv := client.KV()
 	_, err := kv.Put(&api.KVPair{
 		Key:   path,
