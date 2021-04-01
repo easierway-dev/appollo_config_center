@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"net/http"
 	_ "net/http/pprof"
 )
@@ -15,6 +16,14 @@ import (
 // AppVersion 版本信息
 var AppVersion = "unknown"
 var PprofPort *string
+
+func handleKillSignal() {
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, os.Interrupt, os.Kill, syscall.SIGTERM)
+	<-sigchan
+	ccommon.CLogger.Runtime.Infof("get shutdown signal.")
+	os.Exit(0)
+}
 
 func main() {
 	version := flag.Bool("v", false, "print current version")
@@ -33,12 +42,9 @@ func main() {
 	if server, err = cserver.Init(); err != nil {
 		panic(err)
 	}
-
 	go server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
-	stop := make(chan os.Signal)
-	signal.Notify(stop, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
-	<-stop
-
+	ccommon.CLogger.Runtime.Infof("agollo_server start success !!! will listen appolo update ...")
+	handleKillSignal()
 	server.GracefulStop()
 }
