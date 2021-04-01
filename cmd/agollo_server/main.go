@@ -37,7 +37,7 @@ func main() {
 	go server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
 	stop := make(chan os.Signal)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(stop, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
 
 	server.GracefulStop()

@@ -31,11 +31,11 @@ type BaseConf struct {
 type ConfigCenterInfo struct {
     ConfigServerUrl string `toml:"ip_port"`
     AppClusterMap map[string][]string `toml:"app_cluster_map"`
-    ClusterMap map[string]*ClusterInfo `toml:"cluster_map"`
+    ClusterMap map[string]ClusterInfo `toml:"cluster_map"`
 }
 
 type ClusterInfo struct {
-    ClusterDetail map[string]string
+    ConsulAddr string `toml:"consul_addr"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {

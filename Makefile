@@ -10,9 +10,9 @@ all: build test # golint
 .PHONY: build
 build: mod
 	go build -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)"  -o ${BIN_NAME} ./cmd/agollo_server/main.go
-	mkdir -p output/bin
-	cp -r ${BIN_NAME} output/bin
-	cp -r configs output/
+	mkdir -p deployments/output/bin
+	cp -r ${BIN_NAME} deployments/output/bin
+	cp -r configs deployments/output/
 
 .PHONY: cover
 cover: mod
@@ -46,6 +46,6 @@ golint: golang
 	golangci-lint run cmd/... internal/... -v
 
 clean:
-	rm -rf output
+	rm -rf deployments/output
 
 
