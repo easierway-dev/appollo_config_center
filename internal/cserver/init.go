@@ -4,7 +4,6 @@ import (
 	"strings"
         "os"
         "log"
-	"github.com/spf13/viper"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"github.com/shima-park/agollo"
 )
@@ -15,7 +14,7 @@ func Init()(*AgolloServer, error) {
 
         log.SetFlags(log.Lshortfile | log.LstdFlags)
         //init config
-        cfg, err := ccommon.ParseBaseConfig(viper.GetString(ccommon.DirFlag))
+        cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
         if err != nil {
                 log.Printf("ParseConfig error: %s\n", err.Error())
                 return nil, err
