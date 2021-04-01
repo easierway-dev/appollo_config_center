@@ -1,45 +1,45 @@
 package cserver
 
 import (
+	"log"
+	"os"
 	"strings"
-        "os"
-        "log"
-        "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+
 	"github.com/shima-park/agollo"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
 
-
-func Init()(*AgolloServer, error) { 
+func Init() (*AgolloServer, error) {
 	var server *AgolloServer
 
-        log.SetFlags(log.Lshortfile | log.LstdFlags)
-        //init config
-        cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
-        if err != nil {
-                log.Printf("ParseConfig error: %s\n", err.Error())
-                return nil, err
-        }
-        //ccommon.CConfiger =  cfg.CenterCfg
-        // init log
-        cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
-        if err != nil {
-                log.Println("Load Logger err: ", err)
-                return nil, err
-        }
-        ccommon.CLogger = cl
-        cl.Runtime.Infof("Config=[%v],", cfg)
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	//init config
+	cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
+	if err != nil {
+		log.Printf("ParseConfig error: %s\n", err.Error())
+		return nil, err
+	}
+	//ccommon.CConfiger =  cfg.CenterCfg
+	// init log
+	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
+	if err != nil {
+		log.Println("Load Logger err: ", err)
+		return nil, err
+	}
+	ccommon.CLogger = cl
+	cl.Runtime.Infof("Config=[%v],", cfg)
 
 	// server
 	server = NewAgolloServer()
-	for AppId, cNameList := range cfg.CenterCfg.AppClusterMap {
+	for AppID, cNameList := range cfg.CenterCfg.AppClusterMap {
 		for _, cName := range cNameList {
 			cNameArr := strings.SplitN(cName, "_", 2)
 			consulAddr := cfg.CenterCfg.ClusterMap[cName].ConsulAddr
 			if len(cNameArr) == 2 && consulAddr != "" {
 				cluster := cNameArr[1]
 				newAgo, err := agollo.New(
-					cfg.CenterCfg.ConfigServerUrl,
-					AppId,
+					cfg.CenterCfg.ConfigServerURL,
+					AppID,
 					agollo.Cluster(cluster),
 					agollo.PreloadNamespaces("juno"),
 					agollo.AutoFetchOnCacheMiss(),
@@ -50,13 +50,13 @@ func Init()(*AgolloServer, error) {
 					panic(err)
 				}
 				work := Worker{
-					AgolloClient:  newAgo,
-					Cluster:        cluster,
-					ConsulAddr:    consulAddr,
+					AgolloClient: newAgo,
+					Cluster:      cluster,
+					ConsulAddr:   consulAddr,
 				}
 				server.AddWorker(work)
 			} else {
-				ccommon.CLogger.Runtime.Errorf("invalue appClusterInfo AppClusterMap=",cfg.CenterCfg.AppClusterMap,"consulAddr=",consulAddr)
+				ccommon.CLogger.Runtime.Errorf("invalue appClusterInfo AppClusterMap=", cfg.CenterCfg.AppClusterMap, "consulAddr=", consulAddr)
 				continue
 			}
 		}

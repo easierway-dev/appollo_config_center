@@ -1,8 +1,9 @@
 package cconsul
 
 import (
-	"github.com/hashicorp/consul/api"
 	"os"
+
+	"github.com/hashicorp/consul/api"
 )
 
 func WriteOne(addr, path, value string) error {

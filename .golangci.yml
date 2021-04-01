@@ -1,0 +1,46 @@
+# https://gitce.net/mirrors/AdGuardHome/src/commit/72f253f62b4ef2ecc0acac600da9d4161ecdb150/.golangci.yml
+linters:
+  enable:
+    - deadcode
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - unused
+    - varcheck
+    - bodyclose
+    - depguard
+    - dupl
+    - gocyclo
+    - goimports
+    - golint
+    - gosec
+    - misspell
+    - stylecheck
+    - unconvert
+  disable-all: true
+  fast: true
+issues:
+  # List of regexps of issue texts to exclude, empty list by default.
+  # But independently from this option we use default exclude patterns,
+  # it can be disabled by `exclude-use-default: false`. To list all
+  # excluded by default patterns execute `golangci-lint run --help`
+  exclude:
+    # structcheck cannot detect usages while they're there
+    - .parentalServer. is unused
+    - .safeBrowsingServer. is unused
+    # errcheck
+    - Error return value of .s.closeConn. is not checked
+    - Error return value of ..*.Shutdown.
+    # goconst
+    - string .forcesafesearch.google.com. has 3 occurrences
+    # gosec: Profiling endpoint is automatically exposed on /debug/pprof
+    - G108
+    # gosec: Subprocess launched with function call as argument or cmd arguments
+    - G204
+    # gosec: Potential DoS vulnerability via decompression bomb
+    - G110
+    # gosec: Expect WriteFile permissions to be 0600 or less
+    - G306
+
