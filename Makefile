@@ -9,15 +9,15 @@ all: build test # golint
 
 .PHONY: build
 build: mod
-	go build -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)"  -o ${BIN_NAME} ./cmd/main.go
-	mkdir -p output/bin
-	cp -r ${BIN_NAME} output/bin
-	cp -r configs output/
+	go build -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)"  -o ${BIN_NAME} ./cmd/agollo_server/main.go
+	mkdir -p deployments/output/bin
+	cp -r ${BIN_NAME} deployments/output/bin
+	cp -r configs deployments/output/
 
 .PHONY: cover
 cover: mod
 	@echo "build cover test"
-	go test -c -covermode=count -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)" -coverpkg=gitlab.mobvista.com/voyager/pioneer/internal/... -o ${BIN_NAME}_cover  ./cmd/main_test.go
+	go test -c -covermode=count -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)" -coverpkg=gitlab.mobvista.com/voyager/pioneer/internal/... -o ${BIN_NAME}_cover  ./cmd/agollo_server/main_test.go
 
 
 mod: golang
@@ -46,5 +46,6 @@ golint: golang
 	golangci-lint run cmd/... internal/... -v
 
 clean:
-	rm -rf output
+	rm -rf deployments/output
+
 

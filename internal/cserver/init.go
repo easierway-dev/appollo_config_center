@@ -4,7 +4,6 @@ import (
 	"strings"
         "os"
         "log"
-	"github.com/spf13/viper"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"github.com/shima-park/agollo"
 )
@@ -15,7 +14,7 @@ func Init()(*AgolloServer, error) {
 
         log.SetFlags(log.Lshortfile | log.LstdFlags)
         //init config
-        cfg, err := ccommon.ParseBaseConfig(viper.GetString(ccommon.DirFlag))
+        cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
         if err != nil {
                 log.Printf("ParseConfig error: %s\n", err.Error())
                 return nil, err
@@ -34,15 +33,15 @@ func Init()(*AgolloServer, error) {
 	server = NewAgolloServer()
 	for AppId, cNameList := range cfg.CenterCfg.AppClusterMap {
 		for _, cName := range cNameList {
-			cNameArr := strings.SplitN(cName, "_", 1)
-			consulAddr := cfg.CenterCfg.ClusterMap[cName].ClusterDetail["consul_addr"]
-			if len(cNameArr) == 2 {
+			cNameArr := strings.SplitN(cName, "_", 2)
+			consulAddr := cfg.CenterCfg.ClusterMap[cName].ConsulAddr
+			if len(cNameArr) == 2 && consulAddr != "" {
 				cluster := cNameArr[1]
 				newAgo, err := agollo.New(
 					cfg.CenterCfg.ConfigServerUrl,
 					AppId,
 					agollo.Cluster(cluster),
-					agollo.PreloadNamespaces("application"),
+					agollo.PreloadNamespaces("juno"),
 					agollo.AutoFetchOnCacheMiss(),
 					agollo.FailTolerantOnBackupExists(),
 					agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
@@ -57,6 +56,7 @@ func Init()(*AgolloServer, error) {
 				}
 				server.AddWorker(work)
 			} else {
+				ccommon.CLogger.Runtime.Errorf("invalue appClusterInfo AppClusterMap=",cfg.CenterCfg.AppClusterMap,"consulAddr=",consulAddr)
 				continue
 			}
 		}

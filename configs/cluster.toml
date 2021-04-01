@@ -1,20 +1,19 @@
-ipport = "localhost:18080"
-[cluster_info]
-	[cluster_info.dsp_ali_cn] 
-	  consul_addr = "cn-consul-dsp.mobvista.com:8500"
-	[cluster_info.dsp_ali_vg]
-	  consul_addr = "vg-consul-dsp.mobvista.com:8500"
-	[cluster_info.dsp_ali_hk]
-	  consul_addr = "hk-consul-dsp.mobvista.com:8500"
-	[cluster_info.m_ali_vg]
-	  consul_addr = "vg-consul-ali.mobvista.com:8500"
-	[cluster_info.m_aws_se] 
-	  consul_addr = "se-consul.mobvista.com:8500"
-	[cluster_info.m_aws_sg]
-	  consul_addr = "sg-consul.mobvista.com:8500"	
-	[cluster_info.m_aws_fk] 
-	  consul_addr = "fk-consul.mobvista.com:8500"	
-	[cluster_info.m_aws_vg]
-	  consul_addr = "vg-consul.mobvista.com:8500"
-[appId_cluster_map]
-dsp = [dsp_ali_cn, dsp_ali_vg,dsp_ali_hk]
+ip_port = "localhost:18080"
+[cluster_map.dsp_ali_cn] 
+  consul_addr = "cn-consul-dsp.mobvista.com:8500"
+[cluster_map.dsp_ali_vg]
+  consul_addr = "vg-consul-dsp.mobvista.com:8500"
+[cluster_map.dsp_hw_hk]
+  consul_addr = "hk-consul-dsp.mobvista.com:8500"
+[cluster_map.m_ali_vg]
+  consul_addr = "vg-consul-ali.mobvista.com:8500"
+[cluster_map.m_aws_se] 
+  consul_addr = "se-consul.mobvista.com:8500"
+[cluster_map.m_aws_sg]
+  consul_addr = "sg-consul.mobvista.com:8500"	
+[cluster_map.m_aws_fk] 
+  consul_addr = "fk-consul.mobvista.com:8500"	
+[cluster_map.m_aws_vg]
+  consul_addr = "vg-consul.mobvista.com:8500"
+[app_cluster_map]
+dsp = ["dsp_ali_vg","dsp_ali_cn","dsp_hw_hk"]
