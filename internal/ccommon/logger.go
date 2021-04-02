@@ -1,25 +1,26 @@
 package ccommon
 
 import (
-	"gitlab.mobvista.com/voyager/zlog"
 	"errors"
+
+	"gitlab.mobvista.com/voyager/zlog"
 )
 
 var CLogger *ConfigCenterLogger
 
 type LogCfg struct {
-	Runtime      *zlog.Ops `toml:"runtime_log"`
+	Runtime *zlog.Ops `toml:"runtime_log"`
 }
 
 type ConfigCenterLogger struct {
-	Runtime      zlog.Logger
+	Runtime zlog.Logger
 }
 
 func NewconfigCenterLogger(logCfg *LogCfg) (*ConfigCenterLogger, error) {
 	var err error
 	logger := &ConfigCenterLogger{}
 	if logCfg == nil {
-		return nil,errors.New("logCfg is nil")
+		return nil, errors.New("logCfg is nil")
 	}
 	if logger.Runtime, err = zlog.NewZLog(logCfg.Runtime); err != nil {
 		return nil, err

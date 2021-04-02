@@ -2,9 +2,10 @@ package ccommon
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/BurntSushi/toml"
 )
 
 var CConfiger *ConfigCenterInfo
@@ -20,22 +21,22 @@ const (
 
 const (
 	CenterConfig = "cluster.toml"
-	LogConfig  = "log.toml"
+	LogConfig    = "log.toml"
 )
 
 type BaseConf struct {
-	LogCfg  *LogCfg
+	LogCfg    *LogCfg
 	CenterCfg *ConfigCenterInfo
 }
 
 type ConfigCenterInfo struct {
-    ConfigServerUrl string `toml:"ip_port"`
-    AppClusterMap map[string][]string `toml:"app_cluster_map"`
-    ClusterMap map[string]ClusterInfo `toml:"cluster_map"`
+	ConfigServerURL string                 `toml:"ip_port"`
+	AppClusterMap   map[string][]string    `toml:"app_cluster_map"`
+	ClusterMap      map[string]ClusterInfo `toml:"cluster_map"`
 }
 
 type ClusterInfo struct {
-    ConsulAddr string `toml:"consul_addr"`
+	ConsulAddr string `toml:"consul_addr"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {

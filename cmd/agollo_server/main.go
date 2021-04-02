@@ -7,19 +7,19 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"net/http"
 	_ "net/http/pprof"
+
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
 )
 
 // AppVersion 版本信息
 var AppVersion = "unknown"
-var PprofPort *string
 
 func handleKillSignal() {
 	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt, os.Kill, syscall.SIGTERM)
+	signal.Notify(sigchan, os.Interrupt, syscall.SIGTERM)
 	<-sigchan
 	ccommon.CLogger.Runtime.Infof("get shutdown signal.")
 	os.Exit(0)
@@ -27,14 +27,16 @@ func handleKillSignal() {
 
 func main() {
 	version := flag.Bool("v", false, "print current version")
-	PprofPort = flag.String("p", "6666", "监控端口")
 	flag.Parse()
 	if *version {
 		fmt.Println(AppVersion)
 		os.Exit(0)
 	}
 	go func() {
-		http.ListenAndServe(fmt.Sprintf("localhost:%v", *PprofPort), nil)
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	var server *cserver.AgolloServer

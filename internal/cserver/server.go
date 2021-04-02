@@ -3,6 +3,7 @@ package cserver
 import (
 	"context"
 	"sync"
+
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
@@ -18,8 +19,8 @@ func NewAgolloServer() *AgolloServer {
 // Worker 工作者接口
 type Worker struct {
 	AgolloClient agollo.Agollo
-	Cluster string
-	ConsulAddr string
+	Cluster      string
+	ConsulAddr   string
 }
 
 // AgolloServer server 服务
@@ -45,8 +46,8 @@ func (s *AgolloServer) Run() {
 			for {
 				select {
 				case <-s.ctx.Done():
-				    ccommon.CLogger.Runtime.Infof(worker.Cluster, "watch quit...")
-				    return
+					ccommon.CLogger.Runtime.Infof(worker.Cluster, "watch quit...")
+					return
 				case err := <-errorCh:
 					ccommon.CLogger.Runtime.Errorf("Error:", err)
 				case update := <-watchCh:
@@ -61,7 +62,7 @@ func (s *AgolloServer) Run() {
 						worker.Cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
 				}
 			}
-			s.wg.Done()
+			//			s.wg.Done()
 		}(worker)
 		s.wg.Add(1)
 	}
@@ -73,4 +74,3 @@ func (s *AgolloServer) GracefulStop() {
 	s.cancel()
 	s.wg.Wait()
 }
-
