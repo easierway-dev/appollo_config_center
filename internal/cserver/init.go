@@ -19,7 +19,7 @@ func Init() (*AgolloServer, error) {
 		log.Printf("ParseConfig error: %s\n", err.Error())
 		return nil, err
 	}
-	//ccommon.CConfiger =  cfg.CenterCfg
+	ccommon.AgolloConfiger =  cfg
 	// init log
 	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {
@@ -28,7 +28,7 @@ func Init() (*AgolloServer, error) {
 	}
 	ccommon.CLogger = cl
 	cl.Runtime.Infof("Config=[%v],", cfg)
-
+	
 	// server
 	server = NewAgolloServer()
 	for AppID, cNameList := range cfg.CenterCfg.AppClusterMap {
