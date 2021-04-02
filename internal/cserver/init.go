@@ -4,10 +4,125 @@ import (
 	"log"
 	"os"
 	"strings"
+	"context"
 
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
+
+func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, ctx context.Context) {
+	newAgo, err := agollo.New(
+		agolloCfg.ConfigServerURL,
+		agolloCfg.AppID,
+		agollo.Cluster(agolloCfg.Cluster),
+		agollo.PreloadNamespaces(agolloCfg.Namespace),
+		agollo.AutoFetchOnCacheMiss(),
+		agollo.FailTolerantOnBackupExists(),
+		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
+	)
+	if err != nil {
+		panic(err)
+	}
+	cfg, err := ccommon.ParseAppClusterConfig(newAgo.Get("app_cluster_map"))
+	if err != nil {
+			log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+			panic(err)
+	} else {
+		ccommon.DyAgolloConfiger.AppClusterConfig = cfg
+	}
+	
+	cfg1, err1 := ccommon.ParseClusterConfig(newAgo.Get("cluster_map"))
+	if err1 != nil {
+			log.Printf("ParseClusterConfig error: %s\n", err1.Error())
+			panic(err1)
+	} else {
+		ccommon.DyAgolloConfiger.ClusterConfig = cfg1
+	}
+	
+	cfg2, err2 := ccommon.ParseAppConfig(newAgo.Get("app_config_map"))
+	if err != nil {
+			log.Printf("ParseAppConfig error: %s\n", err2.Error())
+			panic(err2)
+	} else {
+		ccommon.DyAgolloConfiger.AppConfig = cfg2
+	}
+	
+	errorCh := newAgo.Start()
+	watchCh := newAgo.Watch()
+
+	go func(cluster string) {
+		for {
+			select {
+			case <-ctx.Done():
+			    ccommon.CLogger.Runtime.Errorf(cluster, "watch quit...")
+			    return
+			case err := <-errorCh:
+				 ccommon.CLogger.Runtime.Errorf("Error:", err)
+			case update := <-watchCh:
+				if value, ok := update.NewValue["app_cluster_map"]; ok {
+					cfg, err = ccommon.ParseAppClusterConfig(value.(string))
+					if err != nil {
+							log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+							panic(err)
+					} else {
+						ccommon.DyAgolloConfiger.AppClusterConfig = cfg
+					}
+				}
+				if value, ok := update.NewValue["cluster_map"]; ok {
+					cfg1, err := ccommon.ParseClusterConfig(value.(string))
+					if err != nil {
+							log.Printf("ParseClusterConfig error: %s\n", err.Error())
+					} else {
+						ccommon.DyAgolloConfiger.ClusterConfig = cfg1
+					}
+				}
+				if value, ok := update.NewValue["app_config_map"]; ok {
+					cfg2, err = ccommon.ParseAppConfig(value.(string))
+					if err != nil {
+							log.Printf("ParseAppConfig error: %s\n", err.Error())
+					} else {
+						ccommon.DyAgolloConfiger.AppConfig = cfg2
+					}
+				}
+				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
+					cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
+			}
+		}
+	}(agolloCfg.Cluster)
+}
+
+func NewAgolloWorker(server *AgolloServer){
+    for appID, cNameList := range ccommon.DyAgolloConfiger.AppClusterConfig.AppClusterMap {
+            for _, cName := range cNameList {
+                    cNameArr := strings.SplitN(cName, "_", 2)
+                    if len(cNameArr) == 2 {
+                            cluster := cNameArr[1]
+                            newAgo, err := agollo.New(
+                                    ccommon.AgolloConfiger.ConfigServerURL,
+                                    appID,
+                                    agollo.Cluster(cluster),
+                                    agollo.PreloadNamespaces("juno"),
+                                    agollo.AutoFetchOnCacheMiss(),
+                                    agollo.FailTolerantOnBackupExists(),
+                                    agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
+                            )
+                            if err != nil {
+                                    panic(err)
+                            }
+                            work := Worker{
+                                    AgolloClient: newAgo,
+				    AppID: appID,
+				    Cluster: cluster,
+                                    ClusterID: cName,
+                            }
+                            server.AddWorker(work)
+                    } else {
+                            ccommon.CLogger.Runtime.Errorf("invalue appClusterInfo AppClusterMap=", ccommon.DyAgolloConfiger.AppClusterConfig)
+                            continue
+                    }
+            }
+    }
+}
 
 func Init() (*AgolloServer, error) {
 	var server *AgolloServer
@@ -19,7 +134,7 @@ func Init() (*AgolloServer, error) {
 		log.Printf("ParseConfig error: %s\n", err.Error())
 		return nil, err
 	}
-	ccommon.AgolloConfiger =  cfg
+	ccommon.AgolloConfiger =  cfg.AgolloCfg
 	// init log
 	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {
@@ -28,38 +143,11 @@ func Init() (*AgolloServer, error) {
 	}
 	ccommon.CLogger = cl
 	cl.Runtime.Infof("Config=[%v],", cfg)
+	server = NewAgolloServer()
 	
+	init_dyagolloconfiger(cfg.AgolloCfg, server.ctx)
 	// server
 	server = NewAgolloServer()
-	for AppID, cNameList := range cfg.CenterCfg.AppClusterMap {
-		for _, cName := range cNameList {
-			cNameArr := strings.SplitN(cName, "_", 2)
-			consulAddr := cfg.CenterCfg.ClusterMap[cName].ConsulAddr
-			if len(cNameArr) == 2 && consulAddr != "" {
-				cluster := cNameArr[1]
-				newAgo, err := agollo.New(
-					cfg.CenterCfg.ConfigServerURL,
-					AppID,
-					agollo.Cluster(cluster),
-					agollo.PreloadNamespaces("juno"),
-					agollo.AutoFetchOnCacheMiss(),
-					agollo.FailTolerantOnBackupExists(),
-					agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
-				)
-				if err != nil {
-					panic(err)
-				}
-				work := Worker{
-					AgolloClient: newAgo,
-					Cluster:      cluster,
-					ConsulAddr:   consulAddr,
-				}
-				server.AddWorker(work)
-			} else {
-				ccommon.CLogger.Runtime.Errorf("invalue appClusterInfo AppClusterMap=", cfg.CenterCfg.AppClusterMap, "consulAddr=", consulAddr)
-				continue
-			}
-		}
-	}
+	NewAgolloWorker(server)
 	return server, nil
 }

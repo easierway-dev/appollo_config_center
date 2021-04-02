@@ -1,4 +1,4 @@
 ipport = "localhost:18080"
 appid = "global_config"
 cluster = "default"
-namespace = ["cluster_map","app_cluster_map","app_config_map"]
+namespace = "application"

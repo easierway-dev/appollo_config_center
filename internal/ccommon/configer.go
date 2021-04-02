@@ -8,7 +8,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-var AgolloConfiger *AgolloConfig
+var AgolloConfiger *AgolloCfg
+var DyAgolloConfiger *DyAgolloCfg
 
 const (
 	ServerName    = "mvbjqa"
@@ -26,31 +27,31 @@ const (
 
 type BaseConf struct {
 	LogCfg    *LogCfg
-	AgolloCfg *AgolloConfig
+	AgolloCfg *AgolloCfg
 }
 
-type DyAgolloConf struct {
-	AppClusterConfig *AppClusterConfig
-	ClusterConfig *ClusterConfig
-	AppConfig *AppConfig
+type DyAgolloCfg struct {
+	AppClusterConfig *AppClusterCfg
+	ClusterConfig *ClusterCfg
+	AppConfig *AppCfg
 } 
 
-type AgolloConfig struct {
+type AgolloCfg struct {
 	ConfigServerURL string                 `toml:"ipport"`
 	AppID string                 		`toml:"appid"`
 	Cluster string                 		`toml:"cluster"`
-	Namespace []string                 	`toml:"namespace"`
+	Namespace string                 	`toml:"namespace"`
 }
 
-type AppClusterConfig struct {
+type AppClusterCfg struct {
 	AppClusterMap   map[string][]string    `toml:"app_cluster_map"`
 }
 
-type ClusterConfig struct {
+type ClusterCfg struct {
 	ClusterMap      map[string]ClusterInfo `toml:"cluster_map"`
 }
 
-type AppConfig struct {
+type AppCfg struct {
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 
@@ -64,16 +65,16 @@ type ConfigInfo struct {
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	cfg := &BaseConf{}
-	agolloCfg, err := parseAgolloConfig(filepath.Join(configDir, AgolloConfig))
+	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
 	if err != nil {
-		return nil, fmt.Errorf("parse logConfig error, err[%s]", err.Error())
+		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
 	}
 
 	cfg.AgolloCfg = agolloCfg
 
 	logCfg, err := parseLogConfig(filepath.Join(configDir, LogConfig))
 	if err != nil {
-		return nil, fmt.Errorf("parse logConfig error, err[%s]", err.Error())
+		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
 	}
 	cfg.LogCfg = logCfg
 
@@ -90,32 +91,32 @@ func parseLogConfig(fileName string) (*LogCfg, error) {
 	return cfg, nil
 }
 
-func parseAgolloConfig(fileName string) (*AgolloConfig, error) {
-	cfg := &AgolloConfig{}
+func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
+	cfg := &AgolloCfg{}
 	if err := parseTomlConfig(fileName, cfg); err != nil {
 		return cfg, err
 	}
 	return cfg, nil
 }
 
-func parseAppClusterConfig(data string) (*AppClusterConfig, error) {
-        cfg := &AppClusterConfig{}
+func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
+        cfg := &AppClusterCfg{}
         if err := parseTomlStringConfig(data, cfg); err != nil {
                 return cfg, err
         }
         return cfg, nil
 }
 
-func parseClusterConfig(data string) (*ClusterConfig, error) {
-        cfg := &ClusterConfig{}
+func ParseClusterConfig(data string) (*ClusterCfg, error) {
+        cfg := &ClusterCfg{}
         if err := parseTomlStringConfig(data, cfg); err != nil {
                 return cfg, err
         }
         return cfg, nil
 }
 
-func parseAppConfig(data string) (*AppConfig, error) {
-        cfg := &AppConfig{}
+func ParseAppConfig(data string) (*AppCfg, error) {
+        cfg := &AppCfg{}
         if err := parseTomlStringConfig(data, cfg); err != nil {
                 return cfg, err
         }
