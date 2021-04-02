@@ -33,7 +33,7 @@ func main() {
 		os.Exit(0)
 	}
 	go func() {
-		err := http.ListenAndServe(":8080", nil)
+		err := http.ListenAndServe(":8989", nil)
 		if err != nil {
 			panic(err)
 		}
