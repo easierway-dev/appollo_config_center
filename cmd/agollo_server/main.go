@@ -33,7 +33,7 @@ func main() {
 		os.Exit(0)
 	}
 	go func() {
-		err := http.ListenAndServe(":8989", nil)
+		err := http.ListenAndServe(":8686", nil)
 		if err != nil {
 			panic(err)
 		}
@@ -41,7 +41,8 @@ func main() {
 
 	var server *cserver.AgolloServer
 	var err error
-	if server, err = cserver.Init(); err != nil {
+	server = cserver.NewAgolloServer()
+	if err = cserver.Init(server); err != nil {
 		panic(err)
 	}
 	go server.Run()

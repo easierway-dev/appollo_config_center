@@ -8,7 +8,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-var CConfiger *ConfigCenterInfo
+var AgolloConfiger *AgolloCfg
+var DyAgolloConfiger *DyAgolloCfg
 
 const (
 	ServerName    = "mvbjqa"
@@ -20,57 +21,106 @@ const (
 )
 
 const (
-	CenterConfig = "cluster.toml"
+	AgolloConfig = "agollo.toml"
 	LogConfig    = "log.toml"
 )
 
 type BaseConf struct {
 	LogCfg    *LogCfg
-	CenterCfg *ConfigCenterInfo
+	AgolloCfg *AgolloCfg
 }
 
-type ConfigCenterInfo struct {
-	ConfigServerURL string                 `toml:"ip_port"`
+type DyAgolloCfg struct {
+	AppClusterConfig *AppClusterCfg
+	ClusterConfig *ClusterCfg
+	AppConfig *AppCfg
+} 
+
+type AgolloCfg struct {
+	ConfigServerURL string                 `toml:"ipport"`
+	AppID string                 		`toml:"appid"`
+	Cluster string                 		`toml:"cluster"`
+	Namespace string                 	`toml:"namespace"`
+}
+
+type AppClusterCfg struct {
 	AppClusterMap   map[string][]string    `toml:"app_cluster_map"`
+}
+
+type ClusterCfg struct {
 	ClusterMap      map[string]ClusterInfo `toml:"cluster_map"`
+}
+
+type AppCfg struct {
+	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 
 type ClusterInfo struct {
 	ConsulAddr string `toml:"consul_addr"`
 }
 
+type ConfigInfo struct {
+	DingKey string `toml:"ding_key"`
+}
+
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	cfg := &BaseConf{}
-	centerCfg, err := parseConfigCenterConf(filepath.Join(configDir, CenterConfig))
+	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
 	if err != nil {
-		return nil, fmt.Errorf("parse logConfig error, err[%s]", err.Error())
+		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
 	}
 
-	cfg.CenterCfg = centerCfg
+	cfg.AgolloCfg = agolloCfg
 
 	logCfg, err := parseLogConfig(filepath.Join(configDir, LogConfig))
 	if err != nil {
-		return nil, fmt.Errorf("parse logConfig error, err[%s]", err.Error())
+		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
 	}
 	cfg.LogCfg = logCfg
 
 	return cfg, nil
 }
 
+
+
 func parseLogConfig(fileName string) (*LogCfg, error) {
-	logCfg := &LogCfg{}
-	if err := parseTomlConfig(fileName, logCfg); err != nil {
-		return logCfg, err
+	cfg := &LogCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
 	}
-	return logCfg, nil
+	return cfg, nil
 }
 
-func parseConfigCenterConf(fileName string) (*ConfigCenterInfo, error) {
-	logCfg := &ConfigCenterInfo{}
-	if err := parseTomlConfig(fileName, logCfg); err != nil {
-		return logCfg, err
+func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
+	cfg := &AgolloCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
 	}
-	return logCfg, nil
+	return cfg, nil
+}
+
+func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
+        cfg := &AppClusterCfg{}
+        if err := parseTomlStringConfig(data, cfg); err != nil {
+                return cfg, err
+        }
+        return cfg, nil
+}
+
+func ParseClusterConfig(data string) (*ClusterCfg, error) {
+        cfg := &ClusterCfg{}
+        if err := parseTomlStringConfig(data, cfg); err != nil {
+                return cfg, err
+        }
+        return cfg, nil
+}
+
+func ParseAppConfig(data string) (*AppCfg, error) {
+        cfg := &AppCfg{}
+        if err := parseTomlStringConfig(data, cfg); err != nil {
+                return cfg, err
+        }
+        return cfg, nil
 }
 
 func parseTomlConfig(fileName string, config interface{}) (err error) {
@@ -84,4 +134,13 @@ func parseTomlConfig(fileName string, config interface{}) (err error) {
 	}
 
 	return nil
+}
+
+func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
+
+        if _, err = toml.Decode(string(tomlData), config); err != nil {
+                return fmt.Errorf("decode %s, %s", tomlData, err.Error())
+        }
+
+        return nil
 }

@@ -20,7 +20,8 @@ func NewAgolloServer() *AgolloServer {
 type Worker struct {
 	AgolloClient agollo.Agollo
 	Cluster      string
-	ConsulAddr   string
+	ClusterID   string
+	AppID	string
 }
 
 // AgolloServer server 服务
@@ -53,9 +54,9 @@ func (s *AgolloServer) Run() {
 				case update := <-watchCh:
 					for path, value := range update.NewValue {
 						v, _ := value.(string)
-						err := cconsul.WriteOne(worker.ConsulAddr, path, v)
+						err := cconsul.WriteOne(ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.ClusterID].ConsulAddr, path, v)
 						if err != nil {
-							ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", worker.ConsulAddr, err)
+							ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.ClusterID].ConsulAddr, err)
 						}
 					}
 					ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
