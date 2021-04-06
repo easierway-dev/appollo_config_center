@@ -4,13 +4,12 @@ import (
 	"log"
 	"os"
 	"strings"
-	"context"
 
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
 
-func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, ctx context.Context) {
+func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) {
 	newAgo, err := agollo.New(
 		agolloCfg.ConfigServerURL,
 		agolloCfg.AppID,
@@ -31,18 +30,18 @@ func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, ctx context.Context) {
 		ccommon.DyAgolloConfiger.AppClusterConfig = cfg
 	}
 	
-	cfg1, err1 := ccommon.ParseClusterConfig(newAgo.Get("cluster_map"))
-	if err1 != nil {
-			log.Printf("ParseClusterConfig error: %s\n", err1.Error())
-			panic(err1)
+	cfg1, err := ccommon.ParseClusterConfig(newAgo.Get("cluster_map"))
+	if err != nil {
+			log.Printf("ParseClusterConfig error: %s\n", err.Error())
+			panic(err)
 	} else {
 		ccommon.DyAgolloConfiger.ClusterConfig = cfg1
 	}
 	
-	cfg2, err2 := ccommon.ParseAppConfig(newAgo.Get("app_config_map"))
+	cfg2, err := ccommon.ParseAppConfig(newAgo.Get("app_config_map"))
 	if err != nil {
-			log.Printf("ParseAppConfig error: %s\n", err2.Error())
-			panic(err2)
+			log.Printf("ParseAppConfig error: %s\n", err.Error())
+			panic(err)
 	} else {
 		ccommon.DyAgolloConfiger.AppConfig = cfg2
 	}
@@ -53,7 +52,7 @@ func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, ctx context.Context) {
 	go func(cluster string) {
 		for {
 			select {
-			case <-ctx.Done():
+			case <-server.ctx.Done():
 			    ccommon.CLogger.Runtime.Errorf(cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
@@ -124,30 +123,27 @@ func NewAgolloWorker(server *AgolloServer){
     }
 }
 
-func Init() (*AgolloServer, error) {
-	var server *AgolloServer
+func Init(server *AgolloServer)  error {
 
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	//init config
 	cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
 	if err != nil {
 		log.Printf("ParseConfig error: %s\n", err.Error())
-		return nil, err
+		return err
 	}
 	ccommon.AgolloConfiger =  cfg.AgolloCfg
 	// init log
 	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {
 		log.Println("Load Logger err: ", err)
-		return nil, err
+		return err
 	}
 	ccommon.CLogger = cl
 	cl.Runtime.Infof("Config=[%v],", cfg)
-	server = NewAgolloServer()
-	
-	init_dyagolloconfiger(cfg.AgolloCfg, server.ctx)
+	//get global_config
+	init_dyagolloconfiger(cfg.AgolloCfg, server)
 	// server
-	server = NewAgolloServer()
 	NewAgolloWorker(server)
-	return server, nil
+	return nil
 }

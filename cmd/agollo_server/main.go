@@ -41,7 +41,8 @@ func main() {
 
 	var server *cserver.AgolloServer
 	var err error
-	if server, err = cserver.Init(); err != nil {
+	server = cserver.NewAgolloServer()
+	if err = cserver.Init(server); err != nil {
 		panic(err)
 	}
 	go server.Run()
