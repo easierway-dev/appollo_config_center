@@ -10,6 +10,7 @@ import (
 )
 
 func init_dyagolloconfiger(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) {
+	ccommon.DyAgolloConfiger = &ccommon.DyAgolloCfg{}
 	newAgo, err := agollo.New(
 		agolloCfg.ConfigServerURL,
 		agolloCfg.AppID,
