@@ -61,6 +61,7 @@ type ClusterInfo struct {
 
 type ConfigInfo struct {
 	DingKey string `toml:"ding_key"`
+	Namespace string `toml:"namespace"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
