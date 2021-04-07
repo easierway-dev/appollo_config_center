@@ -2,6 +2,7 @@ package cworker
 
 import (
 	"os"	
+	"context"
 
         "github.com/shima-park/agollo"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
@@ -15,25 +16,22 @@ type CWorker struct {
         AppID   string
 }
 
-// AddWorker 添加 workder
-func (cw *CWorker) AddWorker(worker CWorker) {
-	cw.workers = append(cw.workers, worker)
-}
-
-func (cw *CWorker) Setup(appid, cluster string)(*CWorker,error){
+// setup workder
+func Setup(appid, cluster, namespace string)(CWorker,error){
+	var work CWorker
 	newAgo, err := agollo.New(
 		ccommon.AgolloConfiger.ConfigServerURL,
-		AppID,
+		appid,
 		agollo.Cluster(cluster),
-		agollo.PreloadNamespaces(ccommon.DyAgolloConfiger.AppConfig.Namespace),
+		agollo.PreloadNamespaces(namespace),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
 	)
 	if err != nil {
-		return nil, err
+		return work, err
 	}
-	work := CWorker{
+	work = CWorker{
 		AgolloClient:  newAgo,
 		Cluster:        cluster,
 		AppID:    appid,
@@ -41,13 +39,14 @@ func (cw *CWorker) Setup(appid, cluster string)(*CWorker,error){
 	return work, nil
 }
 
-func (cw *CWorker) Run(worker *CWorker){
+//work run
+func Run(worker CWorker, ctx context.Context){
 	errorCh := worker.AgolloClient.Start()
 	watchCh := worker.AgolloClient.Watch()
-	go func(worker Worker) {
+	go func(worker CWorker) {
 		for {
 			select {
-			case <-s.ctx.Done():
+			case <-ctx.Done():
 				ccommon.CLogger.Runtime.Infof(worker.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
@@ -55,9 +54,9 @@ func (cw *CWorker) Run(worker *CWorker){
 			case update := <-watchCh:
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
-					err := cconsul.WriteOne(ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.ClusterID].ConsulAddr, path, v)
+					err := cconsul.WriteOne(ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.Cluster].ConsulAddr, path, v)
 					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.ClusterID].ConsulAddr, err)
+						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[worker.Cluster].ConsulAddr, err)
 					}
 				}
 				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
@@ -68,6 +67,7 @@ func (cw *CWorker) Run(worker *CWorker){
 	}(worker)
 }
 
-func (cw *CWorker) Stop(worker *CWorker){
+//work stop
+func Stop(worker CWorker){
 	worker.AgolloClient.Stop()
 }

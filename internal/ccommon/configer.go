@@ -31,7 +31,6 @@ type BaseConf struct {
 }
 
 type DyAgolloCfg struct {
-	AppClusterConfig *AppClusterCfg
 	ClusterConfig *ClusterCfg
 	AppConfig *AppCfg
 } 
@@ -44,7 +43,8 @@ type AgolloCfg struct {
 }
 
 type AppClusterCfg struct {
-	AppClusterMap   map[string][]string    `toml:"app_cluster_map"`
+	Namespace	string `toml:"namespace"`
+	AppClusterMap   map[string]AppClusterInfo    `toml:"app_cluster_map"`
 }
 
 type ClusterCfg struct {
@@ -55,13 +55,17 @@ type AppCfg struct {
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 
+type AppClusterInfo struct {
+        Cluster []string `toml:"cluster"`
+	Namespace       string `toml:"namespace"`
+}
+
 type ClusterInfo struct {
 	ConsulAddr string `toml:"consul_addr"`
 }
 
 type ConfigInfo struct {
 	DingKey string `toml:"ding_key"`
-	Namespace string `toml:"namespace"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
@@ -108,7 +112,28 @@ func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
         return cfg, nil
 }
 
-func ParseClusterConfig(data string) (*ClusterCfg, error) {
+func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
+        cfg := &DyAgolloCfg{}
+		if clusterConfig != "" {
+			clusterCfg, err := parseClusterConfig(clusterConfig)
+			if err == nil {
+					cfg.ClusterConfig = clusterCfg
+			} else {
+				return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
+			}
+		}
+		if appConfig != "" {
+			appCfg, err := parseAppConfig(appConfig)
+			if err == nil {
+					cfg.AppConfig = appCfg
+			} else {
+				return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
+			}
+		}
+        return cfg, nil
+}
+
+func parseClusterConfig(data string) (*ClusterCfg, error) {
         cfg := &ClusterCfg{}
         if err := parseTomlStringConfig(data, cfg); err != nil {
                 return cfg, err
@@ -116,7 +141,7 @@ func ParseClusterConfig(data string) (*ClusterCfg, error) {
         return cfg, nil
 }
 
-func ParseAppConfig(data string) (*AppCfg, error) {
+func parseAppConfig(data string) (*AppCfg, error) {
         cfg := &AppCfg{}
         if err := parseTomlStringConfig(data, cfg); err != nil {
                 return cfg, err
