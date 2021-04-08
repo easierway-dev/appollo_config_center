@@ -16,9 +16,15 @@ type CWorker struct {
         AppID   string
 }
 
+type AgolloInfo struct {
+	AppID string
+	Cluster string
+	Namespace string
+}
+
 // setup workder
-func Setup(appid, cluster, namespace string)(CWorker,error){
-	var work CWorker
+func Setup(appid, cluster, namespace string)(*CWorker,error){
+	var work *CWorker
 	newAgo, err := agollo.New(
 		ccommon.AgolloConfiger.ConfigServerURL,
 		appid,
@@ -31,7 +37,7 @@ func Setup(appid, cluster, namespace string)(CWorker,error){
 	if err != nil {
 		return work, err
 	}
-	work = CWorker{
+	work = &CWorker{
 		AgolloClient:  newAgo,
 		Cluster:        cluster,
 		AppID:    appid,
@@ -40,7 +46,7 @@ func Setup(appid, cluster, namespace string)(CWorker,error){
 }
 
 //work run
-func Run(worker CWorker, ctx context.Context){
+func (cw *CWorker) Run(worker CWorker, ctx context.Context){
 	errorCh := worker.AgolloClient.Start()
 	watchCh := worker.AgolloClient.Watch()
 	go func(worker CWorker) {
@@ -68,6 +74,6 @@ func Run(worker CWorker, ctx context.Context){
 }
 
 //work stop
-func Stop(worker CWorker){
+func (cw *CWorker) Stop(worker CWorker){
 	worker.AgolloClient.Stop()
 }

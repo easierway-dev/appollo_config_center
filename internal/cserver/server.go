@@ -27,14 +27,23 @@ type AgolloServer struct {
 	wg     sync.WaitGroup
 }
 
-
-func (s *AgolloServer) updateOne(appid, cluster, namespace string){
-    if worker, err := cworker.Setup(appid, cluster, namespace); err == nil {
-            s.regworkers.Store(key,worker)
-            cworker.Run(worker, s.ctx)
-            s.wg.Add(1)
-            s.runningworkers.Store(key,worker)
-    }
+func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
+	namespace := cfg.Namespace
+	for appid, appclusterinfo := range cfg {
+		if appclusterinfo.Namespace != "" {
+			namespace = appclusterinfo.Namespace
+		}
+		for _, cluster := range appclusterinfo.Cluster {
+			aInfo := cworker.AgolloInfo{
+				AppID : appid,
+				Cluster : cluster,
+				Namespace : namespace,
+			}
+		    if worker, err := cworker.Setup(aInfo); err == nil {
+		            s.regworkers.Store(key,worker)
+		    }
+		}
+	}
 }
 
 func (s *AgolloServer) AddGAgollo (agollo agollo.Agollo){
@@ -42,59 +51,7 @@ func (s *AgolloServer) AddGAgollo (agollo agollo.Agollo){
 }
 
 // 根据globla_config.app_cluster_map注册worker
-func (s *AgolloServer) Update(cfg *ccommon.AppClusterCfg) {
-	namespace := cfg.Namespace
-	for appid, appclusterinfo := range cfg {
-		if appclusterinfo.Namespace != "" {
-			namespace = appclusterinfo.Namespace
-		}
-		for _, cluster := range appclusterinfo.Cluster {
-			key := fmt.Sprintf("%s_%s_%s", appid, cluster, namespace)
-			updateOne(appid, cluster, namespace)
-		}
-	}
-}
-
-func (s *AgolloServer) Watch(cfg *ccommon.AppClusterCfg) {
-	var keyMap map[string]bool
-	
-	//update
-	namespace := cfg.Namespace
-        for appid, appclusterinfo := range cfg {
-                if appclusterinfo.Namespace != "" {
-                        namespace = appclusterinfo.Namespace
-                }
-                for _, cluster := range appclusterinfo.Cluster {
-			key := fmt.Sprintf("%s_%s_%s", appid, cluster, namespace)
-			keyMap[key] = true	
-			regWorker, regOk := s.regworkers.Load(key)
-			runningWorker, runningOk := s.runningworkers.Load(key)
-			if !regOk {
-				updateOne(appid, cluster, namespace)
-			} else if !runningOk {
-				cworker.Run(regWorker, s.ctx)
-				s.wg.Add(1)
-				s.runningworkers.Store(key,worker)
-			}
-		}
-        }
-	//delete
-	s.regworkers.Range(func(k, v interface{}) bool {
-		if _,ok := keyMap[k]; !ok {
-			s.regworkers.Delete(k)
-		}
-		return true	
-	})
-	s.runningworkers.Range(func(k, v interface{}) bool {
-		if _,ok := keyMap[k]; !ok {
-			cworker.Stop(v)
-			s.runningworkers.Delete(k)
-		}
-		return true
-	})
-}
-
-func (s *AgolloServer) Run() {
+func (s *AgolloServer) Update() {
 	dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map"),s.gAgollo.Get("app_config_map"))
 	if err != nil {
 			log.Printf("ParseDyConfig error: %s\n", err.Error())
@@ -107,7 +64,7 @@ func (s *AgolloServer) Run() {
 			log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
 			panic(err)
 	}	
-	s.Update(cfg)
+	s.UpdateOne(cfg)
 	
 	errorCh := s.gAgollo.Start()
 	watchCh := s.gAgollo.Watch()
@@ -141,7 +98,7 @@ func (s *AgolloServer) Run() {
 							log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
 							panic(err)
 					} else {
-						s.Watch(cfg)
+						s.UpdateOne(cfg)
 					}
 				}
 				ccommon.CLogger.Runtime.Infof("Global Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
@@ -149,6 +106,38 @@ func (s *AgolloServer) Run() {
 			}
 		}
 	}(ccommon.agolloCfg.Cluster)
+}
+
+func (s *AgolloServer) Watch() {
+	t := time.NewTicker(ccommon.AgolloConfiger.CyclePeriod*time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.c:
+			//start
+			s.regworkers.Range(func(k, v interface{}) bool {
+				if _,ok := s.runningworkers.Load(k); !ok {
+					cworker.Run(v, s.ctx)
+					s.wg.Add(1)
+					s.runningworkers.Store(k,v)
+				}
+				return true	
+			})
+			//stop
+			s.runningworkers.Range(func(k, v interface{}) bool {
+				if _,ok := s.regworkers.Load(k); !ok {
+					cworker.Stop(v)
+					s.runningworkers.Delete(k)
+				}
+				return true
+			})			
+		}
+	}
+}
+
+func (s *AgolloServer) Run() {
+	s.watch()
+	s.update()
 	s.wg.Wait()
 }
 

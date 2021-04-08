@@ -40,6 +40,7 @@ type AgolloCfg struct {
 	AppID string                 		`toml:"appid"`
 	Cluster string                 		`toml:"cluster"`
 	Namespace string                 	`toml:"namespace"`
+	CyclePeriod int                		`toml:"cycleperiod"`
 }
 
 type AppClusterCfg struct {
