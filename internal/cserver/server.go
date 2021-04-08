@@ -18,7 +18,7 @@ func NewAgolloServer() *AgolloServer {
 
 // AgolloServer server 服务
 type AgolloServer struct {
-	regworkers sync.Map //map[string]Worker
+	regworkers sync.Map //map[string]WorkerInfo
 	runningworkers sync.Map ///map[string]Worker
 
 	gAgollo agollo.Agollo
@@ -34,14 +34,12 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 			namespace = appclusterinfo.Namespace
 		}
 		for _, cluster := range appclusterinfo.Cluster {
-			aInfo := cworker.AgolloInfo{
+			wInfo := cworker.WorkInfoDetail{
 				AppID : appid,
 				Cluster : cluster,
 				Namespace : namespace,
 			}
-		    if worker, err := cworker.Setup(aInfo); err == nil {
-		            s.regworkers.Store(key,worker)
-		    }
+		    s.regworkers.Store(key,wInfo)
 		}
 	}
 }
@@ -117,9 +115,10 @@ func (s *AgolloServer) Watch() {
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
-					cworker.Run(v, s.ctx)
+					worker := cworker.Setup(v)
+					cworker.Run(worker, s.ctx)
 					s.wg.Add(1)
-					s.runningworkers.Store(k,v)
+					s.runningworkers.Store(k,worker)
 				}
 				return true	
 			})
