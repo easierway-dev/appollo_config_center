@@ -45,7 +45,7 @@ func main() {
 	if err = cserver.Init(server); err != nil {
 		panic(err)
 	}
-	go server.Run()
+	server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
 	ccommon.CLogger.Runtime.Infof("agollo_server start success !!! will listen appolo update ...")
 	handleKillSignal()
