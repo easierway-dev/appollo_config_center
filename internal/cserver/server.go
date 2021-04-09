@@ -142,7 +142,7 @@ func (s *AgolloServer) Watch() {
 }
 
 func (s *AgolloServer) Run() {
-	s.Watch()
+	go s.Watch()
 	s.Update()
 	s.wg.Wait()
 }

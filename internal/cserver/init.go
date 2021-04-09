@@ -44,7 +44,7 @@ func Init(server *AgolloServer)  error {
 		return err
 	}
 	ccommon.CLogger = cl
-	cl.Runtime.Infof("Config=[%v],", cfg)
+	cl.Runtime.Infof("Config=[%v],", cfg.AgolloCfg)
 	//get global_config
 	return build_global_agollo(cfg.AgolloCfg, server)
 }
