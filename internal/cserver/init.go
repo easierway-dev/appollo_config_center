@@ -22,7 +22,7 @@ func build_global_agollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) err
 		log.Printf("Build_global_agollo err: %s\n", err.Error())
 		return err
 	}
-	server.AddGAgollo(newAgo)
+	server.BuildGAgollo(newAgo)
 	return nil
 }
 

@@ -1,6 +1,8 @@
 package cserver
 
 import (
+	"log"
+	"time"
 	"context"
 	"sync"
 
@@ -29,22 +31,23 @@ type AgolloServer struct {
 
 func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 	namespace := cfg.Namespace
-	for appid, appclusterinfo := range cfg {
+	for appid, appclusterinfo := range cfg.AppClusterMap {
 		if appclusterinfo.Namespace != "" {
 			namespace = appclusterinfo.Namespace
 		}
 		for _, cluster := range appclusterinfo.Cluster {
-			wInfo := cworker.WorkInfoDetail{
+			wInfo := cworker.WorkInfo{
 				AppID : appid,
 				Cluster : cluster,
 				Namespace : namespace,
 			}
-		    s.regworkers.Store(key,wInfo)
+			key := wInfo.Key()
+		    	s.regworkers.Store(key,wInfo)
 		}
 	}
 }
 
-func (s *AgolloServer) AddGAgollo (agollo agollo.Agollo){
+func (s *AgolloServer) BuildGAgollo (agollo agollo.Agollo){
 	s.gAgollo = agollo
 }
 
@@ -84,7 +87,7 @@ func (s *AgolloServer) Update() {
 				if value, ok := update.NewValue["app_config_map"]; ok {
 					appCfg = value.(string)
 				}
-				dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map"),s.gAgollo.Get("app_config_map"))
+				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
 						log.Printf("update ParseDyConfig error: %s\n", err.Error())
 				} else {
@@ -103,29 +106,33 @@ func (s *AgolloServer) Update() {
 					cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
 			}
 		}
-	}(ccommon.agolloCfg.Cluster)
+	}(ccommon.AgolloConfiger.Cluster)
 }
 
 func (s *AgolloServer) Watch() {
-	t := time.NewTicker(ccommon.AgolloConfiger.CyclePeriod*time.Second)
+	t := time.NewTicker(time.Duration(ccommon.AgolloConfiger.CyclePeriod)*time.Second)
 	defer t.Stop()
 	for {
 		select {
-		case <-t.c:
+		case <-t.C:
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
-					worker := cworker.Setup(v)
-					cworker.Run(worker, s.ctx)
-					s.wg.Add(1)
-					s.runningworkers.Store(k,worker)
+					worker,err := cworker.Setup(v.(cworker.WorkInfo))
+					if err == nil {
+						worker.Run(s.ctx)
+						s.wg.Add(1)
+						s.runningworkers.Store(k,worker)
+					} else {
+						ccommon.CLogger.Runtime.Errorf("creeative worker failed !!! workerInfo=",v)
+					}
 				}
 				return true	
 			})
 			//stop
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
-					cworker.Stop(v)
+					v.(*cworker.CWorker).Stop()
 					s.runningworkers.Delete(k)
 				}
 				return true
@@ -135,8 +142,8 @@ func (s *AgolloServer) Watch() {
 }
 
 func (s *AgolloServer) Run() {
-	s.watch()
-	s.update()
+	s.Watch()
+	s.Update()
 	s.wg.Wait()
 }
 
