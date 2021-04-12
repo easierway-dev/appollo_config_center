@@ -139,7 +139,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Runtime.Infof("will stop woker:",key, "wait 3s to envalid  !!!")
+					ccommon.CLogger.Runtime.Infof("will stop woker:",k, "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
