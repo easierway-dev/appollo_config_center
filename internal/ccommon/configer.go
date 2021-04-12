@@ -53,6 +53,7 @@ type ClusterCfg struct {
 }
 
 type AppCfg struct {
+	DingKey       string `toml:"ding_key"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 

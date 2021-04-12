@@ -8,7 +8,7 @@ import (
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
 
-func build_global_agollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error {
+func BuildGlobalAgollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error {
 	newAgo, err := agollo.New(
 		agolloCfg.ConfigServerURL,
 		agolloCfg.AppID,
@@ -46,5 +46,5 @@ func Init(server *AgolloServer)  error {
 	ccommon.CLogger = cl
 	cl.Runtime.Infof("Config=[%v],", cfg.AgolloCfg)
 	//get global_config
-	return build_global_agollo(cfg.AgolloCfg, server)
+	return BuildGlobalAgollo(cfg.AgolloCfg, server)
 }

@@ -42,6 +42,12 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 				Namespace : namespace,
 			}
 			key := wInfo.Key()
+			// clear regworkers
+			s.regworkers.Range(func(k, v interface{}) bool {
+				s.regworkers.Delete(k)
+				return true
+			})
+			//store regworkers
 		    	s.regworkers.Store(key,wInfo)
 		}
 	}
@@ -133,6 +139,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
+					ccommon.CLogger.Runtime.Infof("will stop woker:",key, "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
