@@ -30,6 +30,13 @@ type AgolloServer struct {
 }
 
 func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
+	//clear regworkers
+	s.regworkers.Range(func(k, v interface{}) bool {
+		if k.(string) != "" {
+			s.regworkers.Delete(k)
+		}
+		return true
+	})
 	namespace := cfg.Namespace
 	for appid, appclusterinfo := range cfg.AppClusterMap {
 		if appclusterinfo.Namespace != "" {
@@ -42,11 +49,6 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 				Namespace : namespace,
 			}
 			key := wInfo.Key()
-			// clear regworkers
-			s.regworkers.Range(func(k, v interface{}) bool {
-				s.regworkers.Delete(k)
-				return true
-			})
 			//store regworkers
 		    	s.regworkers.Store(key,wInfo)
 		}
@@ -127,6 +129,7 @@ func (s *AgolloServer) Watch() {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
+						ccommon.CLogger.Runtime.Infof("will setup worker", k)
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
