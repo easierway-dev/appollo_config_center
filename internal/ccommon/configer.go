@@ -39,12 +39,12 @@ type AgolloCfg struct {
 	ConfigServerURL string                 `toml:"ipport"`
 	AppID string                 		`toml:"appid"`
 	Cluster string                 		`toml:"cluster"`
-	Namespace string                 	`toml:"namespace"`
+	Namespace []string                 	`toml:"namespace"`
 	CyclePeriod int                		`toml:"cycleperiod"`
 }
 
 type AppClusterCfg struct {
-	Namespace	string `toml:"namespace"`
+	Namespace	[]string `toml:"namespace"`
 	AppClusterMap   map[string]AppClusterInfo    `toml:"app_cluster_map"`
 }
 
@@ -59,7 +59,7 @@ type AppCfg struct {
 
 type AppClusterInfo struct {
         Cluster []string `toml:"cluster"`
-	Namespace       string `toml:"namespace"`
+	Namespace       []string `toml:"namespace"`
 }
 
 type ClusterInfo struct {

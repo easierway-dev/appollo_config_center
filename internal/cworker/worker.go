@@ -2,6 +2,7 @@ package cworker
 
 import (
 	"fmt"
+	"sort"
 	"os"	
 	"context"
 
@@ -19,13 +20,22 @@ type CWorker struct {
 type WorkInfo struct {
 	AppID string
 	Cluster string
-	Namespace string
+	Namespace []string
 	Tag string
 }
 
 func (info *WorkInfo) Key() string {
   if info.Tag == "" {
-    info.Tag = fmt.Sprintf("%s_%s_%s",info.AppID, info.Cluster, info.Namespace)
+    tag := ""
+    sort.Strings(info.Namespace)
+    for i, namespace := range info.Namespace {
+	if i == 0 {
+	  tag = namespace
+	} else {
+	  tag = fmt.Sprintf("%s_%s",tag, namespace)
+        }
+    }
+    info.Tag = fmt.Sprintf("%s_%s_%s",info.AppID, info.Cluster, tag)
   }
   return info.Tag
 }
@@ -36,7 +46,7 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 		ccommon.AgolloConfiger.ConfigServerURL,
 		wInfo.AppID,
 		agollo.Cluster(wInfo.Cluster),
-		agollo.PreloadNamespaces(wInfo.Namespace),
+		agollo.PreloadNamespaces(wInfo.Namespace...),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),

@@ -13,7 +13,7 @@ func BuildGlobalAgollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error
 		agolloCfg.ConfigServerURL,
 		agolloCfg.AppID,
 		agollo.Cluster(agolloCfg.Cluster),
-		agollo.PreloadNamespaces(agolloCfg.Namespace),
+		agollo.PreloadNamespaces(agolloCfg.Namespace...),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),

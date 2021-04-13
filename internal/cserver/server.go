@@ -39,7 +39,7 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 	})
 	namespace := cfg.Namespace
 	for appid, appclusterinfo := range cfg.AppClusterMap {
-		if appclusterinfo.Namespace != "" {
+		if len(appclusterinfo.Namespace) != 0 {
 			namespace = appclusterinfo.Namespace
 		}
 		for _, cluster := range appclusterinfo.Cluster {
