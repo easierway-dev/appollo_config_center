@@ -1,7 +1,6 @@
 package cserver
 
 import (
-	"log"
 	"time"
 	"context"
 	"sync"
@@ -64,14 +63,14 @@ func (s *AgolloServer) Update() {
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				log.Printf("ParseDyConfig error: %s\n", err.Error())
+				ccommon.CLogger.Runtime.Errorf("ParseDyConfig error: %s\n", err.Error())
 				panic(err)
 		}
 		ccommon.DyAgolloConfiger[ns] = dycfg
 
 		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+				ccommon.CLogger.Runtime.Errorf("ParseAppClusterConfig error: %s\n", err.Error())
 				panic(err)
 		}	
 		s.UpdateOne(cfg)
@@ -99,14 +98,14 @@ func (s *AgolloServer) Update() {
 				}
 				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
-						log.Printf("update ParseDyConfig error: %s\n", err.Error())
+						ccommon.CLogger.Runtime.Errorf("update ParseDyConfig error: %s\n", err.Error())
 				} else {
 					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
 					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
-							log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+							ccommon.CLogger.Runtime.Errorf("update ParseAppClusterConfig error: %s\n", err.Error())
 							panic(err)
 					} else {
 						s.UpdateOne(cfg)
@@ -132,7 +131,7 @@ func (s *AgolloServer) Watch() {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Runtime.Infof("will setup worker", k.(string))
+						ccommon.CLogger.Runtime.Infof("will setup worker: %s", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
@@ -145,7 +144,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Runtime.Infof("will stop woker:",k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Runtime.Infof("will stop woker: %s",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
