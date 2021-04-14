@@ -123,7 +123,7 @@ func (s *AgolloServer) Watch() {
 	for {
 		select {
 		case <-t.C:
-			ccommon.CLogger.Runtime.Infof("I am alive and watch change")
+			//ccommon.CLogger.Runtime.Infof("I am alive and watch change")
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
