@@ -1,7 +1,6 @@
 package cserver
 
 import (
-	"log"
 	"time"
 	"context"
 	"sync"
@@ -39,7 +38,7 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 	})
 	namespace := cfg.Namespace
 	for appid, appclusterinfo := range cfg.AppClusterMap {
-		if appclusterinfo.Namespace != "" {
+		if len(appclusterinfo.Namespace) != 0 {
 			namespace = appclusterinfo.Namespace
 		}
 		for _, cluster := range appclusterinfo.Cluster {
@@ -61,19 +60,21 @@ func (s *AgolloServer) BuildGAgollo (agollo agollo.Agollo){
 
 // 根据globla_config.app_cluster_map注册worker
 func (s *AgolloServer) Update() {
-	dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map"),s.gAgollo.Get("app_config_map"))
-	if err != nil {
-			log.Printf("ParseDyConfig error: %s\n", err.Error())
-			panic(err)
-	}
-	ccommon.DyAgolloConfiger = dycfg
+	for _, ns := range ccommon.AgolloConfiger.Namespace {
+		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
+		if err != nil {
+				ccommon.CLogger.Runtime.Errorf("ParseDyConfig error: %s\n", err.Error())
+				panic(err)
+		}
+		ccommon.DyAgolloConfiger[ns] = dycfg
 
-	cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map"))
-	if err != nil {
-			log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
-			panic(err)
-	}	
-	s.UpdateOne(cfg)
+		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
+		if err != nil {
+				ccommon.CLogger.Runtime.Errorf("ParseAppClusterConfig error: %s\n", err.Error())
+				panic(err)
+		}	
+		s.UpdateOne(cfg)
+	}
 	
 	errorCh := s.gAgollo.Start()
 	watchCh := s.gAgollo.Watch()
@@ -97,14 +98,14 @@ func (s *AgolloServer) Update() {
 				}
 				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
-						log.Printf("update ParseDyConfig error: %s\n", err.Error())
+						ccommon.CLogger.Runtime.Errorf("update ParseDyConfig error: %s\n", err.Error())
 				} else {
-					ccommon.DyAgolloConfiger = dycfg
+					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
-					cfg, err = ccommon.ParseAppClusterConfig(value.(string))
+					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
-							log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+							ccommon.CLogger.Runtime.Errorf("update ParseAppClusterConfig error: %s\n", err.Error())
 							panic(err)
 					} else {
 						s.UpdateOne(cfg)
@@ -123,13 +124,14 @@ func (s *AgolloServer) Watch() {
 	for {
 		select {
 		case <-t.C:
+			//ccommon.CLogger.Runtime.Infof("I am alive and watch change")
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Runtime.Infof("will setup worker", k)
+						ccommon.CLogger.Runtime.Infof("will setup worker: %s", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
@@ -142,7 +144,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Runtime.Infof("will stop woker:",k, "wait 3s to envalid  !!!")
+					ccommon.CLogger.Runtime.Infof("will stop woker: %s",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true

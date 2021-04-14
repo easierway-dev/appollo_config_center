@@ -2,6 +2,7 @@ package cworker
 
 import (
 	"fmt"
+	"sort"
 	"os"	
 	"context"
 
@@ -19,13 +20,22 @@ type CWorker struct {
 type WorkInfo struct {
 	AppID string
 	Cluster string
-	Namespace string
+	Namespace []string
 	Tag string
 }
 
 func (info *WorkInfo) Key() string {
   if info.Tag == "" {
-    info.Tag = fmt.Sprintf("%s_%s_%s",info.AppID, info.Cluster, info.Namespace)
+    tag := ""
+    sort.Strings(info.Namespace)
+    for i, namespace := range info.Namespace {
+	if i == 0 {
+	  tag = namespace
+	} else {
+	  tag = fmt.Sprintf("%s_%s",tag, namespace)
+        }
+    }
+    info.Tag = fmt.Sprintf("%s_%s_%s",info.AppID, info.Cluster, tag)
   }
   return info.Tag
 }
@@ -36,7 +46,7 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 		ccommon.AgolloConfiger.ConfigServerURL,
 		wInfo.AppID,
 		agollo.Cluster(wInfo.Cluster),
-		agollo.PreloadNamespaces(wInfo.Namespace),
+		agollo.PreloadNamespaces(wInfo.Namespace...),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
@@ -65,9 +75,9 @@ func (cw *CWorker) Run(ctx context.Context){
 			case update := <-watchCh:
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
-					err := cconsul.WriteOne(ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, path, v)
+					err := cconsul.WriteOne(ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, path, v)
 					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, err)
+						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, err)
 					}
 				}
 				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",

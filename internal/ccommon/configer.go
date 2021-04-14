@@ -9,7 +9,7 @@ import (
 )
 
 var AgolloConfiger *AgolloCfg
-var DyAgolloConfiger *DyAgolloCfg
+var DyAgolloConfiger map[string]*DyAgolloCfg
 
 const (
 	ServerName    = "mvbjqa"
@@ -30,6 +30,7 @@ type BaseConf struct {
 	AgolloCfg *AgolloCfg
 }
 
+
 type DyAgolloCfg struct {
 	ClusterConfig *ClusterCfg
 	AppConfig *AppCfg
@@ -39,12 +40,12 @@ type AgolloCfg struct {
 	ConfigServerURL string                 `toml:"ipport"`
 	AppID string                 		`toml:"appid"`
 	Cluster string                 		`toml:"cluster"`
-	Namespace string                 	`toml:"namespace"`
+	Namespace []string                 	`toml:"namespace"`
 	CyclePeriod int                		`toml:"cycleperiod"`
 }
 
 type AppClusterCfg struct {
-	Namespace	string `toml:"namespace"`
+	Namespace	[]string `toml:"namespace"`
 	AppClusterMap   map[string]AppClusterInfo    `toml:"app_cluster_map"`
 }
 
@@ -59,7 +60,7 @@ type AppCfg struct {
 
 type AppClusterInfo struct {
         Cluster []string `toml:"cluster"`
-	Namespace       string `toml:"namespace"`
+	Namespace       []string `toml:"namespace"`
 }
 
 type ClusterInfo struct {
@@ -116,22 +117,22 @@ func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
 
 func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
         cfg := &DyAgolloCfg{}
-		if clusterConfig != "" {
-			clusterCfg, err := parseClusterConfig(clusterConfig)
-			if err == nil {
-					cfg.ClusterConfig = clusterCfg
-			} else {
-				return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
-			}
+	if clusterConfig != "" {
+		clusterCfg, err := parseClusterConfig(clusterConfig)
+		if err == nil {
+				cfg.ClusterConfig = clusterCfg
+		} else {
+			return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
 		}
-		if appConfig != "" {
-			appCfg, err := parseAppConfig(appConfig)
-			if err == nil {
-					cfg.AppConfig = appCfg
-			} else {
-				return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
-			}
+	}
+	if appConfig != "" {
+		appCfg, err := parseAppConfig(appConfig)
+		if err == nil {
+				cfg.AppConfig = appCfg
+		} else {
+			return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
 		}
+	}
         return cfg, nil
 }
 

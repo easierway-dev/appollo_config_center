@@ -13,7 +13,7 @@ func BuildGlobalAgollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error
 		agolloCfg.ConfigServerURL,
 		agolloCfg.AppID,
 		agollo.Cluster(agolloCfg.Cluster),
-		agollo.PreloadNamespaces(agolloCfg.Namespace),
+		agollo.PreloadNamespaces(agolloCfg.Namespace...),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
@@ -45,6 +45,7 @@ func Init(server *AgolloServer)  error {
 	}
 	ccommon.CLogger = cl
 	cl.Runtime.Infof("Config=[%v],", cfg.AgolloCfg)
+	ccommon.DyAgolloConfiger = make(map[string]*ccommon.DyAgolloCfg)
 	//get global_config
 	return BuildGlobalAgollo(cfg.AgolloCfg, server)
 }
