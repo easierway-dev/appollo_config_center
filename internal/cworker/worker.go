@@ -75,9 +75,9 @@ func (cw *CWorker) Run(ctx context.Context){
 			case update := <-watchCh:
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
-					err := cconsul.WriteOne(ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, path, v)
+					err := cconsul.WriteOne(ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, path, v)
 					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger.ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, err)
+						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, err)
 					}
 				}
 				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",

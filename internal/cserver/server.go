@@ -61,19 +61,21 @@ func (s *AgolloServer) BuildGAgollo (agollo agollo.Agollo){
 
 // 根据globla_config.app_cluster_map注册worker
 func (s *AgolloServer) Update() {
-	dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map"),s.gAgollo.Get("app_config_map"))
-	if err != nil {
-			log.Printf("ParseDyConfig error: %s\n", err.Error())
-			panic(err)
-	}
-	ccommon.DyAgolloConfiger = dycfg
+	for _, ns := range ccommon.AgolloConfiger.Namespace {
+		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
+		if err != nil {
+				log.Printf("ParseDyConfig error: %s\n", err.Error())
+				panic(err)
+		}
+		ccommon.DyAgolloConfiger[ns] = dycfg
 
-	cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map"))
-	if err != nil {
-			log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
-			panic(err)
-	}	
-	s.UpdateOne(cfg)
+		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
+		if err != nil {
+				log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
+				panic(err)
+		}	
+		s.UpdateOne(cfg)
+	}
 	
 	errorCh := s.gAgollo.Start()
 	watchCh := s.gAgollo.Watch()
@@ -99,10 +101,10 @@ func (s *AgolloServer) Update() {
 				if err != nil {
 						log.Printf("update ParseDyConfig error: %s\n", err.Error())
 				} else {
-					ccommon.DyAgolloConfiger = dycfg
+					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
-					cfg, err = ccommon.ParseAppClusterConfig(value.(string))
+					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
 							log.Printf("ParseAppClusterConfig error: %s\n", err.Error())
 							panic(err)
