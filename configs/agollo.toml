@@ -1,5 +1,5 @@
 ipport = "localhost:18080"
 appid = "global_config"
 cluster = "default"
-namespace = "application"
+namespace = ["application"]
 cycleperiod = 3
