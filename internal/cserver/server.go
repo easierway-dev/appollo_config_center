@@ -123,13 +123,14 @@ func (s *AgolloServer) Watch() {
 	for {
 		select {
 		case <-t.C:
+			ccommon.CLogger.Runtime.Infof("I am alive and watch change")
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Runtime.Infof("will setup worker", k)
+						ccommon.CLogger.Runtime.Infof("will setup worker", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
@@ -142,7 +143,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Runtime.Infof("will stop woker:",k, "wait 3s to envalid  !!!")
+					ccommon.CLogger.Runtime.Infof("will stop woker:",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
