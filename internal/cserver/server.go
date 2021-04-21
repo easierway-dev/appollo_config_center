@@ -86,7 +86,7 @@ func (s *AgolloServer) Update() {
 			    ccommon.CLogger.Runtime.Errorf(cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
-				 ccommon.CLogger.Runtime.Errorf("Error:", err)
+				 ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""

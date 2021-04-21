@@ -3,7 +3,6 @@ package cworker
 import (
 	"fmt"
 	"sort"
-	"os"	
 	"context"
 
         "github.com/shima-park/agollo"
@@ -49,7 +48,6 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 		agollo.PreloadNamespaces(wInfo.Namespace...),
 		agollo.AutoFetchOnCacheMiss(),
 		agollo.FailTolerantOnBackupExists(),
-		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
 	)
 	if err != nil {
 		return work, err
@@ -71,7 +69,7 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Runtime.Infof(cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-				ccommon.CLogger.Runtime.Errorf("Error:", err)
+				ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
