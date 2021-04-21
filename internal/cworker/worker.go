@@ -75,9 +75,30 @@ func (cw *CWorker) Run(ctx context.Context){
 			case update := <-watchCh:
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
-					err := cconsul.WriteOne(ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, path, v)
-					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr, err)
+					if ccommon.DyAgolloConfiger != nil {
+						if _,ok := ccommon.DyAgolloConfiger[update.Namespace];ok {
+							if ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap != nil {
+								if _,ok := ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster];ok {
+									consulAddr := ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr
+									err := cconsul.WriteOne(consulAddr, path, v)
+									if err != nil {
+										ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", consulAddr, err)
+									}
+								} else {
+									ccommon.CLogger.Runtime.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cw.WkInfo.Cluster,update.Namespace)
+									continue
+								}
+							} else {
+								ccommon.CLogger.Runtime.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",update.Namespace,ccommon.DyAgolloConfiger[update.Namespace])
+								continue
+							}
+						} else {
+							ccommon.CLogger.Runtime.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",update.Namespace,ccommon.DyAgolloConfiger)
+							continue
+						}
+					} else {
+						ccommon.CLogger.Runtime.Warnf("ccommon.DyAgolloConfiger = nil")
+						continue
 					}
 				}
 				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
