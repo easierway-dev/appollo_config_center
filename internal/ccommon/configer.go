@@ -9,7 +9,7 @@ import (
 )
 
 var AgolloConfiger *AgolloCfg
-var DyAgolloConfiger *DyAgolloCfg
+var DyAgolloConfiger map[string]*DyAgolloCfg
 
 const (
 	ServerName    = "mvbjqa"
@@ -29,6 +29,7 @@ type BaseConf struct {
 	LogCfg    *LogCfg
 	AgolloCfg *AgolloCfg
 }
+
 
 type DyAgolloCfg struct {
 	ClusterConfig *ClusterCfg
@@ -116,22 +117,22 @@ func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
 
 func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
         cfg := &DyAgolloCfg{}
-		if clusterConfig != "" {
-			clusterCfg, err := parseClusterConfig(clusterConfig)
-			if err == nil {
-					cfg.ClusterConfig = clusterCfg
-			} else {
-				return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
-			}
+	if clusterConfig != "" {
+		clusterCfg, err := parseClusterConfig(clusterConfig)
+		if err == nil {
+				cfg.ClusterConfig = clusterCfg
+		} else {
+			return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
 		}
-		if appConfig != "" {
-			appCfg, err := parseAppConfig(appConfig)
-			if err == nil {
-					cfg.AppConfig = appCfg
-			} else {
-				return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
-			}
+	}
+	if appConfig != "" {
+		appCfg, err := parseAppConfig(appConfig)
+		if err == nil {
+				cfg.AppConfig = appCfg
+		} else {
+			return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
 		}
+	}
         return cfg, nil
 }
 
