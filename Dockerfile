@@ -3,7 +3,6 @@ ARG ssh_prv_key
 ENV GOPATH=/root/go
 WORKDIR /data
 # 获取密钥用于依赖拉取代码
-COPY dsp_server_test.go ./
 RUN mkdir -p /root/.ssh && \
         chmod 0700 /root/.ssh && \
         ssh-keyscan github.com > /root/.ssh/known_hosts && \
