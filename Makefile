@@ -1,7 +1,7 @@
 COMMIT_HASH=$(shell git rev-parse --verify HEAD | cut -c 1-8)
 BUILD_DATE=$(shell date +%Y-%m-%d_%H:%M:%S%z)
 GIT_TAG=$(shell git describe --tags)
-GIT_AUTHOR=$(shell git show -s --format=%an)
+GIT_AUTHOR=xuexia.li
 SHELL:=/bin/bash
 BIN_NAME="agollo_server"
 

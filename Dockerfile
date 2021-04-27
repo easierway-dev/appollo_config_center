@@ -16,12 +16,11 @@ RUN mkdir -p /root/.ssh && \
         chmod 600 /root/.ssh/* 
 
 # set git config
-RUN git config --global url."git@gitlab.mobvista.com:".insteadOf "http://gitlab.mobvista.com" ; \
-	cd /data && git clone git@gitlab.mobvista.com:mvbjqa/appollo_config_center.git; \
-	cd appollo_config_center; \
-    sed -i '/golang:/,+9d' Makefile && \
-    make build;	
+RUN git config --global url."git@gitlab.mobvista.com:".insteadOf "http://gitlab.mobvista.com" ; 
 
+COPY . /data/appollo_config_center/
+
+RUN cd /data/appollo_config_center/ && make build; 
 
 FROM alpine:3.11
 WORKDIR /data
