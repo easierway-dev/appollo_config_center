@@ -1,4 +1,4 @@
-ipport = "localhost:18080"
+ipport = "apollo-service-apollo-configservice.apollo-service:8080"
 appid = "global_config"
 cluster = "default"
 namespace = ["application"]
