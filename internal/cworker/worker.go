@@ -71,8 +71,15 @@ func (cw *CWorker) Run(ctx context.Context){
 			case err := <-errorCh:
 				ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
+				skipped_keys := "iamstart"
 				for path, value := range update.NewValue {
 					v, _ := value.(string)
+					if ovalue, ok := update.OldValue[path]; ok {
+						if ovalue.(string) == v {
+							skipped_keys = fmt.Sprintf("%s,%s", key, path)
+							continue
+						}
+					}					
 					if ccommon.DyAgolloConfiger != nil {
 						if _,ok := ccommon.DyAgolloConfiger[update.Namespace];ok {
 							if ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap != nil {
@@ -99,8 +106,8 @@ func (cw *CWorker) Run(ctx context.Context){
 						continue
 					}
 				}
-				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
-					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
+				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) skipped_keys:[%s] error:(%v)\n",
+					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, skipped_keys, update.Error)
 			}
 		}
 	}(cw)
