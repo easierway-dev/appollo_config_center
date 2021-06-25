@@ -68,6 +68,9 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 
 func UpdateConsul(namespace, cluster, key, value string){
 	if ccommon.DyAgolloConfiger != nil {
+		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
+			namespace = "application"
+		}
 		if _,ok := ccommon.DyAgolloConfiger[namespace];ok {
 			if ccommon.DyAgolloConfiger[namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap != nil {
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
@@ -109,16 +112,19 @@ func (cw *CWorker) Run(ctx context.Context){
 			case update := <-watchCh:
 				skipped_keys := "iamstart"
 				if update.Namespace == ABTest {
-					abtest_valuelist := make([]*abtesting.AbInfo,len(update.NewValue)-1)
+					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
 					for key, value := range update.NewValue {
 						if key == "consul_key" {
 							path = value.(string)
 							continue
 						}
-						abtest_value, ok := value.(abtesting.AbInfo)
-						if ok {
+						var abtest_value abtesting.AbInfo
+						err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_value)
+						if err == nil {
 							abtest_valuelist = append(abtest_valuelist, &abtest_value)
+						} else {
+							ccommon.CLogger.Runtime.Errorf("jsoniter.Unmarshal(abtest_value failed, err[%v]\n", err)
 						}
 					}
 					if path != "" {
