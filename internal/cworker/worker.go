@@ -8,6 +8,8 @@ import (
         "github.com/shima-park/agollo"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+	"gitlab.mobvista.com/voyager/abtesting"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -64,7 +66,7 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 	return work, nil
 }
 
-func UpdateConsul(namespace, cluster, key, value){
+func UpdateConsul(namespace, cluster, key, value string){
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];ok {
 			if ccommon.DyAgolloConfiger[namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap != nil {
@@ -106,28 +108,37 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
 				skipped_keys := "iamstart"
-				abtest_valuelist = make([]interface)
 				if update.Namespace == ABTest {
+					abtest_valuelist := make([]*abtesting.AbInfo,len(update.NewValue)-1)
 					path := ""
 					for key, value := range update.NewValue {
 						if key == "consul_key" {
-							path = value
+							path = value.(string)
 							continue
 						}
-						abtest_valuelist = append(abtest_valuelist, value)					 
+						abtest_value, ok := value.(abtesting.AbInfo)
+						if ok {
+							abtest_valuelist = append(abtest_valuelist, &abtest_value)
+						}
 					}
 					if path != "" {
-						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, abtest_valuelist)
-					}				
-				} else {		
+						v, err := jsoniter.Marshal(abtest_valuelist)
+						if err != nil {
+							ccommon.CLogger.Runtime.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err[%v]\n", err)
+						} else {
+							UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, string(v))
+						}
+					}
+				} else {
 					for path, value := range update.NewValue {
 						v, _ := value.(string)
 						if ovalue, ok := update.OldValue[path]; ok {
-							if ovalue.(string) == v {
+							ov, _ := ovalue.(string)
+							if ov == v {
 								skipped_keys = fmt.Sprintf("%s,%s", skipped_keys, path)
 								continue
 							}
-						}			
+						}
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
