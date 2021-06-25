@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	ABTest = "abtest"
+	ABTest = "abtesting"
+
 )
 
 // Worker 工作者接口
@@ -105,9 +106,19 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
 				skipped_keys := "iamstart"
+				abtest_valuelist = make([]interface)
 				if update.Namespace == ABTest {
-						
-
+					path := ""
+					for key, value := range update.NewValue {
+						if key == "consul_key" {
+							path = value
+							continue
+						}
+						abtest_valuelist = append(abtest_valuelist, value)					 
+					}
+					if path != "" {
+						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, abtest_valuelist)
+					}				
 				} else {		
 					for path, value := range update.NewValue {
 						v, _ := value.(string)
