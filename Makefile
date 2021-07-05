@@ -9,7 +9,7 @@ all: build test # golint
 
 .PHONY: build
 build: mod
-	go build -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)"  -o ${BIN_NAME} ./cmd/agollo_server/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitTag=$(GIT_TAG) -X main.BuildTime=$(BUILD_DATE) -X main.GitCommit=$(COMMIT_HASH) -X main.GitAuthor=$(GIT_AUTHOR)"  -o ${BIN_NAME} ./cmd/agollo_server/main.go
 	mkdir -p deployments/output/bin
 	cp -r ${BIN_NAME} deployments/output/bin
 	cp -r configs deployments/output/
