@@ -27,9 +27,6 @@ RUN cd /data/appollo_config_center/ && make build;
 FROM alpine:3.11
 WORKDIR /data/appollo_config_center
 ENV PATH="${PATH}:/sbin"
-RUN apk update
-RUN apk upgrade
-RUN apk add bash
+RUN apk update && apk upgrade && apk add bash && apk add --no-cache libc6-compat
 COPY --from=builder /data/appollo_config_center/deployments ./
-RUN chmod +x /data/appollo_config_center/excute_agollo /data/appollo_config_center/supervise.agollo_server /data/appollo_config_center/run
-ENTRYPOINT ["./run"]
+CMD ["./run"]
