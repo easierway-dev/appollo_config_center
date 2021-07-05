@@ -29,4 +29,4 @@ WORKDIR /data/appollo_config_center
 ENV PATH="${PATH}:/sbin"
 RUN apk update && apk upgrade && apk add bash && apk add --no-cache libc6-compat
 COPY --from=builder /data/appollo_config_center/deployments ./
-CMD ["./run"]
+ENTRYPOINT ["./start_server.sh"]
