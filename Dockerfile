@@ -1,11 +1,14 @@
 FROM golang:1.15.3 as builder
 
-ENV GOPATH=/root/go
-ENV GOCACHE=/root/gocache/.cache/go-build
-
 ARG SSH_KEY
 
 WORKDIR /data
+ENV GOPATH=/root/go
+ENV GOCACHE=/root/gocache/.cache/go-build
+ENV THIRD_DIR=/data
+ENV GO111MODULE=on
+ENV GOPROXY=direct
+ENV GOSUMDB=off
 
 # set prv key 
 RUN mkdir -p /root/.ssh && \
@@ -14,7 +17,6 @@ RUN mkdir -p /root/.ssh && \
         ssh-keyscan gitlab.mobvista.com >> /root/.ssh/known_hosts; \
         echo "$SSH_KEY" > /root/.ssh/id_rsa && \
         chmod 600 /root/.ssh/* 
-
 # set git config
 RUN git config --global url."git@gitlab.mobvista.com:".insteadOf "http://gitlab.mobvista.com" ; 
 
@@ -23,6 +25,8 @@ COPY . /data/appollo_config_center/
 RUN cd /data/appollo_config_center/ && make build; 
 
 FROM alpine:3.11
-WORKDIR /data
-COPY --from=builder /data/appollo_config_center/deployments /data/appollo_config_center
-ENTRYPOINT ["bash excute_agollo start"]
+WORKDIR /data/appollo_config_center
+ENV PATH="${PATH}:/sbin"
+RUN apk update && apk upgrade && apk add bash && apk add --no-cache libc6-compat
+COPY --from=builder /data/appollo_config_center/deployments ./
+ENTRYPOINT ["./start_server.sh"]

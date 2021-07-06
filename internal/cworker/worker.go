@@ -8,6 +8,13 @@ import (
         "github.com/shima-park/agollo"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+	"gitlab.mobvista.com/voyager/abtesting"
+	jsoniter "github.com/json-iterator/go"
+)
+
+const (
+	ABTest = "abtesting"
+
 )
 
 // Worker 工作者接口
@@ -58,6 +65,38 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 	}
 	return work, nil
 }
+
+func UpdateConsul(namespace, cluster, key, value string){
+	if ccommon.DyAgolloConfiger != nil {
+		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
+			namespace = "application"
+		}
+		if _,ok := ccommon.DyAgolloConfiger[namespace];ok {
+			if ccommon.DyAgolloConfiger[namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap != nil {
+				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
+					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
+					err := cconsul.WriteOne(consulAddr, key, value)
+					if err != nil {
+						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", consulAddr, err)
+					}
+				} else {
+					ccommon.CLogger.Runtime.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cluster,namespace)
+					return
+				}
+			} else {
+				ccommon.CLogger.Runtime.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",namespace,ccommon.DyAgolloConfiger[namespace])
+				return
+			}
+		} else {
+			ccommon.CLogger.Runtime.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",namespace,ccommon.DyAgolloConfiger)
+			return
+		}
+	} else {
+		ccommon.CLogger.Runtime.Warnf("ccommon.DyAgolloConfiger = nil")
+	}
+	return
+}
+
 //work run
 func (cw *CWorker) Run(ctx context.Context){
 	errorCh := cw.AgolloClient.Start()
@@ -71,36 +110,46 @@ func (cw *CWorker) Run(ctx context.Context){
 			case err := <-errorCh:
 				ccommon.CLogger.Runtime.Warnf("Error:", err)
 			case update := <-watchCh:
-				for path, value := range update.NewValue {
-					v, _ := value.(string)
-					if ccommon.DyAgolloConfiger != nil {
-						if _,ok := ccommon.DyAgolloConfiger[update.Namespace];ok {
-							if ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap != nil {
-								if _,ok := ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster];ok {
-									consulAddr := ccommon.DyAgolloConfiger[update.Namespace].ClusterConfig.ClusterMap[cw.WkInfo.Cluster].ConsulAddr
-									err := cconsul.WriteOne(consulAddr, path, v)
-									if err != nil {
-										ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", consulAddr, err)
-									}
-								} else {
-									ccommon.CLogger.Runtime.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cw.WkInfo.Cluster,update.Namespace)
-									continue
-								}
-							} else {
-								ccommon.CLogger.Runtime.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",update.Namespace,ccommon.DyAgolloConfiger[update.Namespace])
-								continue
-							}
-						} else {
-							ccommon.CLogger.Runtime.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",update.Namespace,ccommon.DyAgolloConfiger)
+				skipped_keys := "iamstart"
+				if update.Namespace == ABTest {
+					abtest_valuelist := make([]*abtesting.AbInfo,0)
+					path := ""
+					for key, value := range update.NewValue {
+						if key == "consul_key" {
+							path = value.(string)
 							continue
 						}
-					} else {
-						ccommon.CLogger.Runtime.Warnf("ccommon.DyAgolloConfiger = nil")
-						continue
+						var abtest_value abtesting.AbInfo
+						err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_value)
+						if err == nil {
+							abtest_valuelist = append(abtest_valuelist, &abtest_value)
+						} else {
+							ccommon.CLogger.Runtime.Errorf("jsoniter.Unmarshal(abtest_value failed, err[%v]\n", err)
+						}
+					}
+					if path != "" {
+						v, err := jsoniter.Marshal(abtest_valuelist)
+						if err != nil {
+							ccommon.CLogger.Runtime.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err[%v]\n", err)
+						} else {
+							UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, string(v))
+						}
+					}
+				} else {
+					for path, value := range update.NewValue {
+						v, _ := value.(string)
+						if ovalue, ok := update.OldValue[path]; ok {
+							ov, _ := ovalue.(string)
+							if ov == v {
+								skipped_keys = fmt.Sprintf("%s,%s", skipped_keys, path)
+								continue
+							}
+						}
+						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
-					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
+				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) skipped_keys:[%s] error:(%v)\n",
+					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, skipped_keys, update.Error)
 			}
 		}
 	}(cw)

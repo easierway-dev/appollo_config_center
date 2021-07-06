@@ -1,5 +1,6 @@
 #!/bin/bash
-
+killall supervise.agollo_server agollo_server
 ulimit -n 131072
+
 cp -rf ./output/* ./
 nohup ./bin/agollo_server
