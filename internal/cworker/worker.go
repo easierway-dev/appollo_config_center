@@ -14,6 +14,7 @@ import (
 
 const (
 	ABTest = "abtesting"
+	DefaultNamespace = "application"
 
 )
 
@@ -69,15 +70,19 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 func UpdateConsul(namespace, cluster, key, value string){
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
-			namespace = "application"
+			namespace = DefaultNamespace
 		}
 		if _,ok := ccommon.DyAgolloConfiger[namespace];ok {
 			if ccommon.DyAgolloConfiger[namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap != nil {
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
 					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
+					if value == "" {
+						ccommon.CLogger.Runtime.Warnf("value is nil !!! consul_addr[%s], key[%s]\n", consulAddr, key)
+						return
+					}
 					err := cconsul.WriteOne(consulAddr, key, value)
 					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], err[%v]\n", consulAddr, err)
+						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], key[%s], err[%v]\n", consulAddr, key, err)
 					}
 				} else {
 					ccommon.CLogger.Runtime.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cluster,namespace)

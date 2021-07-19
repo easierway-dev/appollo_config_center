@@ -1,7 +1,7 @@
 package cserver
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/shima-park/agollo"
@@ -28,24 +28,22 @@ func BuildGlobalAgollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error
 
 
 func Init(server *AgolloServer)  error {
-
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	//init config
 	cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
 	if err != nil {
-		log.Printf("ParseConfig error: %s\n", err.Error())
+		fmt.Println("ParseConfig error: %s\n", err.Error())
 		return err
 	}
 	ccommon.AgolloConfiger =  cfg.AgolloCfg
+	ccommon.CLogCfg = cfg.LogCfg
 	// init log
-	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
+	err := ccommon.CLogger.NewconfigCenterLogger(ccommon.CLogCfg)
 	if err != nil {
-		log.Println("Load Logger err: ", err)
+		fmt.Println("Load Logger err: ", err)
 		return err
 	}
-	ccommon.CLogger = cl
-	cl.Runtime.Infof("Config=[%v],", cfg.AgolloCfg)
+	ccommon.CLogger.Runtime.Infof("Config=[%v],", ccommon.AgolloConfiger)
 	ccommon.DyAgolloConfiger = make(map[string]*ccommon.DyAgolloCfg)
 	//get global_config
-	return BuildGlobalAgollo(cfg.AgolloCfg, server)
+	return BuildGlobalAgollo(ccommon.AgolloConfiger, server)
 }

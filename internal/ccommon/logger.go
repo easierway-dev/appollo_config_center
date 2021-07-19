@@ -6,24 +6,46 @@ import (
 	"gitlab.mobvista.com/voyager/zlog"
 )
 
-var CLogger *ConfigCenterLogger
+var CLogger *ccLogger
+var CLogCfg *LogCfg
 
 type LogCfg struct {
 	Runtime *zlog.Ops `toml:"runtime_log"`
 }
 
-type ConfigCenterLogger struct {
+type ccLogger struct {
 	Runtime zlog.Logger
 }
 
-func NewconfigCenterLogger(logCfg *LogCfg) (*ConfigCenterLogger, error) {
+func  (this *ccLogger) NewconfigCenterLogger(logCfg *LogCfg) error {
 	var err error
-	logger := &ConfigCenterLogger{}
 	if logCfg == nil {
-		return nil, errors.New("logCfg is nil")
+		return errors.New("logCfg is nil")
 	}
-	if logger.Runtime, err = zlog.NewZLog(logCfg.Runtime); err != nil {
-		return nil, err
+	if this.Runtime, err = zlog.NewZLog(logCfg.Runtime); err != nil {
+		return err
 	}
-	return logger, nil
+	return nil
 }
+
+func (this *ccLoger) Infof(format string, args ...interface{}) {
+	if this == nil || this.runtime == nil {
+		return
+	}
+	this.runtime.Infof(format, args)
+}
+
+func (this *ccLoger) Warnf(format string, args ...interface{}) {
+	if this == nil || this.runtime == nil {
+		return
+	}
+	this.runtime.Warnf(format, args)
+}
+
+func (this *ccLoger) Errorf(format string, args ...interface{}) {
+	if this == nil || this.runtime == nil {
+		return
+	}
+	this.runtime.Errorf(format, args)
+}
+
