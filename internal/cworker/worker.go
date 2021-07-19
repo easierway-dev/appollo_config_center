@@ -77,27 +77,27 @@ func UpdateConsul(namespace, cluster, key, value string){
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
 					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
-						ccommon.CLogger.Runtime.Warnf("value is nil !!! consul_addr[%s], key[%s]\n", consulAddr, key)
+						ccommon.CLogger.Warnf("value is nil !!! consul_addr[%s], key[%s]\n", consulAddr, key)
 						return
 					}
 					err := cconsul.WriteOne(consulAddr, key, value)
 					if err != nil {
-						ccommon.CLogger.Runtime.Errorf("consul_addr[%s], key[%s], err[%v]\n", consulAddr, key, err)
+						ccommon.CLogger.Errorf("consul_addr[%s], key[%s], err[%v]\n", consulAddr, key, err)
 					}
 				} else {
-					ccommon.CLogger.Runtime.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cluster,namespace)
+					ccommon.CLogger.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cluster,namespace)
 					return
 				}
 			} else {
-				ccommon.CLogger.Runtime.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",namespace,ccommon.DyAgolloConfiger[namespace])
+				ccommon.CLogger.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",namespace,ccommon.DyAgolloConfiger[namespace])
 				return
 			}
 		} else {
-			ccommon.CLogger.Runtime.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",namespace,ccommon.DyAgolloConfiger)
+			ccommon.CLogger.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",namespace,ccommon.DyAgolloConfiger)
 			return
 		}
 	} else {
-		ccommon.CLogger.Runtime.Warnf("ccommon.DyAgolloConfiger = nil")
+		ccommon.CLogger.Warnf("ccommon.DyAgolloConfiger = nil")
 	}
 	return
 }
@@ -110,10 +110,10 @@ func (cw *CWorker) Run(ctx context.Context){
 		for {
 			select {
 			case <-ctx.Done():
-				ccommon.CLogger.Runtime.Infof(cw.WkInfo.Cluster, "watch quit...")
+				ccommon.CLogger.Infof(cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-				ccommon.CLogger.Runtime.Warnf("Error:", err)
+				ccommon.CLogger.Warnf("Error:", err)
 			case update := <-watchCh:
 				skipped_keys := "iamstart"
 				if update.Namespace == ABTest {
@@ -129,13 +129,13 @@ func (cw *CWorker) Run(ctx context.Context){
 						if err == nil {
 							abtest_valuelist = append(abtest_valuelist, &abtest_value)
 						} else {
-							ccommon.CLogger.Runtime.Errorf("jsoniter.Unmarshal(abtest_value failed, err[%v]\n", err)
+							ccommon.CLogger.Errorf("jsoniter.Unmarshal(abtest_value failed, err[%v]\n", err)
 						}
 					}
 					if path != "" {
 						v, err := jsoniter.Marshal(abtest_valuelist)
 						if err != nil {
-							ccommon.CLogger.Runtime.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err[%v]\n", err)
+							ccommon.CLogger.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err[%v]\n", err)
 						} else {
 							UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, string(v))
 						}
@@ -153,7 +153,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				ccommon.CLogger.Runtime.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) skipped_keys:[%s] error:(%v)\n",
+				ccommon.CLogger.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) skipped_keys:[%s] error:(%v)\n",
 					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, skipped_keys, update.Error)
 			}
 		}

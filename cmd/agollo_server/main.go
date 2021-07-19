@@ -21,7 +21,7 @@ func handleKillSignal() {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt, syscall.SIGTERM)
 	<-sigchan
-	ccommon.CLogger.Runtime.Infof("get shutdown signal.")
+	ccommon.CLogger.Infof("get shutdown signal.")
 	os.Exit(0)
 }
 
