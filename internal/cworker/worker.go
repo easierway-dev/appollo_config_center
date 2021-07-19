@@ -77,23 +77,23 @@ func UpdateConsul(namespace, cluster, key, value string){
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
 					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
-						ccommon.CLogger.Warnf("value is nil !!! consul_addr[%s], key[%s]\n", consulAddr, key)
+						ccommon.CLogger.Warnf("value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						return
 					}
 					err := cconsul.WriteOne(consulAddr, key, value)
 					if err != nil {
-						ccommon.CLogger.Errorf("consul_addr[%s], key[%s], err[%v]\n", consulAddr, key, err)
+						ccommon.CLogger.Errorf("consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
 					}
 				} else {
-					ccommon.CLogger.Warnf("cluster:%s not in  ccommon.DyAgolloConfiger[%s].ClusterConfig", cluster,namespace)
+					ccommon.CLogger.Warnf("cluster:",cluster,"not in  ccommon.DyAgolloConfiger[",namespace,"].ClusterConfig")
 					return
 				}
 			} else {
-				ccommon.CLogger.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[%s]=%v",namespace,ccommon.DyAgolloConfiger[namespace])
+				ccommon.CLogger.Warnf("consulAddr get failed ccommon.DyAgolloConfiger[",namespace,"=",ccommon.DyAgolloConfiger[namespace])
 				return
 			}
 		} else {
-			ccommon.CLogger.Warnf("%s not in ccommon.DyAgolloConfiger[%v]",namespace,ccommon.DyAgolloConfiger)
+			ccommon.CLogger.Warnf(namespace," not in ccommon.DyAgolloConfiger[",ccommon.DyAgolloConfiger,"]")
 			return
 		}
 	} else {
@@ -129,13 +129,13 @@ func (cw *CWorker) Run(ctx context.Context){
 						if err == nil {
 							abtest_valuelist = append(abtest_valuelist, &abtest_value)
 						} else {
-							ccommon.CLogger.Errorf("jsoniter.Unmarshal(abtest_value failed, err[%v]\n", err)
+							ccommon.CLogger.Errorf("jsoniter.Unmarshal(abtest_value failed, err:", err)
 						}
 					}
 					if path != "" {
 						v, err := jsoniter.Marshal(abtest_valuelist)
 						if err != nil {
-							ccommon.CLogger.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err[%v]\n", err)
+							ccommon.CLogger.Errorf("jsoniter.Marshal(abtest_valuelist) failed, err:", err)
 						} else {
 							UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, string(v))
 						}
@@ -153,8 +153,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				ccommon.CLogger.Infof("Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) skipped_keys:[%s] error:(%v)\n",
-					cw.WkInfo.Cluster, update.Namespace, update.OldValue, update.NewValue, skipped_keys, update.Error)
+				ccommon.CLogger.Infof("Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") old_value:("update.OldValue,") new_value:(",update.NewValue,") skipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
 			}
 		}
 	}(cw)

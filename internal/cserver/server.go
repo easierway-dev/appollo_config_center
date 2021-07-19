@@ -63,14 +63,14 @@ func (s *AgolloServer) Update() {
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Errorf("ParseDyConfig error: %s\n", err.Error())
+				ccommon.CLogger.Errorf("ParseDyConfig error: ", err.Error())
 				panic(err)
 		}
 		ccommon.DyAgolloConfiger[ns] = dycfg
 
 		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Errorf("ParseAppClusterConfig error: %s\n", err.Error())
+				ccommon.CLogger.Errorf("ParseAppClusterConfig error: ", err.Error())
 				panic(err)
 		}	
 		s.UpdateOne(cfg)
@@ -98,21 +98,20 @@ func (s *AgolloServer) Update() {
 				}
 				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
-						ccommon.CLogger.Errorf("update ParseDyConfig error: %s\n", err.Error())
+						ccommon.CLogger.Errorf("update ParseDyConfig error: ", err.Error())
 				} else {
 					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
 					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
-							ccommon.CLogger.Errorf("update ParseAppClusterConfig error: %s\n", err.Error())
+							ccommon.CLogger.Errorf("update ParseAppClusterConfig error: ", err.Error())
 							panic(err)
 					} else {
 						s.UpdateOne(cfg)
 					}
 				}
-				ccommon.CLogger.Infof("Global Apollo cluster(%s) namespace(%s) old_value:(%v) new_value:(%v) error:(%v)\n",
-					cluster, update.Namespace, update.OldValue, update.NewValue, update.Error)
+				ccommon.CLogger.Infof("Global Apollo cluster(",cluster,") namespace(",update.Namespace,") old_value:(",update.OldValue,") new_value:(",update.NewValue, ") error:(",update.Error,")")
 			}
 		}
 	}(ccommon.AgolloConfiger.Cluster)
@@ -131,7 +130,7 @@ func (s *AgolloServer) Watch() {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Infof("will setup worker: %s", k.(string))
+						ccommon.CLogger.Infof("will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
@@ -144,7 +143,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Infof("will stop woker: %s",k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Infof("will stop woker: ",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
