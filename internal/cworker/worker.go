@@ -153,7 +153,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				ccommon.CLogger.Infof("Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") old_value:("update.OldValue,") new_value:(",update.NewValue,") skipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
+				ccommon.CLogger.Infof("Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") old_value:(", update.OldValue,") new_value:(",update.NewValue,") skipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
 			}
 		}
 	}(cw)
