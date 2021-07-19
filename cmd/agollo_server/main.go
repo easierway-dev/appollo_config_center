@@ -47,7 +47,7 @@ func main() {
 	}
 	server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
-	ccommon.CLogger.Runtime.Infof("agollo_server start success !!! will listen appolo update ...")
+	ccommon.CLogger.Infof("agollo_server start success !!! will listen appolo update ...")
 	handleKillSignal()
 	server.GracefulStop()
 }

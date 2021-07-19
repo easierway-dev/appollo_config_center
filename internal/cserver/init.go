@@ -19,7 +19,7 @@ func BuildGlobalAgollo(agolloCfg *ccommon.AgolloCfg, server *AgolloServer) error
 		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
 	)
 	if err != nil {
-		log.Printf("Build_global_agollo err: %s\n", err.Error())
+		fmt.Println("Build_global_agollo err: %s\n", err.Error())
 		return err
 	}
 	server.BuildGAgollo(newAgo)
@@ -35,13 +35,13 @@ func Init(server *AgolloServer)  error {
 		return err
 	}
 	ccommon.AgolloConfiger =  cfg.AgolloCfg
-	ccommon.CLogCfg = cfg.LogCfg
 	// init log
-	err := ccommon.CLogger.NewconfigCenterLogger(ccommon.CLogCfg)
+	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {
 		fmt.Println("Load Logger err: ", err)
 		return err
 	}
+	ccommon.CLogger = cl
 	ccommon.CLogger.Runtime.Infof("Config=[%v],", ccommon.AgolloConfiger)
 	ccommon.DyAgolloConfiger = make(map[string]*ccommon.DyAgolloCfg)
 	//get global_config

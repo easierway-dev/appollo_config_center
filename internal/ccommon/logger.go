@@ -7,45 +7,45 @@ import (
 )
 
 var CLogger *ccLogger
-var CLogCfg *LogCfg
 
 type LogCfg struct {
-	Runtime *zlog.Ops `toml:"runtime_log"`
+	Runtime *zlog.Ops `toml:"Runtime_log"`
 }
 
 type ccLogger struct {
 	Runtime zlog.Logger
 }
 
-func  (this *ccLogger) NewconfigCenterLogger(logCfg *LogCfg) error {
+func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	var err error
 	if logCfg == nil {
-		return errors.New("logCfg is nil")
+		return nil, errors.New("logCfg is nil")
 	}
-	if this.Runtime, err = zlog.NewZLog(logCfg.Runtime); err != nil {
-		return err
+	logger := &ccLogger{}
+	if logger.Runtime, err = zlog.NewZLog(logCfg.Runtime); err != nil {
+		return nil, err
 	}
-	return nil
+	return logger, nil
 }
 
-func (this *ccLoger) Infof(format string, args ...interface{}) {
-	if this == nil || this.runtime == nil {
+func (this *ccLogger) Infof(format string, args ...interface{}) {
+	if this == nil || this.Runtime == nil {
 		return
 	}
-	this.runtime.Infof(format, args)
+	this.Runtime.Infof(format, args)
 }
 
-func (this *ccLoger) Warnf(format string, args ...interface{}) {
-	if this == nil || this.runtime == nil {
+func (this *ccLogger) Warnf(format string, args ...interface{}) {
+	if this == nil || this.Runtime == nil {
 		return
 	}
-	this.runtime.Warnf(format, args)
+	this.Runtime.Warnf(format, args)
 }
 
-func (this *ccLoger) Errorf(format string, args ...interface{}) {
-	if this == nil || this.runtime == nil {
+func (this *ccLogger) Errorf(format string, args ...interface{}) {
+	if this == nil || this.Runtime == nil {
 		return
 	}
-	this.runtime.Errorf(format, args)
+	this.Runtime.Errorf(format, args)
 }
 
