@@ -34,7 +34,11 @@ func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	cnotify.SendText(fmt.Sprintf("%s",args[0],fmt.Sprintf("%s",args[1:]))
+	if DyDingKey != "" {
+		cnotify.SendText(DyDingKey,fmt.Sprintf("%s",args))
+	} else if AgolloConfiger.DingKey != "" {
+		cnotify.SendText(AgolloConfiger.DingKey,fmt.Sprintf("%s",args))
+	}
 	this.Runtime.Info(args)
 }
 

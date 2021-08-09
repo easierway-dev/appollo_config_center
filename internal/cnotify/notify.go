@@ -9,6 +9,7 @@ import (
 	"github.com/CodyGuo/glog"
 )
 
+
 func SendText(token, textContent string) {
 	glog.SetFlags(glog.LglogFlags)
 	webHook := fmt.Sprintf("https://oapi.dingtalk.com/robot/send?access_token=%s",token)
@@ -37,6 +38,5 @@ func printResult(dt *dingtalk.DingTalk) {
 	}
 	glog.Info("发送消息成功, message: ", reqData)
 }
-
 
 

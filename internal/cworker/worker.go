@@ -102,13 +102,32 @@ func UpdateConsul(namespace, cluster, key, value string){
 	return
 }
 
+func GetDingKey(cw WorkInfo, dyAgoCfg map[string]*ccommon.DyAgolloCfg) string {
+	dingKey := ""
+	namespace := DefaultNamespace
+	if dyAgoCfg != nil {
+		if _,ok := dyAgoCfg[cw.Namespace[0]];ok {
+			namespace = cw.Namespace[0]
+		}
+		if dyAgoCfg[namespace].AppConfig != nil {
+			dingKey = dyAgoCfg[namespace].AppConfig.DingKey
+		}
+		if dyAgoCfg[namespace].AppConfig.AppConfigMap != nil {
+			if _,ok := dyAgoCfg[namespace].AppConfig.AppConfigMap[cw.AppID];ok {
+				dingKey = dyAgoCfg[namespace].AppConfig.AppConfigMap[cw.AppID].DingKey
+			} 
+		}		
+	}
+	return dingKey
+}
+
 //work run
 func (cw *CWorker) Run(ctx context.Context){
 	errorCh := cw.AgolloClient.Start()
 	watchCh := cw.AgolloClient.Watch()
 	go func(cw *CWorker) {
 		for {
-			ccommon.cnotify.UpdateDingKey(cw.WkInfo.AppID, ccommon.DyAgolloConfiger)
+			ccommon.DyDingKey = GetDingKey(cw.WkInfo, ccommon.DyAgolloConfiger)
 			select {
 			case <-ctx.Done():
 				ccommon.CLogger.Info(cw.WkInfo.Cluster, "watch quit...")
