@@ -1,24 +1,23 @@
 package cnotify
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/CodyGuo/dingtalk"
 	"github.com/CodyGuo/dingtalk/pkg/robot"
-	gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon
+	"github.com/CodyGuo/glog"
 )
 
-func sendText(token sting, oldValue, newValue interface{}) {
+func SendText(token, textContent string) {
 	glog.SetFlags(glog.LglogFlags)
-	webHook := "https://oapi.dingtalk.com/robot/send?access_token=xxx"
-	secret := token
-	dt := dingtalk.New(webHook, dingtalk.WithSecret(secret))
+	webHook := fmt.Sprintf("https://oapi.dingtalk.com/robot/send?access_token=%s",token)
+	dt := dingtalk.New(webHook, dingtalk.WithSecret(token))
 
 	// text类型
-	textContent := fmt.Sprintf("[global_config changed]\n old:%v \nnew:%v", oldValue, newValue)
-	atMobiles := robot.SendWithAtMobiles([]string{"176xxxxxx07", "178xxxxxx28"})
+	atMobiles := robot.SendWithAtMobiles([]string{"15311489030"})
 	if err := dt.RobotSendText(textContent, atMobiles); err != nil {
-		ccommon.CLogger.Errorf("send ding failed err: ",err)
+		glog.Fatal("send ding failed err: ",err)
 	}
 	printResult(dt)
 }
@@ -26,16 +25,18 @@ func sendText(token sting, oldValue, newValue interface{}) {
 func printResult(dt *dingtalk.DingTalk) {
 	response, err := dt.GetResponse()
 	if err != nil {
-		ccommon.CLogger.Errorf("Parse dingResp failed err: ",err)
+		glog.Fatal("Parse dingResp failed err: ",err)
 	}
 	reqBody, err := response.Request.GetBody()
 	if err != nil {
-		ccommon.CLogger.Errorf("Parse dingResp failed err: ",err)
+		glog.Fatal("Parse dingResp failed err: ",err)
 	}
 	reqData, err := ioutil.ReadAll(reqBody)
 	if err != nil {
-		ccommon.CLogger.Errorf("Parse dingResp failed err: ",err)
+		glog.Fatal("Parse dingResp failed err: ",err)
 	}
-	ccommon.CLogger.Infof("发送消息成功, message: ", reqData)
+	glog.Info("发送消息成功, message: ", reqData)
 }
+
+
 

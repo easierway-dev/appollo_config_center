@@ -11,6 +11,8 @@ import (
 var AgolloConfiger *AgolloCfg
 var DyAgolloConfiger map[string]*DyAgolloCfg
 
+var DyDingKey string
+
 const (
 	ServerName    = "mvbjqa"
 	SubServerName = "configCenter"
@@ -42,6 +44,7 @@ type AgolloCfg struct {
 	Cluster string                 		`toml:"cluster"`
 	Namespace []string                 	`toml:"namespace"`
 	CyclePeriod int                		`toml:"cycleperiod"`
+	DingKey string				`toml:"dingkey"`
 }
 
 type AppClusterCfg struct {
