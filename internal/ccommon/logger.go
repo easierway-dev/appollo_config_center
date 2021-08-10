@@ -30,15 +30,34 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
+func GetDingKey(appid string) string {
+        dingKey := ""
+        namespace := DefaultNamespace
+	if DyAgolloConfiger != nil {
+		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
+			if dyAgoCfg.AppConfig != nil {
+				dingKey = dyAgoCfg.AppConfig.DingKey
+			}
+			if dyAgoCfg.AppConfig.AppConfigMap != nil {
+				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
+					dingKey = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKey
+				} 
+			}
+		}
+        }
+	if dingKey != "" {
+		return dingKey
+	} else {
+		return DdingConfiger.DingKey
+	}
+}
+
 func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	if cnotify.DyDingKey != "" {
-		cnotify.SendText(cnotify.DyDingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
-	} else if DdingConfiger.DingKey != "" {
-		cnotify.SendText(DdingConfiger.DingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
-	}
+	dingkey := GetDingKey(args[0].(string))
+	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
 	this.Runtime.Info(args)
 }
 
@@ -53,11 +72,8 @@ func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	if cnotify.DyDingKey != "" {
-		cnotify.SendText(cnotify.DyDingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
-	} else if DdingConfiger.DingKey != "" {
-		cnotify.SendText(DdingConfiger.DingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
-	}
+	dingkey := GetDingKey(args[0].(string))
+	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
 	this.Runtime.Error(args)
 }
 

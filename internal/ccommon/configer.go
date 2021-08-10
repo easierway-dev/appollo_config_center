@@ -19,6 +19,12 @@ const (
 )
 
 const (
+	ABTest = "abtesting"
+	DefaultNamespace = "application"
+
+)
+
+const (
 	DirFlag = "configs"
 )
 

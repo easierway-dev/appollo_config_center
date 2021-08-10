@@ -9,8 +9,6 @@ import (
 	"github.com/CodyGuo/glog"
 )
 
-var DyDingKey string
-
 func SendText(token, textContent string, dingusers []string) {
 	glog.SetFlags(glog.LglogFlags)
 	webHook := fmt.Sprintf("https://oapi.dingtalk.com/robot/send?access_token=%s",token)
@@ -22,7 +20,6 @@ func SendText(token, textContent string, dingusers []string) {
 		glog.Fatal("send ding failed err: ",err)
 	}
 	printResult(dt)
-	DyDingKey = ""
 }
 
 func printResult(dt *dingtalk.DingTalk) {
