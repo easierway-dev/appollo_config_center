@@ -9,18 +9,20 @@ import (
 	"github.com/CodyGuo/glog"
 )
 
+var DyDingKey string
 
-func SendText(token, textContent string) {
+func SendText(token, textContent string, dingusers []string) {
 	glog.SetFlags(glog.LglogFlags)
 	webHook := fmt.Sprintf("https://oapi.dingtalk.com/robot/send?access_token=%s",token)
 	dt := dingtalk.New(webHook, dingtalk.WithSecret(token))
 
 	// text类型
-	atMobiles := robot.SendWithAtMobiles([]string{"15311489030"})
+	atMobiles := robot.SendWithAtMobiles(dingusers)
 	if err := dt.RobotSendText(textContent, atMobiles); err != nil {
 		glog.Fatal("send ding failed err: ",err)
 	}
 	printResult(dt)
+	DyDingKey = ""
 }
 
 func printResult(dt *dingtalk.DingTalk) {
@@ -36,7 +38,7 @@ func printResult(dt *dingtalk.DingTalk) {
 	if err != nil {
 		glog.Fatal("Parse dingResp failed err: ",err)
 	}
-	glog.Info("发送消息成功, message: ", reqData)
+	glog.Info("发送消息成功, message: ", string(reqData))
 }
 
 

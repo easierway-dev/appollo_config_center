@@ -35,6 +35,7 @@ func Init(server *AgolloServer)  error {
 		return err
 	}
 	ccommon.AgolloConfiger =  cfg.AgolloCfg
+	ccommon.DdingConfiger = cfg.DingCfg
 	// init log
 	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {

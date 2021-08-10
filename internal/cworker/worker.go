@@ -8,6 +8,7 @@ import (
         "github.com/shima-park/agollo"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+        "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cnotify"
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -106,8 +107,11 @@ func GetDingKey(cw WorkInfo, dyAgoCfg map[string]*ccommon.DyAgolloCfg) string {
 	dingKey := ""
 	namespace := DefaultNamespace
 	if dyAgoCfg != nil {
-		if _,ok := dyAgoCfg[cw.Namespace[0]];ok {
-			namespace = cw.Namespace[0]
+		for _, ns := range cw.Namespace {
+			if _,ok := dyAgoCfg[ns];ok {
+				namespace = ns
+				break
+			}
 		}
 		if dyAgoCfg[namespace].AppConfig != nil {
 			dingKey = dyAgoCfg[namespace].AppConfig.DingKey
@@ -127,7 +131,7 @@ func (cw *CWorker) Run(ctx context.Context){
 	watchCh := cw.AgolloClient.Watch()
 	go func(cw *CWorker) {
 		for {
-			ccommon.DyDingKey = GetDingKey(cw.WkInfo, ccommon.DyAgolloConfiger)
+			cnotify.DyDingKey = GetDingKey(cw.WkInfo, ccommon.DyAgolloConfiger)
 			select {
 			case <-ctx.Done():
 				ccommon.CLogger.Info(cw.WkInfo.Cluster, "watch quit...")

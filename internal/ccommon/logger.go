@@ -34,10 +34,10 @@ func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	if DyDingKey != "" {
-		cnotify.SendText(DyDingKey,fmt.Sprintf("%s",args))
-	} else if AgolloConfiger.DingKey != "" {
-		cnotify.SendText(AgolloConfiger.DingKey,fmt.Sprintf("%s",args))
+	if cnotify.DyDingKey != "" {
+		cnotify.SendText(cnotify.DyDingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
+	} else if DdingConfiger.DingKey != "" {
+		cnotify.SendText(DdingConfiger.DingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
 	}
 	this.Runtime.Info(args)
 }
@@ -53,7 +53,11 @@ func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	cnotify.SendText("de9b613437c2dd840ed8afbc6b976a6c60dac44aca81e0aa3301585216a03c7f",fmt.Sprintf("%s",args))
+	if cnotify.DyDingKey != "" {
+		cnotify.SendText(cnotify.DyDingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
+	} else if DdingConfiger.DingKey != "" {
+		cnotify.SendText(DdingConfiger.DingKey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
+	}
 	this.Runtime.Error(args)
 }
 
