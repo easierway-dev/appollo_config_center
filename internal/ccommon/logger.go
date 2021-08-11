@@ -69,6 +69,8 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
+	dingkey := GetDingKey(args[0].(string))
+	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),DdingConfiger.DingUsers)
 	this.Runtime.Warn(args)
 }
 
