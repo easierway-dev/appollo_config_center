@@ -63,14 +63,14 @@ func (s *AgolloServer) Update() {
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Error("","ParseDyConfig error: ", err.Error())
+				ccommon.CLogger.Error(ccomman.DefaultDingType,"ParseDyConfig error: ", err.Error())
 				panic(err)
 		}
 		ccommon.DyAgolloConfiger[ns] = dycfg
 
 		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Error("","ParseAppClusterConfig error: ", err.Error())
+				ccommon.CLogger.Error(ccomman.DefaultDingType,"ParseAppClusterConfig error: ", err.Error())
 				panic(err)
 		}	
 		s.UpdateOne(cfg)
@@ -82,10 +82,10 @@ func (s *AgolloServer) Update() {
 		for {
 			select {
 			case <-s.ctx.Done():
-			    ccommon.CLogger.Error("",cluster, "watch quit...")
+			    ccommon.CLogger.Error(ccomman.DefaultDingType,cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
-				 ccommon.CLogger.Warn("","Error:", err)
+				 ccommon.CLogger.Warn(ccomman.DefaultDingType,"Error:", err)
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""
@@ -97,20 +97,20 @@ func (s *AgolloServer) Update() {
 				}
 				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
-						ccommon.CLogger.Error("","update ParseDyConfig error: ", err.Error())
+						ccommon.CLogger.Error(ccomman.DefaultDingType,"update ParseDyConfig error: ", err.Error())
 				} else {
 					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
 					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
-							ccommon.CLogger.Error("","update ParseAppClusterConfig error: ", err.Error())
+							ccommon.CLogger.Error(ccomman.DefaultDingType,"update ParseAppClusterConfig error: ", err.Error())
 							panic(err)
 					} else {
 						s.UpdateOne(cfg)
 					}
 				}
-				ccommon.CLogger.Info("","Global Apollo cluster(",cluster,") namespace(",update.Namespace,") old_value:(",update.OldValue,") new_value:(",update.NewValue, ") error:(",update.Error,")")
+				ccommon.CLogger.Info(ccomman.DefaultDingType,"Global Apollo cluster(",cluster,") namespace(",update.Namespace,") old_value:(",update.OldValue,") new_value:(",update.NewValue, ") error:(",update.Error,")")
 			}
 		}
 	}(ccommon.AgolloConfiger.Cluster)
@@ -122,18 +122,18 @@ func (s *AgolloServer) Watch() {
 	for {
 		select {
 		case <-t.C:
-			//ccommon.CLogger.Info("","I am alive and watch change")
+			//ccommon.CLogger.Info(ccomman.DefaultDingType,"I am alive and watch change")
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.runningworkers.Load(k); !ok {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Info("","will setup worker: ", k.(string))
+						ccommon.CLogger.Info(ccomman.DefaultDingType,"will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
-						ccommon.CLogger.Error("","creeative worker failed !!! workerInfo=",v)
+						ccommon.CLogger.Error(ccomman.DefaultDingType,"creeative worker failed !!! workerInfo=",v)
 					}
 				}
 				return true	
@@ -142,7 +142,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Info("","will stop woker: ",k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Info(ccomman.DefaultDingType,"will stop woker: ",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true

@@ -72,27 +72,27 @@ func UpdateConsul(namespace, cluster, key, value string){
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
 					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
-						ccommon.CLogger.Warn("","value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
+						ccommon.CLogger.Warn(ccomman.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						return
 					}
 					err := cconsul.WriteOne(consulAddr, key, value)
 					if err != nil {
-						ccommon.CLogger.Error("","consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
+						ccommon.CLogger.Error(ccomman.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
 					}
 				} else {
-					ccommon.CLogger.Warn("","cluster:",cluster,"not in  ccommon.DyAgolloConfiger[",namespace,"].ClusterConfig")
+					ccommon.CLogger.Warn(ccomman.DefaultDingType,"cluster:",cluster,"not in  ccommon.DyAgolloConfiger[",namespace,"].ClusterConfig")
 					return
 				}
 			} else {
-				ccommon.CLogger.Warn("","consulAddr get failed ccommon.DyAgolloConfiger[",namespace,"=",ccommon.DyAgolloConfiger[namespace])
+				ccommon.CLogger.Warn(ccomman.DefaultDingType,"consulAddr get failed ccommon.DyAgolloConfiger[",namespace,"=",ccommon.DyAgolloConfiger[namespace])
 				return
 			}
 		} else {
-			ccommon.CLogger.Warn("",namespace," not in ccommon.DyAgolloConfiger[",ccommon.DyAgolloConfiger,"]")
+			ccommon.CLogger.Warn(ccomman.DefaultDingType,namespace," not in ccommon.DyAgolloConfiger[",ccommon.DyAgolloConfiger,"]")
 			return
 		}
 	} else {
-		ccommon.CLogger.Warn("","ccommon.DyAgolloConfiger = nil")
+		ccommon.CLogger.Warn(ccomman.DefaultDingType,"ccommon.DyAgolloConfiger = nil")
 	}
 	return
 }
@@ -105,7 +105,7 @@ func (cw *CWorker) Run(ctx context.Context){
 		for {
 			select {
 			case <-ctx.Done():
-				ccommon.CLogger.Info("",cw.WkInfo.Cluster, "watch quit...")
+				ccommon.CLogger.Info(ccomman.DefaultDingType,cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
 				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Error:", err)
@@ -158,7 +158,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 				}
-				ccommon.CLogger.Info("","Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
+				ccommon.CLogger.Info(ccomman.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
 				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent," \nerror:(",update.Error,")\n")
 			}
 		}

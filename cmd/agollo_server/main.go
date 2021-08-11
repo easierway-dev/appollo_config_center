@@ -21,7 +21,7 @@ func handleKillSignal() {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt, syscall.SIGTERM)
 	<-sigchan
-	ccommon.CLogger.Info("","get shutdown signal.")
+	ccommon.CLogger.Info(ccomman.DefaultDingType,"get shutdown signal.")
 	os.Exit(0)
 }
 
@@ -47,7 +47,7 @@ func main() {
 	}
 	server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
-	ccommon.CLogger.Info("","agollo_server start success !!! will listen appolo update ...")
+	ccommon.CLogger.Info(ccomman.DefaultDingType,"agollo_server start success !!! will listen appolo update ...")
 	handleKillSignal()
 	server.GracefulStop()
 }
