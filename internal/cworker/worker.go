@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"context"
+	"strings"
 
         "github.com/shima-park/agollo"
         "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
@@ -109,7 +110,7 @@ func (cw *CWorker) Run(ctx context.Context){
 			case err := <-errorCh:
 				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Error:", err)
 			case update := <-watchCh:
-				skipped_keys := "iamstart"
+				skipped_keys := ""
 				if update.Namespace == ccommon.ABTest {
 					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
@@ -147,7 +148,18 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") old_value:(", update.OldValue,") new_value:(",update.NewValue,") skipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
+				updatecontent := ""
+				for k, v := range update.NewValue {
+					if ! strings.Contains(skipped_keys, k) {
+						if _,ok := update.OldValue[k]; ok{
+							updatecontent = fmt.Sprintf("%s|key=%s, old=%s, new=%s", updatecontent, k, update.OldValue[k], v)
+						} else {
+							updatecontent = fmt.Sprintf("%s|key=%s, old=%s, new=%s", updatecontent, k, "", v)
+						}
+					}
+				}
+				ccommon.CLogger.Info("","Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
+				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent," \nerror:(",update.Error,")\n")
 			}
 		}
 	}(cw)

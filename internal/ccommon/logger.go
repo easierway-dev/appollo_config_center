@@ -10,6 +10,10 @@ import (
 
 var CLogger *ccLogger
 
+const (
+	DefaultDingType = ""
+)
+
 type LogCfg struct {
 	Runtime *zlog.Ops `toml:"Runtime_log"`
 }
