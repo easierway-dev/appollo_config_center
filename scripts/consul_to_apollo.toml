@@ -1,5 +1,0 @@
-[consul_apollovg]
-consuladdr="http://vg-consul-dsp.mobvista.com:8500/v1/"
-[consul_apollovg."config/dmp-server/pkg_dict"]
-appid="dmp"
-cluster="dmp_ali_vg"
