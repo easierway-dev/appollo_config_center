@@ -1,4 +1,6 @@
 portaddr="http://localhost:80"
 env="DEV"
+timeout=60
+dsp_ali_vg="http://localhost:8500"
 [usermap.apollo]
 token="0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"
