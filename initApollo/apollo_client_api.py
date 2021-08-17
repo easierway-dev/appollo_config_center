@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2020/12/2 18:52
-# @Author  : Weiqiang.long
+# @Time    : 2021/08/16 18:52
+# @Author  : Xuexia.li
 # @Site    : 
-# @File    : apollo_client.py
-# @Software: PyCharm
+# @File    : apollo_client_api.py
 # @Description:
 import requests
 import json
