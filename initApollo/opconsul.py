@@ -12,16 +12,40 @@ class OpConsul(object):
         self.conn = Connection(endpoint=consuladdr)
         
     def _putconsul(self, key, value):
-        conn.put(key, value)
+        try:
+            self.conn.put(key, value)
+            return True
+        except BaseException as e:
+            print("_putconsul err", e)
+            return False
+        
         
     def _getconsul(self, key):
-        conn.gut(key)
+        try:
+            resp = self.conn.get(key)
+            if key in resp :
+                return resp[key]
+            else :
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                return ""
+        except BaseException as e:
+            print("_getconsul err", e)
+            return ""
     
     def _putmapconsul(self, consulmap):
         if isinstance(consulmap, dict) :
-            conn.put_mapping(consulmap)
+            try:
+                self.conn.put_mapping(consulmap)
+                return True
+            except BaseException as e:
+                print("_putmapconsul err", e)
+                return False
         else :
             print("need dict, real:",type(consulmap))
+            return False
 
 if __name__ == '__main__':
+    opconsul = OpConsul(consuladdr="http://47.252.4.203:8500/v1/")
+    print(opconsul._getconsul("cnmultins"))
+    print(opconsul._putconsul("cnmultins11",11))
     pass

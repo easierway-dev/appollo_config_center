@@ -7,6 +7,7 @@
 # @Description:
 import requests
 import json
+import sys
 
 class RequestClient(object):
     def __init__(self, timeout=60, authorization="0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"):
@@ -46,6 +47,7 @@ class RequestClient(object):
             return requests.delete(url=url, params=params, timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
     def _request_post(self, url, json_data):
+        print(self._authorization)
         if self._authorization:
             return requests.post(
                 url=url,
@@ -82,12 +84,13 @@ class PrivateApolloClient(RequestClient):
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName
         )
+        print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
             resp = self._request_get(url=__url)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("get_cluster err", e)
@@ -101,22 +104,23 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
-        if dataChangeCreatedBy != "" :
+        if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters'.format(
             portal_address=self._portal_address, env=self._env, appId=appid
         )
         __data = {
-                "clusterName":namespaceName,
+                "name":clusterName,
                 "appId":appid,
                 "dataChangeCreatedBy":dataChangeCreatedBy
             }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
             resp = self._request_post(url=__url, json_data=__data)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("creat_cluster err", e)
@@ -132,18 +136,19 @@ class PrivateApolloClient(RequestClient):
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName
         )
+        print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
             resp = self._request_get(url=__url)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("get_namespace err", e)
             return {}
 
-    def creat_namespace(self, appid='dsp', namespaceName='default', format='properties', isPublic=True, dataChangeCreatedBy="", comment=None):
+    def create_namespace(self, appid='dsp', namespaceName='default', format='properties', isPublic=False, dataChangeCreatedBy="", comment=None):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -154,7 +159,7 @@ class PrivateApolloClient(RequestClient):
         :param comment: 配置的备注,长度不能超过1024个字符
         :return:
         '''
-        if dataChangeCreatedBy != "" :
+        if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/apps/{appId}/appnamespaces'.format(
             portal_address=self._portal_address, appId=appid
@@ -167,12 +172,13 @@ class PrivateApolloClient(RequestClient):
                 "comment":comment,
                 "dataChangeCreatedBy":dataChangeCreatedBy
             }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
             resp = self._request_post(url=__url, json_data=__data)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("creat_namespace err", e)
@@ -189,12 +195,13 @@ class PrivateApolloClient(RequestClient):
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key
         )
+        print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
             resp = self._request_get(url=__url)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("get_namespace_items_key err", e)
@@ -210,7 +217,7 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeLastModifiedBy: item的修改人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
-        if dataChangeLastModifiedBy != "" :
+        if dataChangeLastModifiedBy == "" :
             dataChangeLastModifiedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key
@@ -221,12 +228,13 @@ class PrivateApolloClient(RequestClient):
                 "comment":comment,
                 "dataChangeLastModifiedBy":dataChangeLastModifiedBy
             }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
             resp = self._request_put(url=__url, json_data=__data)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("update_namespace_items_key err", e)
@@ -242,7 +250,7 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
-        if dataChangeCreatedBy != "" :
+        if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName
@@ -253,12 +261,13 @@ class PrivateApolloClient(RequestClient):
                 "comment":comment,
                 "dataChangeCreatedBy":dataChangeCreatedBy
             }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
             resp = self._request_post(url=__url, json_data=__data)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("create_namespace_items_key err", e)
@@ -273,7 +282,7 @@ class PrivateApolloClient(RequestClient):
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
         :return:
         '''
-        if releasedBy != "" :
+        if releasedBy == "" :
             releasedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName)
@@ -282,12 +291,13 @@ class PrivateApolloClient(RequestClient):
                 "releaseComment":releaseComment,
                 "releasedBy":releasedBy
             }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
             resp = self._request_post(url=__url, json_data=__data)
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("response code is %d" %(resp.status_code))
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return {}
         except BaseException as e:
             print("releases err", e)
