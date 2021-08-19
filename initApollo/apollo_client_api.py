@@ -122,7 +122,7 @@ class PrivateApolloClient(RequestClient):
             print("creat_cluster err", e)
             return {}
 
-    def get_namespace(self, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application'):
+    def get_namespace(self, appid='dsp', clusterName='dsp_ali_vg', namespaceName='default'):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -143,7 +143,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace err", e)
             return {}
 
-    def creat_namespace(self, appid='dsp', namespaceName='application', format='properties', isPublic=True, dataChangeCreatedBy="", comment=None):
+    def creat_namespace(self, appid='dsp', namespaceName='default', format='properties', isPublic=True, dataChangeCreatedBy="", comment=None):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -178,7 +178,7 @@ class PrivateApolloClient(RequestClient):
             print("creat_namespace err", e)
             return {}
 
-    def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application'):
+    def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='default'):
         '''
         读取配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -200,7 +200,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace_items_key err", e)
             return {}
 
-    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", comment=None):
+    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='default', dataChangeLastModifiedBy="", comment=None):
         '''
         修改配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -232,7 +232,7 @@ class PrivateApolloClient(RequestClient):
             print("update_namespace_items_key err", e)
             return {}
 
-    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=None):
+    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='default', dataChangeCreatedBy="", comment=None):
         '''
         新增配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -264,7 +264,7 @@ class PrivateApolloClient(RequestClient):
             print("create_namespace_items_key err", e)
             return {}
 
-    def releases(self, releaseTitle, releaseComment, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', releasedBy=""):
+    def releases(self, releaseTitle, releaseComment, appid='dsp', clusterName='dsp_ali_vg', namespaceName='default', releasedBy=""):
         '''
         发布配置接口
         :param releaseTitle: 此次发布的标题，长度不能超过64个字符

@@ -20,7 +20,7 @@ const (
 
 const (
 	ABTest = "abtesting"
-	DefaultNamespace = "application"
+	DefaultNamespace = "default"
 
 )
 
