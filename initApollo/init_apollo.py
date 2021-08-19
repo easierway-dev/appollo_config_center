@@ -72,7 +72,7 @@ class InitApollo(object):
 								else :
 									#namespace创建
 									if bool(create_namespace(appid, cluster,namespace)) :
-										if "consulkey" in clusters and for key in clusters["consulkey"] :
+										for key in consulkeylist :
 											value = operateConsul._getconsul(key)
 											getResp = self.get_namespace_items_key(key,appid,cluster,namespace)
 											if bool(getResp) :
@@ -117,7 +117,7 @@ class InitApollo(object):
 									else :
 										#namespace创建
 										if bool(create_namespace(appid, cluster,namespace)) :
-											if "consulkey" in clusters and for key in clusters["consulkey"] :
+											for key in consulkeylist :
 												value = operateConsul._getconsul(key)
 												getResp = self.get_namespace_items_key(key,appid,cluster,namespace)
 												if bool(getResp) :
