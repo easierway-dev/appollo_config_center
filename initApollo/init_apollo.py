@@ -61,13 +61,30 @@ class InitApollo(object):
                         if "namespace" in clusters : 
                             for namespace, consulkeylist in clusters["namespace"].items():
                                 #namespace已经创建
-                                if bool(self.PrivateApolloClient.get_namespace(appid, cluster,namespace)) :
+                                get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                if bool(get_namespace_resp) :
                                     for key in consulkeylist :
                                         value = operateConsul._getconsul(key)
+                                        if value == "" :
+                                            print("consul key=%s value=%s, will skip" %(key, value))
+                                            continue
+                                        get_namespace_key_fail  = True
                                         getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
-                                        if bool(getResp) :
-                                            if getResp["value"] != value :
-                                                self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                        old_value = ""
+                                        if not bool(getResp) :
+                                            for item_map in get_namespace_resp["items"] :
+                                                if "key" in item_map :
+                                                    get_namespace_key_fail  = False
+                                                    if "value" in item_map :
+                                                        old_value = item_map["value"]
+                                                    break
+                                        else :
+                                            get_namespace_key_fail  = False
+                                            if "value" in getResp :
+                                                old_value = getResp["value"] 
+                                        if not get_namespace_key_fail :
+                                            if old_value != value :
+                                                self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,old_value,value))
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
@@ -77,10 +94,26 @@ class InitApollo(object):
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
+                                            if value == "" :
+                                                print("consul key=%s value=%s, will skip" %(key, value))
+                                                continue
+                                            get_namespace_key_fail  = True
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
-                                            if bool(getResp) :
-                                                if getResp["value"] != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                            old_value = ""
+                                            if not bool(getResp) :
+                                                for item_map in get_namespace_resp["items"] :
+                                                    if "key" in item_map :
+                                                        get_namespace_key_fail  = False
+                                                        if "value" in item_map :
+                                                            old_value = item_map["value"]
+                                                        break
+                                            else :
+                                                get_namespace_key_fail  = False
+                                                if "value" in getResp :
+                                                    old_value = getResp["value"] 
+                                            if not get_namespace_key_fail :
+                                                if old_value != value :
+                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,old_value,value))
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
@@ -100,10 +133,26 @@ class InitApollo(object):
                                     if bool(self.PrivateApolloClient.get_namespace(appid, cluster,namespace)) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
+                                            if value == "" :
+                                                print("consul key=%s value=%s, will skip" %(key, value))
+                                                continue
+                                            get_namespace_key_fail  = True
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
-                                            if bool(getResp) :
-                                                if getResp["value"] != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                            old_value = ""
+                                            if not bool(getResp) :
+                                                for item_map in get_namespace_resp["items"] :
+                                                    if "key" in item_map :
+                                                        get_namespace_key_fail  = False
+                                                        if "value" in item_map :
+                                                            old_value = item_map["value"]
+                                                        break
+                                            else :
+                                                get_namespace_key_fail  = False
+                                                if "value" in getResp :
+                                                    old_value = getResp["value"] 
+                                            if not get_namespace_key_fail :
+                                                if old_value != value :
+                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,old_value,value))
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
@@ -113,10 +162,26 @@ class InitApollo(object):
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key)
+                                                if value == "" :
+                                                    print("consul key=%s value=%s, will skip" %(key, value))
+                                                    continue
+                                                get_namespace_key_fail  = True
                                                 getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
-                                                if bool(getResp) :
-                                                    if getResp["value"] != value :
-                                                        self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                                old_value = ""
+                                                if not bool(getResp) :
+                                                    for item_map in get_namespace_resp["items"] :
+                                                        if "key" in item_map :
+                                                            get_namespace_key_fail  = False
+                                                            if "value" in item_map :
+                                                                old_value = item_map["value"]
+                                                            break
+                                                else :
+                                                    get_namespace_key_fail  = False
+                                                    if "value" in getResp :
+                                                        old_value = getResp["value"] 
+                                                if not get_namespace_key_fail :
+                                                    if old_value != value :
+                                                        self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,old_value,value))
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
