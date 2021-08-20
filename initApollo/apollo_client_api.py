@@ -96,7 +96,7 @@ class PrivateApolloClient(RequestClient):
             print("get_cluster err", e)
             return {}
 
-    def creat_cluster(self, appid='dsp', clusterName='dsp_ali_vg', dataChangeCreatedBy=""):
+    def create_cluster(self, appid='dsp', clusterName='dsp_ali_vg', dataChangeCreatedBy=""):
         '''
         新增cluster
         :param appid: Cluster所属的AppId

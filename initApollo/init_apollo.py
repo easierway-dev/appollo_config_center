@@ -11,7 +11,7 @@ import json,toml
 from apollo_client_api import *
 from opconsul import *
 
-skipnull = False
+skipNull = False
 cluster_num = 0
 namespace_num = 0
 key_num = 0
@@ -51,6 +51,7 @@ class InitApollo(object):
         self.PrivateApolloClient = PrivateApolloClient( _portaddr, _user, _token, _appid, _env, _timeout)
         
     def setup_apollo(self):
+        global cluster_num, namespace_num, key_num
         for appid, clusters in self.apollo_to_consul_config_data.items() :
             if "cluster" in clusters : 
                 for cluster in clusters["cluster"] :
