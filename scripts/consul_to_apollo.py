@@ -40,10 +40,11 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
     if clustn.startswith("dsp_"):
       if not "dsp" in defmap.keys() :
         defmap["dsp"] = {}
+        defmap["dsp"]["namespace"] = {}
       if len(clusterlist) > 0:
         defmap["dsp"]["cluster"] = clusterlist
       if len(filelist) > 0:
-        defmap["dsp"]["consulkey"]=filelist
+        defmap["dsp"]["namespace"]["application"]=filelist
 
     if clustn.startswith("as_"):
       if not "as" in defmap.keys() :
@@ -52,7 +53,7 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
       if len(clusterlist) > 0:
         defmap["as"]["cluster"] = clusterlist
       if len(filelist) > 0:
-        defmap["as"]["application"]=filelist
+        defmap["as"]["namespace"]["application"]=filelist
       #file.write(("  里面的文件有：{0}\n\n").format(filename))
   #toml.dump(defmap,fw)
   #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))

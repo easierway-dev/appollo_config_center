@@ -9,6 +9,8 @@ import requests
 import json
 import sys
 
+from urllib import parse
+
 class RequestClient(object):
     def __init__(self, timeout=60, authorization="0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"):
         self._timeout = timeout
@@ -19,7 +21,7 @@ class RequestClient(object):
             return requests.get(
                 url=url,
                 timeout=self._timeout,
-                headers={"Authorization": self._authorization}
+                headers={"Authorization": self._authorization,'Accept-Encoding':'gzip, deflate, br'}
             )
         else:
             return requests.get(url=url, params=params, timeout=self._timeout)
@@ -140,6 +142,7 @@ class PrivateApolloClient(RequestClient):
         try:
             resp = self._request_get(url=__url)
             if resp.status_code is 200 :
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return resp.json()
             else :
                 print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
@@ -187,13 +190,13 @@ class PrivateApolloClient(RequestClient):
     def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application'):
         '''
         读取配置接口
-        :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
+        :param namespaceName: 所管理的Namespace的名称
         :param clusterName: 所管理的配置集群名， 一般情况下传入 default 即可。如果是特殊集群，传入相应集群的名称即可
         :param key: 配置对应的key名称
         :return:
         '''
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
-            portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key
+            portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key.replace("/","\/")
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
