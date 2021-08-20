@@ -11,13 +11,19 @@ class OpConsul(object):
     def __init__(self, consuladdr='http://localhost:8500/v1/'):
         self.conn = Connection(endpoint=consuladdr)
         
+    #conn.put('the/key', 'the_value')
     def _putconsul(self, key, value):
         try:
             self.conn.put(key, value)
-            return True
+            resp = self.conn.get(key)
+            if key in resp :
+                return resp[key]
+            else :
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                return ""
         except BaseException as e:
             print("_putconsul err", e)
-            return False
+            return ""
         
         
     def _getconsul(self, key):
@@ -31,7 +37,12 @@ class OpConsul(object):
         except BaseException as e:
             print("_getconsul err", e)
             return ""
-    
+    """
+    mapping = {
+    'a/key': 'a_value',
+    'another/k': 'another_value'
+    }
+    """
     def _putmapconsul(self, consulmap):
         if isinstance(consulmap, dict) :
             try:
@@ -41,7 +52,28 @@ class OpConsul(object):
                 print("_putmapconsul err", e)
                 return False
         else :
-            print("need dict, real:",type(consulmap))
+            print("need map, real:",type(consulmap))
+            return False
+    """
+    dictionary = {
+        'a': {
+            'key': 'a_value'
+        },
+        'another': {
+            'k': 'another_value'
+        }
+    }
+    """
+    def _putdictconsul(self, consuldict):
+        if isinstance(consuldict, dict) :
+            try:
+                self.conn.put_dict(consuldict)
+                return True
+            except BaseException as e:
+                print("_putdictconsul err", e)
+                return False
+        else :
+            print("need dict, real:",type(consuldict))
             return False
 
 if __name__ == '__main__':

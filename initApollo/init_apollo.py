@@ -19,7 +19,6 @@ class InitApollo(object):
             self.base_config_data = toml.load(fs)   
         with open(apollo_to_consul_config, "r") as fs: 
             self.apollo_to_consul_config_data = toml.load(fs)  
-        print(self.base_config_data)
         if "portaddr" in self.base_config_data:
             _portaddr = self.base_config_data["portaddr"]
         else :
@@ -88,10 +87,9 @@ class InitApollo(object):
                                                 self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
                                     else :
                                         print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
-                                        continue                        
+                                self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
                         else :
                             print("appid:%s namespace config not find failed" %(appid))
-                            continue
                     else :
                         #cluster创建
                         if bool(self.PrivateApolloClient.creat_cluster(appid, cluster)) :
@@ -125,14 +123,13 @@ class InitApollo(object):
                                                     self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
                                         else :
                                             print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
-                                            continue                        
+                                    self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
                             else :
                                 print("appid:%s namespace config not find" %(appid))
                                 continue        
                         else :
                             print("create_cluster appid_%s cluster_%s failed" %(appid, cluster))
                             continue                
-                        self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster))
 
 if __name__ == '__main__':
     appid = "dsp"
