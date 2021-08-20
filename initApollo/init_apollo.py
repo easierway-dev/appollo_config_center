@@ -95,7 +95,10 @@ class InitApollo(object):
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
-                                            self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                            if namespace == "abtesting" :
+                                                self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                            else :
+                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
                                             key_num += 1
                                 else :
                                     #namespace创建
@@ -128,7 +131,10 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                if namespace == "abtesting" :
+                                                    self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                else :
+                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
                                                 key_num += 1
                                     else :
                                         print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
@@ -171,7 +177,10 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                if namespace == "abtesting" :
+                                                    self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                else :
+                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
                                                 key_num += 1
                                     else :
                                         #namespace创建
@@ -204,7 +213,10 @@ class InitApollo(object):
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
-                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                    if namespace == "abtesting" :
+                                                        self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                    else :
+                                                        self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
                                                     key_num += 1
                                         else :
                                             print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
