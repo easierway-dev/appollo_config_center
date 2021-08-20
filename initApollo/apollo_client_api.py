@@ -278,7 +278,10 @@ class PrivateApolloClient(RequestClient):
         
         for real_value in literal_eval(value) :
             if "experiment" in real_value and "name" in  real_value["experiment"] :
-                real_key = real_value["experiment"]["name"]
+                if "layer" in real_value :
+                    real_key = "%s_%s" % (real_value["layer"], real_value["experiment"]["name"])
+                else :
+                    real_key = real_value["experiment"]["name"]
             else :
                 print("invalid abtest_info config: ",real_value)
                 continue
