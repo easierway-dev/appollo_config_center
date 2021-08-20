@@ -11,6 +11,11 @@ import json,toml
 from apollo_client_api import *
 from opconsul import *
 
+skipnull = False
+cluster_num = 0
+namespace_num = 0
+key_num = 0
+
 class InitApollo(object):
     def __init__(self, user="", appid="", base_config = "./baseconfig.toml", apollo_to_consul_config="./apollo_to_consul.toml"):
         self.base_config_data = {}
@@ -64,27 +69,36 @@ class InitApollo(object):
                                 if bool(self.PrivateApolloClient.get_namespace(appid, cluster,namespace)) :
                                     for key in consulkeylist :
                                         value = operateConsul._getconsul(key)
+                                        if value == "" and skipNull:
+                                            print("consul key:%s value:%s, will skip" %(key, value))
+                                            continue
                                         getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                         if bool(getResp) :
                                             if getResp["value"] != value :
-                                                self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                                self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace)
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
-                                            self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
+                                            self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                            key_num += 1
                                 else :
                                     #namespace创建
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
+                                        namespace_num += 1
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
+                                            if value == "" and skipNull:
+                                                print("consul key:%s value:%s, will skip" %(key, value))
+                                                continue
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                             if bool(getResp) :
                                                 if getResp["value"] != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace)
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
+                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                key_num += 1
                                     else :
                                         print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
                                 self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
@@ -92,7 +106,8 @@ class InitApollo(object):
                             print("appid:%s namespace config not find failed" %(appid))
                     else :
                         #cluster创建
-                        if bool(self.PrivateApolloClient.creat_cluster(appid, cluster)) :
+                        if bool(self.PrivateApolloClient.create_cluster(appid, cluster)) :
+                            cluster_num += 1
                             #不使用默认namespace=application
                             if "namespace" in clusters : 
                                 for namespace, consulkeylist in clusters["namespace"].items():
@@ -100,27 +115,36 @@ class InitApollo(object):
                                     if bool(self.PrivateApolloClient.get_namespace(appid, cluster,namespace)) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
+                                            if value == "" and skipNull:
+                                                print("consul key:%s value:%s, will skip" %(key, value))
+                                                continue
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                             if bool(getResp) :
                                                 if getResp["value"] != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace)
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
+                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                key_num += 1
                                     else :
                                         #namespace创建
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
+                                            namespace_num += 1
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key)
+                                                if value == "" and skipNull:
+                                                    print("consul key:%s value:%s, will skip" %(key, value))
+                                                    continue
                                                 getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                                 if bool(getResp) :
                                                     if getResp["value"] != value :
-                                                        self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace, comment="update k=%s ov=%s nv=%s " %(key,getResp["value"],value))
+                                                        self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace)
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
-                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace, comment="insert k=%s v=%s" %(key,value))
+                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace)
+                                                    key_num += 1
                                         else :
                                             print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
                                     self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
@@ -136,4 +160,5 @@ if __name__ == '__main__':
     inputuser = "apollo"
     initClient = InitApollo(user=inputuser,appid=appid)
     initClient.setup_apollo()
+    print("cluster_num=%d namespace_num=%d key_num=%d" %(cluster_num,namespace_num,key_num))
 
