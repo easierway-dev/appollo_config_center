@@ -100,7 +100,7 @@ class InitApollo(object):
                                 else :
                                     #namespace创建
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
-                                    	get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                        get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                         namespace_num += 1
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
@@ -176,7 +176,7 @@ class InitApollo(object):
                                     else :
                                         #namespace创建
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
-                                        	get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                            get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                             namespace_num += 1
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key)
