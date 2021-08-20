@@ -62,4 +62,4 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
 
 util_path = os.path.realpath(__file__)
 util_dir = os.path.dirname(util_path)  
-do_file("%s/test.file"%util_dir,"%s/consul_backup"%util_dir)#传入相关的参数即可
+do_file("%s/consul_to_apollo.toml"%util_dir,"%s/consul_backup"%util_dir)#传入相关的参数即可
