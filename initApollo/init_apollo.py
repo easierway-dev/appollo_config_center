@@ -79,7 +79,7 @@ class InitApollo(object):
                                         old_value = ""
                                         if not bool(getResp) :
                                             for item_map in get_namespace_resp["items"] :
-                                                if "key" in item_map :
+                                                if "key" in item_map and item_map["key"] == key :
                                                     get_namespace_key_fail  = False
                                                     if "value" in item_map :
                                                         old_value = item_map["value"]
@@ -100,6 +100,7 @@ class InitApollo(object):
                                 else :
                                     #namespace创建
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
+                                    	get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                         namespace_num += 1
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
@@ -111,7 +112,7 @@ class InitApollo(object):
                                             old_value = ""
                                             if not bool(getResp) :
                                                 for item_map in get_namespace_resp["items"] :
-                                                    if "key" in item_map :
+                                                    if "key" in item_map and item_map["key"] == key :
                                                         get_namespace_key_fail  = False
                                                         if "value" in item_map :
                                                             old_value = item_map["value"]
@@ -142,7 +143,8 @@ class InitApollo(object):
                             if "namespace" in clusters : 
                                 for namespace, consulkeylist in clusters["namespace"].items():
                                     #namespace已经创建
-                                    if bool(self.PrivateApolloClient.get_namespace(appid, cluster,namespace)) :
+                                    get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                    if bool(get_namespace_resp) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
                                             if value == "" and skipNull :
@@ -153,7 +155,7 @@ class InitApollo(object):
                                             old_value = ""
                                             if not bool(getResp) :
                                                 for item_map in get_namespace_resp["items"] :
-                                                    if "key" in item_map :
+                                                    if "key" in item_map and item_map["key"] == key :
                                                         get_namespace_key_fail  = False
                                                         if "value" in item_map :
                                                             old_value = item_map["value"]
@@ -174,6 +176,7 @@ class InitApollo(object):
                                     else :
                                         #namespace创建
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace)) :
+                                        	get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                             namespace_num += 1
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key)
@@ -185,7 +188,7 @@ class InitApollo(object):
                                                 old_value = ""
                                                 if not bool(getResp) :
                                                     for item_map in get_namespace_resp["items"] :
-                                                        if "key" in item_map :
+                                                        if "key" in item_map and item_map["key"] == key :
                                                             get_namespace_key_fail  = False
                                                             if "value" in item_map :
                                                                 old_value = item_map["value"]

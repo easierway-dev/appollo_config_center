@@ -3,6 +3,6 @@ env="DEV"
 timeout=60
 dsp_ali_vg="http://47.90.246.93:8500"
 dsp_ali_cn="http://47.90.246.93:8500"
-dsp_ali_hk="http://47.90.246.93:8500"
+dsp_hw_hk="http://47.90.246.93:8500"
 [usermap.apollo]
 token="0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"
