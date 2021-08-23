@@ -117,8 +117,8 @@ class InitApollo(object):
                                                     update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     if bool(update_namespace_items_key_resp) :
                                                         key_num += 1
-                                                else :
-                                                    print("update %s_%s_%s_%s failed" %(appid,cluster,namespace,key))
+                                                    else :
+                                                        print("update %s_%s_%s_%s failed" %(appid,cluster,namespace,key))
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
