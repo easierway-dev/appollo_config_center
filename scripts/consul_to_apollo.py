@@ -12,7 +12,8 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
   defmap={}
   for parent,dirnames,filenames in walk(o_filepath):
     clustn=parent.replace(o_filepath+"/","")
-    if ".git" in parent or "script" in parent or parent.endswith("consul_backup"):
+    #if ".git" in parent or "script" in parent or parent.endswith("consul_backup"):
+    if not parent.endswith(("dsp_ali_cn","dsp_ali_vg","dsp_hw_hk","as_ali_vg","as_aws_fk","as_aws_se","as_aws_sg","as_aws_vg")):
       continue
     print(("根目录为：{0}\n\n").format(parent))
 
