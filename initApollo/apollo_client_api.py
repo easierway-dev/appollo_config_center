@@ -151,7 +151,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace err", e)
             return {}
 
-    def create_namespace(self, appid='dsp', namespaceName='application', format='properties', isPublic=False, dataChangeCreatedBy="", comment=None):
+    def create_namespace(self, appid='dsp', namespaceName='application', format='properties', isPublic=False, dataChangeCreatedBy="", comment=""):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -212,7 +212,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace_items_key err", e)
             return {}
 
-    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", comment=None):
+    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", comment=""):
         '''
         修改配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -248,7 +248,7 @@ class PrivateApolloClient(RequestClient):
             return {}
 
 
-    def create_namespace_items_key_abtest(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=None):
+    def create_namespace_items_key_abtest(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
         '''
         新增abtest/abtest_info配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -316,7 +316,7 @@ class PrivateApolloClient(RequestClient):
         else :
             return {"status_code":200}
 
-    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=None):
+    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
         '''
         新增配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
