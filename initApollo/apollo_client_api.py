@@ -92,7 +92,7 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("get_cluster err", e)
@@ -122,7 +122,7 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("creat_cluster err", e)
@@ -142,10 +142,9 @@ class PrivateApolloClient(RequestClient):
         try:
             resp = self._request_get(url=__url)
             if resp.status_code is 200 :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("get_namespace err", e)
@@ -181,7 +180,7 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("creat_namespace err", e)
@@ -204,7 +203,7 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("get_namespace_items_key err", e)
@@ -254,6 +253,7 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
+        create_abtest_fail = False
         if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items'.format(
@@ -272,9 +272,11 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 print(resp.json())
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
+                create_abtest_fail = True
         except BaseException as e:
             print("create_namespace_items_key err", e)
+            create_abtest_fail = True
         
         for real_value in literal_eval(value) :
             if "experiment" in real_value and "name" in  real_value["experiment"] :
@@ -296,10 +298,16 @@ class PrivateApolloClient(RequestClient):
                 resp = self._request_post(url=__url, json_data=__data)
                 if resp.status_code is 200 :
                     print(resp.json())
+                    create_abtest_fail = True
                 else :
-                    print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                    print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
             except BaseException as e:
                 print("create_namespace_items_key err", e)
+                create_abtest_fail = True
+        if create_abtest_fail = True :
+            return {}
+        else :
+            return {"status_code":200}
 
     def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=None):
         '''
@@ -328,7 +336,7 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("create_namespace_items_key err", e)
@@ -358,44 +366,11 @@ class PrivateApolloClient(RequestClient):
             if resp.status_code is 200 :
                 return resp.json()
             else :
-                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
                 return {}
         except BaseException as e:
             print("releases err", e)
             return {}
 
 if __name__ == '__main__':
-    reqClient = RequestClient()
-    portaddr = "http://localhost:80"
-    appid = "dsp"
-    token = "0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"
-    inputuser = "apollo"
-    apolloClient = PrivateApolloClient(portaddr,inputuser,token,appid)
-    key= "test"
-    value ="5"
-    enRelease = True
-    inputdata = {
-        "dsp":{
-            "cluster": [ "dsp_ali_cn", "dsp_hw_hk", "dsp_ali_vg",],
-            "consulkey": [ "test", "xiongjia/aa",]
-        }
-    }
-    #for appid, clusters in inputdata.items() :
-    #    if "cluster" in clusters.keys() :
-    #        for cluster in clusters["cluster"] :
-
-
-    getResp = apolloClient.get_namespace_items_key(key)
-    #if getResp.status_code is 200 and getResp.
-    if bool(getResp) :
-        if getResp["value"] != value :
-            putResp = apolloClient.put_namespace_items_key(key, value, comment="update k=%s ov=%s nv=%s " %(key,getResp.json()["value"],value))
-            if bool(putResp) and enRelease :
-                print("update:",apolloClient.releases("release", "release %s:%s"%(key,value)))
-        else :
-            print("noNeed to update !!!",getResp)
-    else :
-        postResp = apolloClient.create_namespace_items_key(key, value, inputuser, comment="insert k=%s v=%s" %(key,value))
-        if bool(postResp) and enRelease :
-            print("insert:",apolloClient.releases("release", "release %s:%s"%(key,value)))
-
+    pass

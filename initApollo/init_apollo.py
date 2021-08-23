@@ -79,16 +79,18 @@ class InitApollo(object):
                                             if "value" in getResp :
                                                 old_value = getResp["value"] 
                                             if old_value != value :
-                                                self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                key_num += 1
+                                                update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                if bool (update_namespace_items_key_resp) :
+                                                    key_num += 1
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
                                             if namespace == "abtesting" :
-                                                self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
                                             else :
-                                                self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                            key_num += 1
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                            if bool (create_namespace_items_key_resp) :
+                                                key_num += 1
                                 else :
                                     #namespace创建
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
@@ -104,16 +106,18 @@ class InitApollo(object):
                                                 if "value" in getResp :
                                                     old_value = getResp["value"]
                                                 if old_value != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                    key_num += 1
+                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    if bool(update_namespace_items_key_resp) :
+                                                        key_num += 1
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
                                                 if namespace == "abtesting" :
-                                                    self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
                                                 else :
-                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                key_num += 1
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                if bool (create_namespace_items_key_resp) :
+                                                    key_num += 1
                                     else :
                                         print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
                                 self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
@@ -140,16 +144,18 @@ class InitApollo(object):
                                                 if "value" in getResp :
                                                     old_value = getResp["value"]
                                                 if old_value != value :
-                                                    self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                    key_num += 1
+                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    if bool(update_namespace_items_key_resp) :
+                                                        key_num += 1
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
                                                 if namespace == "abtesting" :
-                                                    self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace)
                                                 else :
-                                                    self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                key_num += 1
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                if bool (create_namespace_items_key_resp) :
+                                                    key_num += 1
                                     else :
                                         #namespace创建
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
@@ -165,16 +171,18 @@ class InitApollo(object):
                                                     if "value" in getResp :
                                                         old_value = getResp["value"]
                                                     if old_value != value :
-                                                        self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                        key_num += 1
+                                                        update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        if bool (update_namespace_items_key_resp) :
+                                                            key_num += 1
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
                                                     if namespace == "abtesting" :
-                                                        self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     else :
-                                                        self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                    key_num += 1
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    if bool (create_namespace_items_key_resp) :
+                                                        key_num += 1
                                         else :
                                             print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
                                     self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
