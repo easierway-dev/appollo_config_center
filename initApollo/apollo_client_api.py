@@ -305,9 +305,9 @@ class PrivateApolloClient(RequestClient):
                 resp = self._request_post(url=__url, json_data=__data)
                 if resp.status_code is 200 :
                     print(resp.json())
-                    create_abtest_fail = True
                 else :
                     print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
+                    create_abtest_fail = True
             except BaseException as e:
                 print("create_namespace_items_key err", e)
                 create_abtest_fail = True

@@ -71,6 +71,8 @@ class InitApollo(object):
                                 if bool(get_namespace_resp) :
                                     for key in consulkeylist :
                                         value = operateConsul._getconsul(key.replace(".","/"))
+                                        if value == None :
+                                            value = ""
                                         if value == "" and skipNull :
                                             print("consul key=%s value=%s, will skip" %(key, value))
                                             continue
@@ -101,6 +103,8 @@ class InitApollo(object):
                                         namespace_num += 1
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key.replace(".","/"))
+                                            if value == None :
+                                                value = ""
                                             if value == "" and skipNull :
                                                 print("consul key=%s value=%s, will skip" %(key, value))
                                                 continue
@@ -143,6 +147,8 @@ class InitApollo(object):
                                     if bool(get_namespace_resp) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key.replace(".","/"))
+                                            if value == None :
+                                                value = ""
                                             if value == "" and skipNull :
                                                 print("consul key=%s value=%s, will skip" %(key, value))
                                                 continue
@@ -174,6 +180,8 @@ class InitApollo(object):
                                             namespace_num += 1
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key.replace(".","/"))
+                                                if value == None :
+                                                    value = ""                                                
                                                 if value == "" and skipNull :
                                                     print("consul key=%s value=%s, will skip" %(key, value))
                                                     continue
