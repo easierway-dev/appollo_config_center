@@ -75,6 +75,7 @@ class PrivateApolloClient(RequestClient):
         self._appid = app_id
         self._env = env
         self._user = user
+        self._commentlimit = 64
 
     def get_cluster(self, appid='dsp', clusterName='dsp_ali_vg'):
         '''
@@ -161,6 +162,8 @@ class PrivateApolloClient(RequestClient):
         :param comment: 配置的备注,长度不能超过1024个字符
         :return:
         '''
+        if len(comment) > self._commentlimit :
+            comment = comment[0:63]
         if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/apps/{appId}/appnamespaces'.format(
@@ -219,6 +222,8 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeLastModifiedBy: item的修改人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
+        if len(comment) > self._commentlimit :
+            comment = comment[0:63]
         if dataChangeLastModifiedBy == "" :
             dataChangeLastModifiedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
@@ -253,6 +258,8 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
+        if len(comment) > self._commentlimit :
+            comment = comment[0:63]
         create_abtest_fail = False
         if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
@@ -319,6 +326,8 @@ class PrivateApolloClient(RequestClient):
         :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
         :return:
         '''
+        if len(comment) > self._commentlimit :
+            comment = comment[0:63]
         if dataChangeCreatedBy == "" :
             dataChangeCreatedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items'.format(
@@ -351,6 +360,10 @@ class PrivateApolloClient(RequestClient):
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
         :return:
         '''
+        if len(releaseTitle) > self._commentlimit :
+            releaseTitle = releaseTitle[0:63]       
+        if len(releaseComment) > self._commentlimit :
+            releaseComment = releaseComment[0:63]
         if releasedBy == "" :
             releasedBy = self._user
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases'.format(

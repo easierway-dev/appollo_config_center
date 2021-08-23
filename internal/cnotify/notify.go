@@ -16,7 +16,12 @@ func SendText(token, textContent string, dingusers []string) {
 
 	// text类型
 	atMobiles := robot.SendWithAtMobiles(dingusers)
-	if err := dt.RobotSendText(textContent, atMobiles); err != nil {
+	textByteList := []byte(textContent)
+	dingContent := textContent
+	if len(textByteList) > 10000 {
+		dingContent = textByteList[:10000]
+	}
+	if err := dt.RobotSendText(dingContent, atMobiles); err != nil {
 		glog.Fatal("send ding failed err: ",err)
 	}
 	printResult(dt)
