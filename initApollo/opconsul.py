@@ -28,7 +28,6 @@ class OpConsul(object):
         
     def _getconsul(self, key):
         try:
-            key = key.replace(".","/")
             resp = self.conn.get(key)
             if key in resp :
                 return resp[key]

@@ -6,9 +6,9 @@ import (
 	"context"
 	"strings"
 
-        "github.com/shima-park/agollo"
-        "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
-        "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+  "github.com/shima-park/agollo"
+  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -75,7 +75,7 @@ func UpdateConsul(namespace, cluster, key, value string){
 						ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						return
 					}
-					err := cconsul.WriteOne(consulAddr, key, value)
+					err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
 					if err != nil {
 						ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
 					}
