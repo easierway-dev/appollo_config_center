@@ -304,7 +304,7 @@ class PrivateApolloClient(RequestClient):
             except BaseException as e:
                 print("create_namespace_items_key err", e)
                 create_abtest_fail = True
-        if create_abtest_fail = True :
+        if create_abtest_fail :
             return {}
         else :
             return {"status_code":200}
