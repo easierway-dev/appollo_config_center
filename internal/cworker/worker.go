@@ -72,7 +72,8 @@ func UpdateConsul(namespace, cluster, key, value string){
 				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
 					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
-						ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
+						//ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
+						fmt.Println("value is nil, will not update consul!!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						return
 					}
 					err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
@@ -115,6 +116,13 @@ func (cw *CWorker) Run(ctx context.Context){
 					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
 					for key, value := range update.NewValue {
+	          v, _ := value.(string)
+	          if ovalue, ok := update.OldValue[key]; ok {
+	          	ov, _ := ovalue.(string)
+	              if ov == v {
+	                skipped_keys = fmt.Sprintf("%s,%s", skipped_keys, key)
+	              }
+	          }
 						if key == "consul_key" {
 							path = value.(string)
 							continue
@@ -148,13 +156,13 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				updatecontent := ""
+				updatecontent := "clear config"
 				for k, v := range update.NewValue {
 					if ! strings.Contains(skipped_keys, k) {
 						if _,ok := update.OldValue[k]; ok{
-							updatecontent = fmt.Sprintf("%s|key=%s, old=%s, new=%s", updatecontent, k, update.OldValue[k], v)
+							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, update.OldValue[k], v)
 						} else {
-							updatecontent = fmt.Sprintf("%s|key=%s, old=%s, new=%s", updatecontent, k, "", v)
+							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, "", v)
 						}
 					}
 				}
