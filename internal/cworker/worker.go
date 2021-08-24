@@ -157,8 +157,8 @@ func (cw *CWorker) Run(ctx context.Context){
 					}
 				}
 				updatecontent := ""			
-				if len(map) == 0 {
-					updatecontent = "clear config"
+				if len(update.NewValue) == 0 {
+					updatecontent = "clear_config or create_namesplace:%s[%s]" %(cw.WkInfo.Cluster,update.Namespace)
 				}
 				for k, v := range update.NewValue {
 					if ! strings.Contains(skipped_keys, fmt.Sprintf(",%s,", k)) {

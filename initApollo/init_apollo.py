@@ -7,6 +7,7 @@
 # @Description:
 import requests
 import json,toml
+import time
 
 from apollo_client_api import *
 from opconsul import *
@@ -47,8 +48,13 @@ class InitApollo(object):
         if "timeout" in self.base_config_data:
             _timeout = self.base_config_data["timeout"]
         else :
-            _timeout = 60       
+            _timeout = 60  
+
+        self._waittime = 5    
         self.PrivateApolloClient = PrivateApolloClient( _portaddr, _user, _token, _appid, _env, _timeout)
+
+    def wait_update(self):
+        time.sleep(self._waittime)
         
     def setup_apollo(self):
         global cluster_num, namespace_num, key_num
@@ -100,6 +106,8 @@ class InitApollo(object):
                                 else :
                                     #namespace创建
                                     if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
+                                        self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                        self.wait_update()
                                         namespace_num += 1
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key.replace(".","/"))
@@ -177,6 +185,8 @@ class InitApollo(object):
                                     else :
                                         #namespace创建
                                         if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
+                                            self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                            self.wait_update()
                                             namespace_num += 1
                                             for key in consulkeylist :
                                                 value = operateConsul._getconsul(key.replace(".","/"))
