@@ -36,7 +36,7 @@ class OpConsul(object):
                 return ""
         except BaseException as e:
             print("_getconsul err", e)
-            return ""
+            return "error"
     """
     mapping = {
     'a/key': 'a_value',

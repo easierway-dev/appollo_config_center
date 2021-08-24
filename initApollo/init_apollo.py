@@ -73,8 +73,8 @@ class InitApollo(object):
                                         value = operateConsul._getconsul(key.replace(".","/"))
                                         if value == None :
                                             value = ""
-                                        if value == "" and skipNull :
-                                            print("consul key=%s value=%s, will skip" %(key, value))
+                                        if value == "" and skipNull or value == "error":
+                                            print("consul key=%s, will skip" %(key))
                                             continue
                                         getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                         if bool(getResp) :
@@ -105,8 +105,8 @@ class InitApollo(object):
                                             value = operateConsul._getconsul(key.replace(".","/"))
                                             if value == None :
                                                 value = ""
-                                            if value == "" and skipNull :
-                                                print("consul key=%s value=%s, will skip" %(key, value))
+                                            if value == "" and skipNull or value == "error":
+                                                print("consul key=%s, will skip" %(key))
                                                 continue
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                             old_value = ""
@@ -149,8 +149,8 @@ class InitApollo(object):
                                             value = operateConsul._getconsul(key.replace(".","/"))
                                             if value == None :
                                                 value = ""
-                                            if value == "" and skipNull :
-                                                print("consul key=%s value=%s, will skip" %(key, value))
+                                            if value == "" and skipNull or value == "error":
+                                                print("consul key=%s, will skip" %(key))
                                                 continue
                                             getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                             old_value = ""
@@ -182,8 +182,8 @@ class InitApollo(object):
                                                 value = operateConsul._getconsul(key.replace(".","/"))
                                                 if value == None :
                                                     value = ""                                                
-                                                if value == "" and skipNull :
-                                                    print("consul key=%s value=%s, will skip" %(key, value))
+                                                if value == "" and skipNull or value == "error":
+                                                    print("consul key=%s, will skip" %(key))
                                                     continue
                                                 getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
                                                 old_value = ""
