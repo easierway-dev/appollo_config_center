@@ -76,7 +76,8 @@ class InitApollo(object):
                                 get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                 if bool(get_namespace_resp) :
                                     for key in consulkeylist :
-                                        value = operateConsul._getconsul(key.replace(".","/"))
+                                        #value = operateConsul._getconsul(key.replace(".","/"))
+                                        value = operateConsul._getconsul(key)
                                         if value == None :
                                             value = ""
                                         if value == "" and skipNull or value == "error":
@@ -110,7 +111,7 @@ class InitApollo(object):
                                         self.wait_update()
                                         namespace_num += 1
                                         for key in consulkeylist :
-                                            value = operateConsul._getconsul(key.replace(".","/"))
+                                            value = operateConsul._getconsul(key)
                                             if value == None :
                                                 value = ""
                                             if value == "" and skipNull or value == "error":
@@ -154,7 +155,7 @@ class InitApollo(object):
                                     get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
                                     if bool(get_namespace_resp) :
                                         for key in consulkeylist :
-                                            value = operateConsul._getconsul(key.replace(".","/"))
+                                            value = operateConsul._getconsul(key)
                                             if value == None :
                                                 value = ""
                                             if value == "" and skipNull or value == "error":
@@ -189,7 +190,7 @@ class InitApollo(object):
                                             self.wait_update()
                                             namespace_num += 1
                                             for key in consulkeylist :
-                                                value = operateConsul._getconsul(key.replace(".","/"))
+                                                value = operateConsul._getconsul(key)
                                                 if value == None :
                                                     value = ""                                                
                                                 if value == "" and skipNull or value == "error":

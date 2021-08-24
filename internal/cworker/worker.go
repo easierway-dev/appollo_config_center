@@ -76,7 +76,8 @@ func UpdateConsul(namespace, cluster, key, value string){
 						fmt.Println("value is nil, will not update consul!!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						return
 					}
-					err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
+					//err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
+					err := cconsul.WriteOne(consulAddr, key, value)
 					if err != nil {
 						ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
 					}

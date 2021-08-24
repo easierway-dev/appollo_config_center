@@ -36,7 +36,7 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
       #fileddn={0}.format(filename)
       if filename.endswith("#"):
         continue
-      filekey=filename.replace("#",".")
+      filekey=filename.replace("#","/")
       if filekey not in filelist :
         filelist.append(filekey)
 
