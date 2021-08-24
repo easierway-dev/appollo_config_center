@@ -120,7 +120,7 @@ func (cw *CWorker) Run(ctx context.Context){
 	          if ovalue, ok := update.OldValue[key]; ok {
 	          	ov, _ := ovalue.(string)
 	              if ov == v {
-	                skipped_keys = fmt.Sprintf("%s,%s", skipped_keys, key)
+	                skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
 	              }
 	          }
 						if key == "consul_key" {
@@ -149,7 +149,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if ovalue, ok := update.OldValue[path]; ok {
 							ov, _ := ovalue.(string)
 							if ov == v {
-								skipped_keys = fmt.Sprintf("%s,%s", skipped_keys, path)
+								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, path)
 								continue
 							}
 						}
@@ -161,7 +161,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent = "clear config"
 				}
 				for k, v := range update.NewValue {
-					if ! strings.Contains(skipped_keys, k) {
+					if ! strings.Contains(skipped_keys, fmt.Sprintf(",%s,", k)) {
 						if _,ok := update.OldValue[k]; ok{
 							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, update.OldValue[k], v)
 						} else {
