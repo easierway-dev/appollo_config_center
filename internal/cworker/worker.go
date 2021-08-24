@@ -156,7 +156,10 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				updatecontent := "clear config"
+				updatecontent := ""			
+				if len(map) == 0 {
+					updatecontent = "clear config"
+				}
 				for k, v := range update.NewValue {
 					if ! strings.Contains(skipped_keys, k) {
 						if _,ok := update.OldValue[k]; ok{
