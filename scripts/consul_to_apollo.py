@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os,json,toml
+import os,json,toml,sys
 from os import walk
  
 # 获取文件夹的中的文件夹和文件夹里文件
-def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的位置和要操作的任意电脑路劲
-  file=open(save_filepath,"w+")
-  #with open(save_filepath, "w") as fw: 
+def do_file(o_filepath): #定义函数 传入写入文档保存的位置和要操作的任意电脑路劲
   # 遍历文件路径
   defmap={}
   for parent,dirnames,filenames in walk(o_filepath):
@@ -57,11 +55,31 @@ def do_file(save_filepath,o_filepath): #定义函数 传入写入文档保存的
         defmap["as"]["cluster"] = clusterlist
       if len(filelist) > 0:
         defmap["as"]["namespace"]["application"]=filelist
+  return defmap
 
-  #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
-  toml.dump(defmap,file)
-  file.close()
+#根据映射规则将dsp/as的配置拆分成dsp/rtdsp(pioneer)/juno/dmp/drs(rs)
+def split_map_conf(source_map, mapping_file):
+  return source_map
 
-util_path = os.path.realpath(__file__)
-util_dir = os.path.dirname(util_path)  
-do_file("%s/consul_to_apollo.toml"%util_dir,"%s/consul_backup"%util_dir)#传入相关的参数即可
+if __name__ == "__main__":
+  util_path = os.path.realpath(__file__)
+  util_dir = os.path.dirname(util_path)
+  mapping_conf_path = "%s/apollo_mapping.toml"%util_dir
+  gen_conf_path = "%s/consul_to_apollo.toml"%util_dir
+  watch_path = "%s/consul_backup"%util_dir
+
+  if len(sys.argv) == 2 :
+    watch_path = sys.argv[1]
+  if len(sys.argv) == 3 :
+    watch_path = sys.argv[1]
+    gen_conf_path = sys.argv[2]
+  if len(sys.argv) == 4 :
+    watch_path = sys.argv[1]
+    gen_conf_path = sys.argv[2]
+    mapping_conf_path = sys.argv[3]
+
+  source_conf_map = do_file(watch_path)#传入相关的参数即可
+  final_conf_map = split_map_conf(source_conf_map, mapping_conf_path)
+  with open(gen_conf_path, "w") as fw: 
+    #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
+    toml.dump(source_conf_map,fw)
