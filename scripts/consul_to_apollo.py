@@ -57,6 +57,36 @@ def do_file(o_filepath): #定义函数 传入写入文档保存的位置和要�
         defmap["as"]["namespace"]["application"]=filelist
   return defmap
 
+def json_merge_update(input_json, join_json) :
+    if isinstance(join_json, dict) and isinstance(input_json, dict):
+        for k,v in join_json.items() :
+            if k not in input_json :
+                input_json[k] = v
+                continue
+            else :
+                if isinstance(v, (dict)) or isinstance(v, (tuple, list)):
+                    json_merge_update(input_json[k], v)
+                else :
+                    input_json[k] = v
+    elif isinstance(input_json, (tuple, list)) and isinstance(join_json, (tuple, list)):
+        simpleFlag = True
+        for index in range(len(join_json)) :
+            if isinstance(join_json[index], dict) or isinstance(join_json[index], (tuple, list)) :
+                simpleFlag = False
+        if simpleFlag == True :
+            for index in range(len(join_json)) :
+                if not join_json[index] in input_json :
+                    input_json.append(join_json[index])
+        else :
+            for index in range(len(join_json)) :
+                if index < len(input_json) :
+                    json_merge_update(input_json[index], join_json[index])
+                else :
+                    input_json.append(join_json[index])
+    else :
+        print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
+        sys.exit(-1)
+
 #根据映射规则将dsp/as的配置拆分成dsp/rtdsp(pioneer)/juno/dmp/drs(rs)
 def split_map_conf(source_map, mapping_file):
   return source_map
@@ -67,7 +97,7 @@ if __name__ == "__main__":
   mapping_conf_path = "%s/apollo_mapping.toml"%util_dir
   gen_conf_path = "%s/consul_to_apollo.toml"%util_dir
   watch_path = "%s/consul_backup"%util_dir
-
+  tasklist = ["dsp","as","rtdsp","juno","dmp","drs"]
   if len(sys.argv) == 2 :
     watch_path = sys.argv[1]
   if len(sys.argv) == 3 :
@@ -78,8 +108,17 @@ if __name__ == "__main__":
     gen_conf_path = sys.argv[2]
     mapping_conf_path = sys.argv[3]
 
-  source_conf_map = do_file(watch_path)#传入相关的参数即可
+  source_conf_map = do_file(watch_path)#根据consul备份结果生成包含dsp/as的map
+
+  #除dsp/as之外的服务的配置默认是dsp/as的并集
+  for task in tasklist :
+    if not task in source_conf_map :
+      merge_json = {}
+      for _,value in source_conf_map.items() :
+        json_merge_update(merge_json,deepcopy(value))
+        source_conf_map[task] = deepcopy(merge_json)
+  #根据mapping结果，对各业务线的配置进行瘦身（从全集中去掉不属于该业务线的内容）
   final_conf_map = split_map_conf(source_conf_map, mapping_conf_path)
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
-    toml.dump(source_conf_map,fw)
+    toml.dump(final_conf_map,fw)
