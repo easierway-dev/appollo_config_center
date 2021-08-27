@@ -71,8 +71,10 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 			enUpdate := false
 			if dyAgoCfg.AppConfig != nil {
 				enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
-				if dyAgoCfg.AppConfig.AppConfigMap != nil;_,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
-					enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+				if dyAgoCfg.AppConfig.AppConfigMap != nil {
+					if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
+						enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+					}
 				}
 			}
 			if !enUpdate {
