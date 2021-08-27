@@ -62,15 +62,26 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 	return work, nil
 }
 
-func UpdateConsul(namespace, cluster, key, value string){
+func UpdateConsul(appid, namespace, cluster, key, value string){
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
 			namespace = ccommon.DefaultNamespace
 		}
-		if _,ok := ccommon.DyAgolloConfiger[namespace];ok {
-			if ccommon.DyAgolloConfiger[namespace].ClusterConfig != nil && ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap != nil {
-				if _,ok := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster];ok {
-					consulAddr := ccommon.DyAgolloConfiger[namespace].ClusterConfig.ClusterMap[cluster].ConsulAddr
+		if dyAgoCfg,ok := ccommon.DyAgolloConfiger[namespace];ok {
+			enUpdate := false
+			if dyAgoCfg.AppConfig != nil {
+				enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
+				if dyAgoCfg.AppConfig.AppConfigMap != nil;_,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
+					enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+				}
+			}
+			if !enUpdate {
+				ccommon.CLogger.Info(appid, "Task_",appid, "is not permit to update consul")
+				return
+			}
+			if dyAgoCfg.ClusterConfig != nil && dyAgoCfg.ClusterConfig.ClusterMap != nil {
+				if _,ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster];ok {
+					consulAddr := dyAgoCfg.ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
 						//ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
 						fmt.Println("value is nil, will not update consul!!! consul_addr[",consulAddr,"],key[",key,"]\n")
@@ -86,7 +97,7 @@ func UpdateConsul(namespace, cluster, key, value string){
 					return
 				}
 			} else {
-				ccommon.CLogger.Warn(ccommon.DefaultDingType,"consulAddr get failed ccommon.DyAgolloConfiger[",namespace,"=",ccommon.DyAgolloConfiger[namespace])
+				ccommon.CLogger.Warn(ccommon.DefaultDingType,"consulAddr get failed ccommon.DyAgolloConfiger[",namespace,"]=",dyAgoCfg)
 				return
 			}
 		} else {
@@ -141,7 +152,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if err != nil {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Marshal(abtest_valuelist) failed, err:", err)
 						} else {
-							UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, string(v))
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
 						}
 					}
 				} else {
@@ -154,7 +165,7 @@ func (cw *CWorker) Run(ctx context.Context){
 								continue
 							}
 						}
-						UpdateConsul(update.Namespace, cw.WkInfo.Cluster, path, v) 
+						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
 				updatecontent := ""			
