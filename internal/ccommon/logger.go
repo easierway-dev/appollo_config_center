@@ -34,7 +34,7 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string) (dingKeys string,dingusers []string) {
+func GetDingInfo(appid string) (dingKeys []string,dingusers []string) {
         namespace := DefaultNamespace
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
