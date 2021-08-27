@@ -119,7 +119,7 @@ if __name__ == "__main__":
       merge_json = {}
       for _,value in source_conf_map.items() :
         json_merge_update(merge_json,deepcopy(value))
-        source_conf_map[task] = deepcopy(merge_json)
+      source_conf_map[task] = deepcopy(merge_json)
   #根据mapping结果，对各业务线的配置进行瘦身（从全集中去掉不属于该业务线的内容）
   final_conf_map = split_map_conf(source_conf_map, mapping_conf_path)
   with open(gen_conf_path, "w") as fw: 
