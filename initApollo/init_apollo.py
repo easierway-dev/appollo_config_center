@@ -65,7 +65,7 @@ class InitApollo(object):
                         consul_addr = "%s/v1/" %(self.base_config_data[cluster])
                         operateConsul = OpConsul(consul_addr)
                     else :
-                        print("init consul:%s connection failed" %(consul_addr))
+                        print("init consul:%s connection failed" %(cluster))
                         continue
                     #cluster已经创建
                     if bool(self.PrivateApolloClient.get_cluster(appid, cluster)) :
