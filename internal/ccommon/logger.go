@@ -41,7 +41,7 @@ func GetDingInfo(appid string) (dingKeys []string,dingusers []string) {
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {
-				if dyAgoCfg.AppConfig.DingKeys != "" {
+				if len(dyAgoCfg.AppConfig.DingKeys) > 0 {
 					dingKeys = dyAgoCfg.AppConfig.DingKeys
 				}
 				if len(dyAgoCfg.AppConfig.DingUsers) > 0 {
@@ -50,7 +50,7 @@ func GetDingInfo(appid string) (dingKeys []string,dingusers []string) {
 			}
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
-					if dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys != "" {
+					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys) > 0 {
 						dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
 					}
 					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers) > 0 {
