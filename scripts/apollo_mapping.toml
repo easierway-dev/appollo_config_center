@@ -17,4 +17,7 @@ drs = [ "drs",]
 dsp = [ "dsp",]
 
 [[mappingrules]]
+rs = [ "experiment", "mlflow",]
+
+[[mappingrules]]
 as = []

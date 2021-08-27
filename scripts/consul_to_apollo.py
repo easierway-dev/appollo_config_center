@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os,json,toml,sys
+import os,json,toml,sys,time
 from os import walk
 from copy import deepcopy
  
@@ -98,36 +98,37 @@ def split_map_conf(source_map, merge_map, mapping_rule):
         for appid, matchlist in rulemap.items() :
             if not appid in mapping_conf_map:
                 mapping_conf_map[appid] = []
-            print("xxdebug matchlist=",appid,appid)
-            print("before:", merged_consul_list)
+            print("before: appid,matchlist=",appid,matchlist)
+            print("before:merged_consul_list", merged_consul_list)
             needremove = []
             if len(matchlist) > 0 :
                 for consulkey in merged_consul_list :
-                    print("ing:", merged_consul_list)
-                    print("ing:", consulkey, matchlist,findcheck(consulkey, matchlist))
+                    print("ing:merged_consul_list", merged_consul_list)
+                    print("ing:consulkey, matchlist,findcheck", consulkey, matchlist,findcheck(consulkey, matchlist))
                     if findcheck(consulkey, matchlist) :
                         if not consulkey in mapping_conf_map[appid] :
                             mapping_conf_map[appid].append(consulkey)
                         needremove.append(consulkey)
                 for rmkey in needremove :
                     merged_consul_list.remove(rmkey)
-                print("after:",mapping_conf_map[appid])
-                print("after:",merged_consul_list)
-                if appid in sourcemap :
-                    sourcemap[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                print("after:mapping_conf_map",mapping_conf_map[appid])
+                print("after:merged_consul_list",merged_consul_list)
+                if appid in source_map :
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
                 else :
-                    sourcemap[appid] = deepcopy(merge_map)
-                    sourcemap[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                    source_map[appid] = deepcopy(merge_map)
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
             else :
                 mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
-                if appid in sourcemap :
-                    sourcemap[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                if appid in source_map :
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
                 else :
-                    sourcemap[appid] = deepcopy(merge_map)
-                    sourcemap[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                    source_map[appid] = deepcopy(merge_map)
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
     return source_map
 
 if __name__ == "__main__":
+  print("start:",time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
   util_path = os.path.realpath(__file__)
   util_dir = os.path.dirname(util_path)
   mapping_rule_path = "%s/apollo_mapping.toml"%util_dir
@@ -157,7 +158,7 @@ if __name__ == "__main__":
     mapping_rule = {"mappingrules":[]}
   #根据mapping结果，对各业务线的配置进行瘦身（从全集中去掉不属于该业务线的内容）
   final_conf_map = split_map_conf(source_conf_map, merge_map, mapping_rule)
-  
+
   #abtest信息独立namespace存储
   final_conf_map["as"]["namespace"]["abtesting"] = ["abtest/abtest_info"]
   final_conf_map["as"]["namespace"]["application"].remove("abtest/abtest_info")
@@ -167,3 +168,4 @@ if __name__ == "__main__":
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
     toml.dump(final_conf_map,fw)
+  print("end:",time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
