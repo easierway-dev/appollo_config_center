@@ -17,7 +17,7 @@ func SendText(tokens []string, textContent string, dingusers []string) {
 	textByteList := []byte(textContent)
 	dingContent := textContent
 	if len(textByteList) > DingLimit {
-		dingContent = textByteList[:DingLimit]
+		dingContent = string(textByteList[:DingLimit])
 	}
 	for _, token := range tokens {
 		SendTextUnit(token, dingContent, dingusers)
