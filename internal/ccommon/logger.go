@@ -34,15 +34,15 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingKey(appid string) (dingKey string,dingusers []string) {
+func GetDingInfo(appid string) (dingKeys string,dingusers []string) {
         namespace := DefaultNamespace
-	dingKey = AppConfiger.DingKey
+	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {
-				if dyAgoCfg.AppConfig.DingKey != "" {
-					dingKey = dyAgoCfg.AppConfig.DingKey
+				if dyAgoCfg.AppConfig.DingKeys != "" {
+					dingKeys = dyAgoCfg.AppConfig.DingKeys
 				}
 				if len(dyAgoCfg.AppConfig.DingUsers) > 0 {
 					dingusers = dyAgoCfg.AppConfig.DingUsers
@@ -50,8 +50,8 @@ func GetDingKey(appid string) (dingKey string,dingusers []string) {
 			}
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
-					if dyAgoCfg.AppConfig.AppConfigMap[appid].DingKey != "" {
-						dingKey = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKey
+					if dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys != "" {
+						dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
 					}
 					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers) > 0 {
 						dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
@@ -60,15 +60,15 @@ func GetDingKey(appid string) (dingKey string,dingusers []string) {
 			}
 		}
         }
-	return dingKey, dingusers
+	return dingKeys, dingusers
 }
 
 func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkey,dingusers := GetDingKey(args[0].(string))
-	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),dingusers)
+	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Info(args)
 }
 
@@ -76,8 +76,8 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkey,dingusers := GetDingKey(args[0].(string))
-	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),dingusers)
+	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Warn(args)
 }
 
@@ -85,8 +85,8 @@ func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkey,dingusers := GetDingKey(args[0].(string))
-	cnotify.SendText(dingkey,fmt.Sprintf("%s",args),dingusers)
+	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Error(args)
 }
 

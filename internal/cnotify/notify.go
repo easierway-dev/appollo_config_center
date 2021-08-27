@@ -9,18 +9,29 @@ import (
 	"github.com/CodyGuo/glog"
 )
 
-func SendText(token, textContent string, dingusers []string) {
+const (
+	DingLimit    = 10000
+)
+
+func SendText(tokens []string, textContent string, dingusers []string) {
+	textByteList := []byte(textContent)
+	dingContent := textContent
+	if len(textByteList) > DingLimit {
+		dingContent = textByteList[:DingLimit]
+	}
+	for _, token := range tokens {
+		SendTextUnit(token, dingContent, dingusers)
+	}
+}
+
+func SendTextUnit(token, dingContent string, dingusers []string) {
 	glog.SetFlags(glog.LglogFlags)
 	webHook := fmt.Sprintf("https://oapi.dingtalk.com/robot/send?access_token=%s",token)
 	dt := dingtalk.New(webHook, dingtalk.WithSecret(token))
 
 	// text类型
 	atMobiles := robot.SendWithAtMobiles(dingusers)
-	textByteList := []byte(textContent)
-	dingContent := textContent
-	if len(textByteList) > 10000 {
-		dingContent = textByteList[:10000]
-	}
+
 	if err := dt.RobotSendText(dingContent, atMobiles); err != nil {
 		glog.Fatal("send ding failed err: ",err)
 	}

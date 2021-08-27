@@ -63,7 +63,7 @@ type ClusterCfg struct {
 }
 
 type AppCfg struct {
-	DingKey       string `toml:"ding_key"`
+	DingKeys       []string `toml:"ding_keys"`
 	DingUsers	[]string `toml:"ding_users"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
@@ -78,7 +78,7 @@ type ClusterInfo struct {
 }
 
 type ConfigInfo struct {
-	DingKey string `toml:"ding_key"`
+	DingKeys []string `toml:"ding_keys"`
 	DingUsers       []string `toml:"ding_users"`
 }
 
