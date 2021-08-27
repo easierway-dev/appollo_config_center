@@ -89,6 +89,14 @@ def json_merge_update(input_json, join_json) :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
 
+def findcheck(a, alist) :
+    find = False
+    for checkstr in alist :
+        if a.lower().find(checkstr.lower()) != -1 :
+            find = True
+            break
+    return find
+
 def split_map_conf(source_map, merge_map, mapping_rule):
     merged_consul_list = []
     mapping_conf_map = {}
@@ -160,10 +168,14 @@ if __name__ == "__main__":
   final_conf_map = split_map_conf(source_conf_map, merge_map, mapping_rule)
 
   #abtest信息独立namespace存储
-  final_conf_map["as"]["namespace"]["abtesting"] = ["abtest/abtest_info"]
-  final_conf_map["as"]["namespace"]["application"].remove("abtest/abtest_info")
-  final_conf_map["dsp"]["namespace"]["abtesting"] = ["abtest/abtest_info"]
-  final_conf_map["dsp"]["namespace"]["application"].remove("abtest/abtest_info")
+  abtest_key = "abtesting"
+  abtest_value = "abtest/abtest_info"
+  final_conf_map["as"]["namespace"][abtest_key] = [abtest_value]
+  if abtest_value in final_conf_map["as"]["namespace"]["application"] :
+    final_conf_map["as"]["namespace"]["application"].remove(abtest_value)
+  final_conf_map["dsp"]["namespace"][abtest_key] = [abtest_value]
+  if abtest_value in final_conf_map["dsp"]["namespace"]["application"] :
+    final_conf_map["dsp"]["namespace"]["application"].remove(abtest_value)
 
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
