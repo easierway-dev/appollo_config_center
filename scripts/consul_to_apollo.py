@@ -83,7 +83,8 @@ def json_merge_update(input_json, join_json) :
                 if index < len(input_json) :
                     json_merge_update(input_json[index], join_json[index])
                 else :
-                    input_json.append(join_json[index])
+                    if not join_json[index] in input_json :
+                        input_json.append(join_json[index])
     else :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
