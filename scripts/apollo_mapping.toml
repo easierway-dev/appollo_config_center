@@ -1,0 +1,20 @@
+[[mappingrules]]
+dmp = [ "dmp",]
+
+[[mappingrules]]
+juno = [ "juno",]
+
+[[mappingrules]]
+nowin = [ "nowin",]
+
+[[mappingrules]]
+rtdsp = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
+
+[[mappingrules]]
+drs = [ "drs",]
+
+[[mappingrules]]
+dsp = [ "dsp",]
+
+[[mappingrules]]
+as = []
