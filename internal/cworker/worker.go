@@ -78,7 +78,7 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 				}
 			}
 			if !enUpdate {
-				ccommon.CLogger.Info(appid, "Task_",appid, "is not permit to update consul")
+				ccommon.CLogger.Info(appid, "is not permit to update consul")
 				return
 			}
 			if dyAgoCfg.ClusterConfig != nil && dyAgoCfg.ClusterConfig.ClusterMap != nil {
