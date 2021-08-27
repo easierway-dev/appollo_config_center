@@ -3,6 +3,7 @@
 
 import os,json,toml,sys
 from os import walk
+from copy import deepcopy
  
 # 获取文件夹的中的文件夹和文件夹里文件
 def do_file(o_filepath): #定义函数 传入写入文档保存的位置和要操作的任意电脑路劲
@@ -45,7 +46,7 @@ def do_file(o_filepath): #定义函数 传入写入文档保存的位置和要�
       if len(clusterlist) > 0:
         defmap["dsp"]["cluster"] = clusterlist
       if len(filelist) > 0:
-        defmap["dsp"]["namespace"]["application"]=filelist
+        defmap["dsp"]["namespace"]["application"]=sorted(filelist)
 
     if clustn.startswith("as_"):
       if not "as" in defmap.keys() :
@@ -54,7 +55,7 @@ def do_file(o_filepath): #定义函数 传入写入文档保存的位置和要�
       if len(clusterlist) > 0:
         defmap["as"]["cluster"] = clusterlist
       if len(filelist) > 0:
-        defmap["as"]["namespace"]["application"]=filelist
+        defmap["as"]["namespace"]["application"]=sorted(filelist)
   return defmap
 
 def json_merge_update(input_json, join_json) :
@@ -86,6 +87,7 @@ def json_merge_update(input_json, join_json) :
     else :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
+
 
 #根据映射规则将dsp/as的配置拆分成dsp/rtdsp(pioneer)/juno/dmp/drs(rs)
 def split_map_conf(source_map, mapping_file):
