@@ -13,11 +13,6 @@ rtdsp = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
 [[mappingrules]]
 drs = [ "drs",]
 
+#白名单规则置空，即以上规则过滤后，剩下的归于此类
 [[mappingrules]]
-dsp = [ "dsp",]
-
-[[mappingrules]]
-rs = [ "experiment", "mlflow",]
-
-[[mappingrules]]
-as = []
+dsp = [ ]
