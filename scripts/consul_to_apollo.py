@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os,json,toml,sys
+import os,json,toml,sys,time
 from os import walk
 from copy import deepcopy
  
@@ -89,15 +89,57 @@ def json_merge_update(input_json, join_json) :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
 
+def findcheck(a, alist) :
+    find = False
+    for checkstr in alist :
+        if a.lower().find(checkstr.lower()) != -1 :
+            find = True
+            break
+    return find
 
-#根据映射规则将dsp/as的配置拆分成dsp/rtdsp(pioneer)/juno/dmp/drs(rs)
-def split_map_conf(source_map, mapping_file):
-  return source_map
+def split_map_conf(source_map, merge_map, mapping_rule):
+    merged_consul_list = []
+    mapping_conf_map = {}
+    if "namespace" in merge_map and "application" in merge_map["namespace"] :
+        merged_consul_list.extend(merge_map["namespace"]["application"])
+    for rulemap in mapping_rule["mappingrules"] :
+        for appid, matchlist in rulemap.items() :
+            if not appid in mapping_conf_map:
+                mapping_conf_map[appid] = []
+            print("before: appid,matchlist=",appid,matchlist)
+            print("before:merged_consul_list", merged_consul_list)
+            needremove = []
+            if len(matchlist) > 0 :
+                for consulkey in merged_consul_list :
+                    print("ing:merged_consul_list", merged_consul_list)
+                    print("ing:consulkey, matchlist,findcheck", consulkey, matchlist,findcheck(consulkey, matchlist))
+                    if findcheck(consulkey, matchlist) :
+                        if not consulkey in mapping_conf_map[appid] :
+                            mapping_conf_map[appid].append(consulkey)
+                        needremove.append(consulkey)
+                for rmkey in needremove :
+                    merged_consul_list.remove(rmkey)
+                print("after:mapping_conf_map",mapping_conf_map[appid])
+                print("after:merged_consul_list",merged_consul_list)
+                if appid in source_map :
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                else :
+                    source_map[appid] = deepcopy(merge_map)
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+            else :
+                mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
+                if appid in source_map :
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                else :
+                    source_map[appid] = deepcopy(merge_map)
+                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+    return source_map
 
 if __name__ == "__main__":
+  print("start:",time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
   util_path = os.path.realpath(__file__)
   util_dir = os.path.dirname(util_path)
-  mapping_conf_path = "%s/apollo_mapping.toml"%util_dir
+  mapping_rule_path = "%s/apollo_mapping.toml"%util_dir
   gen_conf_path = "%s/consul_to_apollo.toml"%util_dir
   watch_path = "%s/consul_backup"%util_dir
   tasklist = ["dsp","as","rtdsp","juno","dmp","drs"]
@@ -114,14 +156,28 @@ if __name__ == "__main__":
   source_conf_map = do_file(watch_path)#根据consul备份结果生成包含dsp/as的map
 
   #除dsp/as之外的服务的配置默认是dsp/as的并集
-  for task in tasklist :
-    if not task in source_conf_map :
-      merge_json = {}
-      for _,value in source_conf_map.items() :
-        json_merge_update(merge_json,deepcopy(value))
-      source_conf_map[task] = deepcopy(merge_json)
+  merge_map = {}
+  for _,value in source_conf_map.items() :
+    json_merge_update(merge_map,deepcopy(value))
+  
+  if os.path.exists(mapping_rule_path) :
+    mapping_rule = toml.load(mapping_rule_path, _dict=dict)
+  else :
+    mapping_rule = {"mappingrules":[]}
   #根据mapping结果，对各业务线的配置进行瘦身（从全集中去掉不属于该业务线的内容）
-  final_conf_map = split_map_conf(source_conf_map, mapping_conf_path)
+  final_conf_map = split_map_conf(source_conf_map, merge_map, mapping_rule)
+
+  #abtest信息独立namespace存储
+  abtest_key = "abtesting"
+  abtest_value = "abtest/abtest_info"
+  final_conf_map["as"]["namespace"][abtest_key] = [abtest_value]
+  if abtest_value in final_conf_map["as"]["namespace"]["application"] :
+    final_conf_map["as"]["namespace"]["application"].remove(abtest_value)
+  final_conf_map["dsp"]["namespace"][abtest_key] = [abtest_value]
+  if abtest_value in final_conf_map["dsp"]["namespace"]["application"] :
+    final_conf_map["dsp"]["namespace"]["application"].remove(abtest_value)
+
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
     toml.dump(final_conf_map,fw)
+  print("end:",time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
