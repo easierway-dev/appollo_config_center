@@ -142,7 +142,7 @@ def split_map_conf(source_map, merge_map, mapping_rule):
                 print("after:merged_consul_list",merged_consul_list)
             else :               
                 if appid in source_map :
-                    mapping_conf_map[appid] =  = list_minus(source_map[appid]["namespace"]["application"], needremove)
+                    mapping_conf_map[appid] = list_minus(source_map[appid]["namespace"]["application"], needremove)
                 else :
                     mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
             if not appid in source_map :
