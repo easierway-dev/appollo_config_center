@@ -89,7 +89,7 @@ def json_merge_update(input_json, join_json) :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
 
-def find_check(a, alist) :
+def findcheck(a, alist) :
     find = False
     for checkstr in alist :
         if a.lower().find(checkstr.lower()) != -1 :
@@ -97,13 +97,13 @@ def find_check(a, alist) :
             break
     return find
 
-def not_find_check(a, alist) :
-    nofind = True
+def nofindcheck(a, alist) :
+    find = False
     for checkstr in alist :
         if a.lower().find(checkstr.lower()) != -1 :
-            nofind = False
+            find = True
             break
-    return nofind
+    return find
 
 def split_map_conf(source_map, merge_map, mapping_rule):
     merged_consul_list = []
@@ -120,14 +120,8 @@ def split_map_conf(source_map, merge_map, mapping_rule):
             if "white" in matchlist and len(matchlist["white"]) > 0 or "black" in matchlist and len(matchlist["black"]) > 0:
                 for consulkey in merged_consul_list :
                     print("ing:merged_consul_list", merged_consul_list)
-                    white_match = False
-                    black_not_match = False
-                    if not "white" in matchlist or "white" in matchlist and find_check(consulkey, matchlist["white"]) :
-                        white_match = True
-                    if not "black" in matchlist or "black" in matchlist and not_find_check(consulkey, matchlist["black"]) :
-                        black_not_match = True
-                    print("ing:consulkey, matchlist,white_match,black_not_match", consulkey, matchlist, white_match, black_not_match)
-                    if white_match and black_not_match :
+                    print("ing:consulkey, matchlist,findcheck", consulkey, matchlist,findcheck(consulkey, matchlist))
+                    if "white" in matchlist adn findcheck(consulkey, matchlist["white"]) :
                         if not consulkey in mapping_conf_map[appid] :
                             mapping_conf_map[appid].append(consulkey)
                         needremove.append(consulkey)
@@ -167,7 +161,8 @@ if __name__ == "__main__":
     gen_conf_path = sys.argv[2]
     mapping_conf_path = sys.argv[3]
 
-  source_conf_map = do_file(watch_path)#根据consul备份结果生成包含dsp/as的map
+  #根据consul备份结果生成包含dsp/as的map
+  source_conf_map = do_file(watch_path)
 
   #除dsp/as之外的服务的配置默认是dsp/as的并集
   merge_map = {}
@@ -184,12 +179,14 @@ if __name__ == "__main__":
   #abtest信息独立namespace存储
   abtest_key = "abtesting"
   abtest_value = "abtest/abtest_info"
-  final_conf_map["as"]["namespace"][abtest_key] = [abtest_value]
-  if abtest_value in final_conf_map["as"]["namespace"]["application"] :
-    final_conf_map["as"]["namespace"]["application"].remove(abtest_value)
-  final_conf_map["dsp"]["namespace"][abtest_key] = [abtest_value]
-  if abtest_value in final_conf_map["dsp"]["namespace"]["application"] :
-    final_conf_map["dsp"]["namespace"]["application"].remove(abtest_value)
+  if "as" in final_conf_map :
+    if abtest_value in final_conf_map["as"]["namespace"]["application"] :
+      final_conf_map["as"]["namespace"]["application"].remove(abtest_value)
+    final_conf_map["as"]["namespace"][abtest_key] = [abtest_value]
+  if "dsp" in final_conf_map :
+    if abtest_value in final_conf_map["dsp"]["namespace"]["application"] :
+      final_conf_map["dsp"]["namespace"]["application"].remove(abtest_value)
+    final_conf_map["dsp"]["namespace"][abtest_key] = [abtest_value]
 
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
