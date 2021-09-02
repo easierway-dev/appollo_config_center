@@ -117,14 +117,14 @@ def split_map_conf(source_map, merge_map, mapping_rule):
             print("before: appid,matchlist=",appid,matchlist)
             print("before:merged_consul_list", merged_consul_list)
             needremove = []
-            white_match = False
-            black_nomatch = False
             if "white" in matchlist and len(matchlist["white"]) > 0 or "black" in matchlist and len(matchlist["black"]) > 0:
-                if not "white" in matchlist or "white" in matchlist and find_check(consulkey, matchlist["white"]) :
-                    white_match = True
-                if not "black" in matchlist or "black" in matchlist and not_find_check(consulkey, matchlist["black"]) :
-                    black_nomatch = True
                 for consulkey in merged_consul_list :
+                    white_match = False
+                    black_nomatch = False
+                    if not "white" in matchlist or "white" in matchlist and find_check(consulkey, matchlist["white"]) :
+                        white_match = True
+                    if not "black" in matchlist or "black" in matchlist and not_find_check(consulkey, matchlist["black"]) :
+                        black_nomatch = True
                     print("ing:merged_consul_list", merged_consul_list)
                     print("ing:consulkey, matchlist,white_match, black_nomatch", consulkey, matchlist, white_match, black_nomatch)
                     if white_match and black_nomatch :
