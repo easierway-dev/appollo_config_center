@@ -108,7 +108,7 @@ def not_find_check(a, alist) :
 def list_minus(alist, blist) :
     for b in blist :
         if b in alist :
-            alist.remove(alist)
+            alist.remove(b)
     return alist
 
 def split_map_conf(source_map, merge_map, mapping_rule):
@@ -140,18 +140,19 @@ def split_map_conf(source_map, merge_map, mapping_rule):
                 merged_consul_list = list_minus(merged_consul_list, needremove)
                 print("after:mapping_conf_map",mapping_conf_map[appid])
                 print("after:merged_consul_list",merged_consul_list)
+            else :               
                 if appid in source_map :
-                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                    mapping_conf_map[appid] =  = list_minus(source_map[appid]["namespace"]["application"], needremove)
                 else :
-                    source_map[appid] = deepcopy(merge_map)
-                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
-            else :
-                mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
-                if appid in source_map :
-                    source_map[appid]["namespace"]["application"] = list_minus(mapping_conf_map[appid], needremove)
-                else :
-                    source_map[appid] = deepcopy(merge_map)
-                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                    mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
+            if not appid in source_map :
+                source_map[appid] = deepcopy(merge_map)
+            source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+
+    #没有配置规则的默认不在apollo上同步
+    for skey in source_map.keys() :
+        if not skey in mapping_conf_map :
+            del source_map[skey]
     return source_map
 
 if __name__ == "__main__":
