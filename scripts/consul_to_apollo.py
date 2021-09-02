@@ -89,13 +89,21 @@ def json_merge_update(input_json, join_json) :
         print("%s:object type error %r %r %r %r" % (sys._getframe().f_code.co_name, input_json, type(input_json), join_json, type(join_json)))
         sys.exit(-1)
 
-def findcheck(a, alist) :
+def find_check(a, alist) :
     find = False
     for checkstr in alist :
         if a.lower().find(checkstr.lower()) != -1 :
             find = True
             break
     return find
+
+def not_find_check(a, alist) :
+    nofind = True
+    for checkstr in alist :
+        if a.lower().find(checkstr.lower()) != -1 :
+            nofind = False
+            break
+    return nofind
 
 def split_map_conf(source_map, merge_map, mapping_rule):
     merged_consul_list = []
@@ -109,11 +117,17 @@ def split_map_conf(source_map, merge_map, mapping_rule):
             print("before: appid,matchlist=",appid,matchlist)
             print("before:merged_consul_list", merged_consul_list)
             needremove = []
-            if len(matchlist) > 0 :
+            if "white" in matchlist and len(matchlist["white"]) > 0 or "black" in matchlist and len(matchlist["black"]) > 0:
                 for consulkey in merged_consul_list :
                     print("ing:merged_consul_list", merged_consul_list)
-                    print("ing:consulkey, matchlist,findcheck", consulkey, matchlist,findcheck(consulkey, matchlist))
-                    if findcheck(consulkey, matchlist) :
+                    white_match = False
+                    black_not_match = False
+                    if not "white" in matchlist or "white" in matchlist and find_check(consulkey, matchlist["white"]) :
+                        white_match = True
+                    if not "black" in matchlist or "black" in matchlist and not_find_check(consulkey, matchlist["black"]) :
+                        black_not_match = True
+                    print("ing:consulkey, matchlist,white_match,black_not_match", consulkey, matchlist, white_match, black_not_match)
+                    if white_match and black_not_match :
                         if not consulkey in mapping_conf_map[appid] :
                             mapping_conf_map[appid].append(consulkey)
                         needremove.append(consulkey)

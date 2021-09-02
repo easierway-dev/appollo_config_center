@@ -1,23 +1,24 @@
+#white指白名单,black指黑名单
 [[mappingrules]]
-dmp = [ "dmp",]
+[mappingrules.dmp]
+white = [ "dmp",]
 
 [[mappingrules]]
-juno = [ "juno",]
+[mappingrules.juno]
+white = [ "juno",]
 
 [[mappingrules]]
-nowin = [ "nowin",]
+[mappingrules.nowin]
+white = [ "nowin",]
 
 [[mappingrules]]
-rtdsp = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
+[mappingrules.rtdsp]
+white = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
 
 [[mappingrules]]
-drs = [ "drs",]
+[mappingrules.drs]
+white = [ "drs",]
 
 [[mappingrules]]
-dsp = [ "dsp",]
-
-[[mappingrules]]
-rs = [ "experiment", "mlflow",]
-
-[[mappingrules]]
-as = []
+[mappingrules.dsp]
+white = []
