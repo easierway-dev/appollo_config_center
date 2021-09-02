@@ -105,18 +105,24 @@ def not_find_check(a, alist) :
             break
     return nofind
 
+def list_minus(alist, blist) :
+    for b in blist :
+        if b in alist :
+            alist.remove(alist)
+    return alist
+
 def split_map_conf(source_map, merge_map, mapping_rule):
     merged_consul_list = []
     mapping_conf_map = {}
     if "namespace" in merge_map and "application" in merge_map["namespace"] :
         merged_consul_list.extend(merge_map["namespace"]["application"])
+    needremove = []
     for rulemap in mapping_rule["mappingrules"] :
         for appid, matchlist in rulemap.items() :
             if not appid in mapping_conf_map:
                 mapping_conf_map[appid] = []
             print("before: appid,matchlist=",appid,matchlist)
             print("before:merged_consul_list", merged_consul_list)
-            needremove = []
             if "white" in matchlist and len(matchlist["white"]) > 0 or "black" in matchlist and len(matchlist["black"]) > 0:
                 for consulkey in merged_consul_list :
                     white_match = False
@@ -131,8 +137,7 @@ def split_map_conf(source_map, merge_map, mapping_rule):
                         if not consulkey in mapping_conf_map[appid] :
                             mapping_conf_map[appid].append(consulkey)
                         needremove.append(consulkey)
-                for rmkey in needremove :
-                    merged_consul_list.remove(rmkey)
+                merged_consul_list = list_minus(merged_consul_list, needremove)
                 print("after:mapping_conf_map",mapping_conf_map[appid])
                 print("after:merged_consul_list",merged_consul_list)
                 if appid in source_map :
@@ -143,7 +148,7 @@ def split_map_conf(source_map, merge_map, mapping_rule):
             else :
                 mapping_conf_map[appid] = list(set(mapping_conf_map[appid]+merged_consul_list))
                 if appid in source_map :
-                    source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
+                    source_map[appid]["namespace"]["application"] = list_minus(mapping_conf_map[appid], needremove)
                 else :
                     source_map[appid] = deepcopy(merge_map)
                     source_map[appid]["namespace"]["application"] = mapping_conf_map[appid]
