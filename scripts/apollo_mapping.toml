@@ -1,0 +1,25 @@
+#white指白名单,black指黑名单
+[[mappingrules]]
+[mappingrules.dmp]
+white = [ "dmp",]
+
+[[mappingrules]]
+[mappingrules.juno]
+white = [ "juno",]
+
+[[mappingrules]]
+[mappingrules.nowin]
+white = [ "nowin",]
+
+[[mappingrules]]
+[mappingrules.rtdsp]
+white = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
+
+[[mappingrules]]
+[mappingrules.drs]
+white = [ "drs", "modeldata"]
+
+#白名单规则置空，即以上规则过滤后，剩下的归于此类
+[[mappingrules]]
+[mappingrules.dsp]
+white = []

@@ -11,9 +11,17 @@ import (
 var AgolloConfiger *AgolloCfg
 var DyAgolloConfiger map[string]*DyAgolloCfg
 
+var AppConfiger  *AppCfg
+
 const (
 	ServerName    = "mvbjqa"
 	SubServerName = "configCenter"
+)
+
+const (
+	ABTest = "abtesting"
+	DefaultNamespace = "application"
+
 )
 
 const (
@@ -23,13 +31,14 @@ const (
 const (
 	AgolloConfig = "agollo.toml"
 	LogConfig    = "log.toml"
+	AppConfig   = "app.toml"
 )
 
 type BaseConf struct {
 	LogCfg    *LogCfg
 	AgolloCfg *AgolloCfg
+	AppCfg   *AppCfg
 }
-
 
 type DyAgolloCfg struct {
 	ClusterConfig *ClusterCfg
@@ -54,7 +63,9 @@ type ClusterCfg struct {
 }
 
 type AppCfg struct {
-	DingKey       string `toml:"ding_key"`
+	DingKeys       []string `toml:"ding_keys"`
+	DingUsers	[]string `toml:"ding_users"`
+	EnUpdateConsul	bool `toml:"enable_update_consul"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 
@@ -68,7 +79,9 @@ type ClusterInfo struct {
 }
 
 type ConfigInfo struct {
-	DingKey string `toml:"ding_key"`
+	DingKeys []string `toml:"ding_keys"`
+	DingUsers       []string `toml:"ding_users"`
+	EnUpdateConsul	bool `toml:"enable_update_consul"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
@@ -86,6 +99,12 @@ func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	}
 	cfg.LogCfg = logCfg
 
+        appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
+        if err != nil {
+                return nil, fmt.Errorf("Parse dingConfig error, err[%s]", err.Error())
+        }
+        cfg.AppCfg = appCfg
+
 	return cfg, nil
 }
 
@@ -97,6 +116,14 @@ func parseLogConfig(fileName string) (*LogCfg, error) {
 		return cfg, err
 	}
 	return cfg, nil
+}
+
+func parseBaseAppConfig(fileName string) (*AppCfg, error) {
+        cfg := &AppCfg{}
+        if err := parseTomlConfig(fileName, cfg); err != nil {
+                return cfg, err
+        }
+        return cfg, nil
 }
 
 func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
