@@ -123,7 +123,8 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Info(ccommon.DefaultDingType,cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Error:", err)
+
+				ccommon.CLogger.Warn(ccommon.DefaultDingType,"Error:", err)
 			case update := <-watchCh:
 				skipped_keys := ""
 				if update.Namespace == ccommon.ABTest {
