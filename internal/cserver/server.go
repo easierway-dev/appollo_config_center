@@ -82,10 +82,10 @@ func (s *AgolloServer) Update() {
 		for {
 			select {
 			case <-s.ctx.Done():
-			    ccommon.CLogger.Error(ccommon.DefaultDingType,cluster, "watch quit...")
+			    ccommon.CLogger.Info(ccommon.DefaultDingType,cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
-				 ccommon.CLogger.Warn(ccommon.DefaultDingType,"Error:", err)
+				 ccommon.CLogger.Warn(ccommon.DefaultPollDingType,"Error:", err)
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""

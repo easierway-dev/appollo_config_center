@@ -12,6 +12,7 @@ var CLogger *ccLogger
 
 const (
 	DefaultDingType = ""
+	DefaultPollDingType = "poll"
 )
 
 type LogCfg struct {
