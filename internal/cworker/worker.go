@@ -123,13 +123,12 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Info(ccommon.DefaultDingType,cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-				chklograte := ccommon.AppConfiger.ChklogRate
 				if ccommon.AppConfiger.AppConfigMap != nil {
 					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
-						chklograte = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
+						ccommon.ChklogRate = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
 					}
 				}
-				if rand.Float64() < chklograte {
+				if ccommon.ChklogRamdom < ccommon.ChklogRate {
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:

@@ -13,6 +13,9 @@ var DyAgolloConfiger map[string]*DyAgolloCfg
 
 var AppConfiger  *AppCfg
 
+var ChklogRamdom float64
+var ChklogRate float64
+
 const (
 	ServerName    = "mvbjqa"
 	SubServerName = "configCenter"
