@@ -1,5 +1,4 @@
-[init]
-ding_keys=["de9b613437c2dd840ed8afbc6b976a6c60dac44aca81e0aa3301585216a03c7f"]
-ding_users=["15311489030"]
-[poll]
+[app_config_map.init]
+ding_keys=["159041625c744e27df8f5105436f4b40a47dccf55e9515677d14a6a70fb11f27"]
+[app_config_map.poll]
 log_rate = 0.001

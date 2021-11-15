@@ -93,7 +93,7 @@ func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	cfg := &BaseConf{}
 	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
 	if err != nil {
-		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
+		return nil, fmt.Errorf("Parse agoConfig error, err[%s]", err.Error())
 	}
 
 	cfg.AgolloCfg = agolloCfg
@@ -106,7 +106,7 @@ func ParseBaseConfig(configDir string) (*BaseConf, error) {
 
         appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
         if err != nil {
-                return nil, fmt.Errorf("Parse dingConfig error, err[%s]", err.Error())
+                return nil, fmt.Errorf("Parse appConfig error, err[%s]", err.Error())
         }
         cfg.AppCfg = appCfg
 
