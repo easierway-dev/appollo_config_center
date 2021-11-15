@@ -12,6 +12,8 @@ var CLogger *ccLogger
 
 const (
 	DefaultDingType = ""
+	DefaultDingType = ""
+	InitDingType = "init"
 	DefaultPollDingType = "poll"
 )
 
@@ -35,7 +37,11 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string) (dingKeys []string,dingusers []string) {
+func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []string) {
+	if appid == "" && itype == "info"{
+		return dingKeys, dingusers
+	}
+
         namespace := DefaultNamespace
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
@@ -68,7 +74,7 @@ func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	dingkeys,dingusers := GetDingInfo(args[0].(string), "info")
 	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Info(args)
 }
@@ -77,7 +83,7 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	dingkeys,dingusers := GetDingInfo(args[0].(string), "warn")
 	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Warn(args)
 }
@@ -86,7 +92,7 @@ func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string))
+	dingkeys,dingusers := GetDingInfo(args[0].(string), "err")
 	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Error(args)
 }

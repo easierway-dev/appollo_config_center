@@ -124,7 +124,7 @@ func (cw *CWorker) Run(ctx context.Context){
 				return
 			case err := <-errorCh:
 
-				ccommon.CLogger.Warn(ccommon.DefaultPollDingType,"Error:", err)
+				ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 			case update := <-watchCh:
 				skipped_keys := ""
 				if update.Namespace == ccommon.ABTest {
