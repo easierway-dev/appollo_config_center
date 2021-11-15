@@ -12,7 +12,6 @@ var CLogger *ccLogger
 
 const (
 	DefaultDingType = ""
-	DefaultDingType = ""
 	InitDingType = "init"
 	DefaultPollDingType = "poll"
 )
@@ -48,21 +47,13 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {
-				if len(dyAgoCfg.AppConfig.DingKeys) > 0 {
-					dingKeys = dyAgoCfg.AppConfig.DingKeys
-				}
-				if len(dyAgoCfg.AppConfig.DingUsers) > 0 {
-					dingusers = dyAgoCfg.AppConfig.DingUsers
-				}
+				dingKeys = dyAgoCfg.AppConfig.DingKeys
+				dingusers = dyAgoCfg.AppConfig.DingUsers
 			}
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
-					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys) > 0 {
-						dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
-					}
-					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers) > 0 {
-						dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
-					}
+					dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
+					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
 				} 
 			}
 		}
