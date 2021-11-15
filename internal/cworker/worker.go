@@ -123,8 +123,14 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Info(ccommon.DefaultDingType,cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-
-				ccommon.CLogger.Warn(ccommon.DefaultPollDingType,"Error:", err)
+				if ccommon.AppConfiger.AppConfigMap != nil {
+					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
+						ccommon.ChklogRate = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
+					}
+				}
+				if ccommon.ChklogRamdom < ccommon.ChklogRate {
+					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				}
 			case update := <-watchCh:
 				skipped_keys := ""
 				if update.Namespace == ccommon.ABTest {
@@ -184,7 +190,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 				}
-				ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
+				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
 				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
 			}
 		}

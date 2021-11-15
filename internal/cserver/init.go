@@ -3,6 +3,7 @@ package cserver
 import (
 	"fmt"
 	"os"
+	"math/rand"	
 
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
@@ -36,6 +37,8 @@ func Init(server *AgolloServer)  error {
 	}
 	ccommon.AgolloConfiger =  cfg.AgolloCfg
 	ccommon.AppConfiger = cfg.AppCfg
+	ccommon.ChklogRamdom = rand.Float64()
+	ccommon.ChklogRate = ccommon.AppConfiger.ChklogRate
 	// init log
 	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {

@@ -85,7 +85,14 @@ func (s *AgolloServer) Update() {
 			    ccommon.CLogger.Info(ccommon.DefaultDingType,cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
-				 ccommon.CLogger.Warn(ccommon.DefaultPollDingType,"Error:", err)
+				if ccommon.AppConfiger.AppConfigMap != nil {
+					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
+						ccommon.ChklogRate = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
+					}
+				}
+				if ccommon.ChklogRamdom < ccommon.ChklogRate {
+					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				}				
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""
@@ -129,11 +136,11 @@ func (s *AgolloServer) Watch() {
 					worker,err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
-						ccommon.CLogger.Info(ccommon.DefaultDingType,"will setup worker: ", k.(string))
+						ccommon.CLogger.Info(ccommon.InitDingType,"will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
-						ccommon.CLogger.Error(ccommon.DefaultDingType,"creeative worker failed !!! workerInfo=",v)
+						ccommon.CLogger.Error(ccommon.InitDingType,"create worker failed !!! workerInfo=",v)
 					}
 				}
 				return true	
@@ -142,7 +149,7 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Info(ccommon.DefaultDingType,"will stop woker: ",k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Info(ccommon.InitDingType,"will stop woker: ",k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
