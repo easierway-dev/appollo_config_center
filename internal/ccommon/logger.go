@@ -44,6 +44,12 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
         namespace := DefaultNamespace
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
+	if AppConfiger.AppConfigMap != nil {
+		if _,ok := AppConfiger.AppConfigMap[appid];ok {
+			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
+			dingusers = AppConfiger.AppConfigMap[appid].DingUsers
+		} 		
+	}
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {

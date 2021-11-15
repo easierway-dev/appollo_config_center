@@ -1,2 +1,5 @@
+ding_keys=[]
+ding_users=[]
+[init]
 ding_keys=["de9b613437c2dd840ed8afbc6b976a6c60dac44aca81e0aa3301585216a03c7f"]
 ding_users=["15311489030"]
