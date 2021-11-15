@@ -66,6 +66,7 @@ type AppCfg struct {
 	DingKeys       []string `toml:"ding_keys"`
 	DingUsers	[]string `toml:"ding_users"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	ChklogRate float64 `toml:"log_rate"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
 
@@ -81,6 +82,7 @@ type ClusterInfo struct {
 type ConfigInfo struct {
 	DingKeys []string `toml:"ding_keys"`
 	DingUsers       []string `toml:"ding_users"`
+	ChklogRate float64 `toml:"log_rate"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
 }
 

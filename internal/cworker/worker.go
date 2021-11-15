@@ -123,8 +123,15 @@ func (cw *CWorker) Run(ctx context.Context){
 				ccommon.CLogger.Info(ccommon.DefaultDingType,cw.WkInfo.Cluster, "watch quit...")
 				return
 			case err := <-errorCh:
-
-				ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				chklograte := ccommon.AppConfiger.ChklogRate
+				if ccommon.AppConfiger.AppConfigMap != nil {
+					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
+						chklograte = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
+					}
+				}
+				if rand.Float64() < chklograte {
+					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				}
 			case update := <-watchCh:
 				skipped_keys := ""
 				if update.Namespace == ccommon.ABTest {

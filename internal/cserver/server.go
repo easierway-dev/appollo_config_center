@@ -85,7 +85,15 @@ func (s *AgolloServer) Update() {
 			    ccommon.CLogger.Info(ccommon.DefaultDingType,cluster, "watch quit...")
 			    return
 			case err := <-errorCh:
-				 ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				chklograte := ccommon.AppConfiger.ChklogRate
+				if ccommon.AppConfiger.AppConfigMap != nil {
+					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
+						chklograte = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
+					}
+				}
+				if rand.Float64() < chklograte {
+					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
+				}				
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""
@@ -133,7 +141,7 @@ func (s *AgolloServer) Watch() {
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
-						ccommon.CLogger.Error(ccommon.InitDingType,"creeative worker failed !!! workerInfo=",v)
+						ccommon.CLogger.Error(ccommon.InitDingType,"create worker failed !!! workerInfo=",v)
 					}
 				}
 				return true	
