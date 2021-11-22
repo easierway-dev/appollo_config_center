@@ -6,3 +6,8 @@ dsp_ali_cn="http://47.90.246.93:8500"
 dsp_hw_hk="http://47.90.246.93:8500"
 [usermap.apollo]
 token="0bcbd744e2c08203a384a740f5aa9ab13f7cc24c"
+[usermap.dsp]
+token="6f27190ea9ff6dd9f3819a2df069a3546bcc0928"
+[usermap.pioneer]
+token="ade2f9d8590139607b3fb4847c0d1224d3834366"
+
