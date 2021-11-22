@@ -8,6 +8,7 @@
 import requests
 import json,toml
 import time
+import argparse
 
 from apollo_client_api import *
 from opconsul import *
@@ -229,6 +230,14 @@ class InitApollo(object):
                             continue                
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='manual to this script')
+    parser.add_argument('--appid', type=str, default = "dsp")
+    parser.add_argument('--user', type=str, default = "apollo")
+
+    args = parser.parse_args()
+    appid = args.appid
+    inputuser = args.user
+
     appid = "dsp"
     inputuser = "apollo"
     initClient = InitApollo(user=inputuser,appid=appid)
