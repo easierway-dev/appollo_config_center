@@ -285,7 +285,7 @@ class PrivateApolloClient(RequestClient):
             print("create_namespace_items_key err", e)
             create_abtest_fail = True
         
-        for real_value in literal_eval(value) :
+        for real_value in literal_eval(value.strip()) :
             if "experiment" in real_value and "name" in  real_value["experiment"] :
                 if "layer" in real_value :
                     real_key = "%s_%s" % (real_value["layer"], real_value["experiment"]["name"])
