@@ -16,6 +16,14 @@ white = [ "nowin",]
 white = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
 
 [[mappingrules]]
+[mappingrules.rs]
+white = [ "rs\/",]
+
+[[mappingrules]]
+[mappingrules.make_money_dsp]
+white = [ "make_money_dsp",]
+
+[[mappingrules]]
 [mappingrules.drs]
 white = [ "drs", "modeldata"]
 

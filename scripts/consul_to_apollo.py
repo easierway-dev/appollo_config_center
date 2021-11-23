@@ -189,6 +189,12 @@ if __name__ == "__main__":
   final_conf_map = split_map_conf(source_conf_map, merge_map, mapping_rule)
 
   #abtest信息独立namespace存储
+  special_key_value = {
+    "abtesting":"abtest/abtest_info",
+    "dsp_bidforce":"config/mvdsp/BidForce",
+    "rtdsp_bidforce":"config/dsp-retarget/server/BidForce"
+  }
+  """
   abtest_key = "abtesting"
   abtest_value = "abtest/abtest_info"
   if "as" in final_conf_map :
@@ -199,6 +205,12 @@ if __name__ == "__main__":
     if abtest_value in final_conf_map["dsp"]["namespace"]["application"] :
       final_conf_map["dsp"]["namespace"]["application"].remove(abtest_value)
     final_conf_map["dsp"]["namespace"][abtest_key] = [abtest_value]
+  """
+  for ns, value in final_conf_map.items() :
+    for sns, snv in special_key_value.items() :
+        if snv in final_conf_map[ns]["namespace"]["application"] :
+            final_conf_map[ns]["namespace"]["application"].remove(snv)
+        final_conf_map[ns]["namespace"][sns] = [snv]
 
   with open(gen_conf_path, "w") as fw: 
     #file.write(json.dumps(defmap, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False))
