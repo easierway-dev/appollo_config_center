@@ -17,7 +17,7 @@ white = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
 
 [[mappingrules]]
 [mappingrules.rs]
-white = [ "rs\/",]
+white = [ "rs/",]
 
 [[mappingrules]]
 [mappingrules.make_money_dsp]
