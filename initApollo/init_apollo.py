@@ -43,7 +43,7 @@ class InitApollo(object):
         else :
             _user = "apollo"    
         if "usermap" in self.base_config_data and _user in self.base_config_data["usermap"]:
-             _token = self.base_config_data["usermap"][_user]["token"]
+             _token = self.base_config_data["usermap"][_appid]["token"]
         else :
             _token = "0bcbd744e2c08203a384a740f5aa9ab13f7cc24c" 
         if "timeout" in self.base_config_data:
