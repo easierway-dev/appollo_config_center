@@ -248,9 +248,9 @@ class PrivateApolloClient(RequestClient):
             return {}
 
 
-    def create_namespace_items_key_abtest(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
+    def create_namespace_items_key_json(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
         '''
-        新增abtest/abtest_info配置接口
+        新增abtest/abtest_info配置接口 json
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
         :param key: 配置的key，需和url中的key值一致。非properties格式，key固定为content
         :param value: 配置的value，长度不能超过20000个字符，非properties格式，value为文件全部内容
@@ -315,6 +315,69 @@ class PrivateApolloClient(RequestClient):
             return {}
         else :
             return {"status_code":200}
+
+    def create_namespace_items_key_toml(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
+        '''
+        新增bidforce配置接口
+        :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
+        :param key: 配置的key，需和url中的key值一致。非properties格式，key固定为content
+        :param value: 配置的value，长度不能超过20000个字符，非properties格式，value为文件全部内容
+        :param comment: 配置的备注,长度不能超过1024个字符
+        :param dataChangeCreatedBy: item的创建人，格式为域账号，也就是sso系统的User ID
+        :return:
+        '''
+        if len(comment) > self._commentlimit :
+            comment = comment[0:63]
+        create_abtest_fail = False
+        if dataChangeCreatedBy == "" :
+            dataChangeCreatedBy = self._user
+        __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items'.format(
+            portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName
+        )
+        
+        __data = {
+                "key":"consul_key",
+                "value":key.replace(".","/"),
+                "comment":comment,
+                "dataChangeCreatedBy":dataChangeCreatedBy
+            }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
+        try:
+            resp = self._request_post(url=__url, json_data=__data)
+            if resp.status_code is 200 :
+                print(resp.json())
+            else :
+                print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
+                create_abtest_fail = True
+        except BaseException as e:
+            print("create_namespace_items_key err", e)
+            create_abtest_fail = True
+        bidforce_config = toml.loads(value.strip())
+        if "BidForceDeviceType" in bidforce_config :
+            for real_key, value in bidforce_config["BidForceDeviceType"].items() :
+                real_value = bidforce_config["BidForceDeviceType"][real_key]
+                __data = {
+                        "key":real_key,
+                        "value":toml.dumps(real_value),
+                        "comment":comment,
+                        "dataChangeCreatedBy":dataChangeCreatedBy
+                    }
+                print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
+                try:
+                    resp = self._request_post(url=__url, json_data=__data)
+                    if resp.status_code is 200 :
+                        print(resp.json())
+                    else :
+                        print("%s: response code is %d, response detail: %s" %(sys._getframe().f_code.co_name, resp.status_code,resp.json()))
+                        create_abtest_fail &= True
+                except BaseException as e:
+                    print("create_namespace_items_key err", e)
+                    create_abtest_fail &= True
+        if create_abtest_fail :
+            return {}
+        else :
+            return {"status_code":200}
+
 
     def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
         '''

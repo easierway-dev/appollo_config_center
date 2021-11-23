@@ -98,7 +98,9 @@ class InitApollo(object):
                                                 print("noNeed to update !!!",getResp)
                                         else :
                                             if namespace == "abtesting" :
-                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                            elif namespace == "bidforce" :
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                             else :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                             if bool (create_namespace_items_key_resp) :
@@ -133,7 +135,9 @@ class InitApollo(object):
                                                     print("noNeed to update !!!",getResp)
                                             else :
                                                 if namespace == "abtesting" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                elif namespace == "bidforce" :
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 else :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 if bool (create_namespace_items_key_resp) :
@@ -177,7 +181,9 @@ class InitApollo(object):
                                                     print("noNeed to update !!!",getResp)
                                             else :
                                                 if namespace == "abtesting" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                elif namespace == "bidforce" :
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 else :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 if bool (create_namespace_items_key_resp) :
@@ -212,7 +218,9 @@ class InitApollo(object):
                                                         print("noNeed to update !!!",getResp)
                                                 else :
                                                     if namespace == "abtesting" :
-                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_abtest(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    elif namespace == "bidforce" :
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     else :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     if bool (create_namespace_items_key_resp) :
