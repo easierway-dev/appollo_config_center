@@ -26,6 +26,32 @@ type WorkInfo struct {
 	Tag string
 }
 
+type (
+	BidForce struct {
+		BidForceDevice map[string]*BidForceDeviceType `toml:"BidForceDeviceType"` // key="describe"
+
+		TargetAdxDevice map[string]*DeviceKV //key=adx
+	}
+	DeviceKV struct {
+		DeviceIds map[string]BidForceInfo //key=deviceId
+	}
+	BidForceDeviceType struct {
+		DeviceId    []string `toml:"DeviceId"`
+		DeviceIdMd5 []string `toml:"DeviceIdMd5"`
+		Adx         []string `toml:"Adx"`
+		BidForceInfo
+	}
+	BidForceInfo struct {
+		TargetCampaign  int64   `toml:"TargetCampaign"`
+		TargetTemplate  int32   `toml:"TargetTemplate"`
+		TargetTemplates []int32 `toml:"TargetTemplates"`
+		TargetPrice     float64 `toml:"TargetPrice"`
+		TargetRtToken   string  `toml:"TargetRtToken"`
+		TargetRtTriggerItem string   `toml:"TargetRtTriggerItem"`
+		User string
+	}
+)
+
 func (info *WorkInfo) Key() string {
   if info.Tag == "" {
     tag := ""
@@ -160,6 +186,37 @@ func (cw *CWorker) Run(ctx context.Context){
 						v, err := jsoniter.Marshal(abtest_valuelist)
 						if err != nil {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Marshal(abtest_valuelist) failed, err:", err)
+						} else {
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
+						}
+					}
+				} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
+					bidforce_valuemap := make(map[string]*BidForceDeviceType)
+					path := ""
+					for key, value := range update.NewValue {
+	          v, _ := value.(string)
+	          if ovalue, ok := update.OldValue[key]; ok {
+	          	ov, _ := ovalue.(string)
+	              if ov == v {
+	                skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
+	              }
+	          }
+						if key == "consul_key" {
+							path = value.(string)
+							continue
+						}
+						var bidforce_value BidForceDeviceType
+						err := jsoniter.Unmarshal([]byte(value.(string)), &bidforce_value)
+						if err == nil {
+							bidforce_valuemap[key] = bidforce_value
+						} else {
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(bidforce_value failed, err:", err)
+						}
+					}
+					if path != "" {
+						v, err := toml.encode(bidforce_valuemap)
+						if err != nil {
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.encode(bidforce_valuemap) failed, err:", err)
 						} else {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
 						}

@@ -23,6 +23,9 @@ const (
 
 const (
 	ABTest = "abtesting"
+	BidForceDsp = "dsp"
+	BidForceRtDsp = "rtdsp"
+	BidForcePioneer = "pioneer"
 	DefaultNamespace = "application"
 
 )
