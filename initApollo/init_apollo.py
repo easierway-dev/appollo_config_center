@@ -99,7 +99,7 @@ class InitApollo(object):
                                         else :
                                             if namespace == "abtesting" :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                            elif namespace == "bidforce" :
+                                            elif appid == "bidforce" :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                             else :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -136,7 +136,7 @@ class InitApollo(object):
                                             else :
                                                 if namespace == "abtesting" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                elif namespace == "bidforce" :
+                                                elif appid == "bidforce" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 else :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -182,7 +182,7 @@ class InitApollo(object):
                                             else :
                                                 if namespace == "abtesting" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                elif namespace == "bidforce" :
+                                                elif appid == "bidforce" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 else :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -219,7 +219,7 @@ class InitApollo(object):
                                                 else :
                                                     if namespace == "abtesting" :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
-                                                    elif namespace == "bidforce" :
+                                                    elif appid == "bidforce" :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     else :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))

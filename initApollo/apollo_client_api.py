@@ -250,7 +250,7 @@ class PrivateApolloClient(RequestClient):
 
     def create_namespace_items_key_json(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
         '''
-        新增abtest/abtest_info配置接口 json
+        新增abtest/abtest_info配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
         :param key: 配置的key，需和url中的key值一致。非properties格式，key固定为content
         :param value: 配置的value，长度不能超过20000个字符，非properties格式，value为文件全部内容
