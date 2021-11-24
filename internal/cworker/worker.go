@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-  "github.com/shima-park/agollo"
-  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
-  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+	"github.com/shima-park/agollo"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -164,13 +164,13 @@ func (cw *CWorker) Run(ctx context.Context){
 					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
 					for key, value := range update.NewValue {
-	          v, _ := value.(string)
-	          if ovalue, ok := update.OldValue[key]; ok {
-	          	ov, _ := ovalue.(string)
-	              if ov == v {
-	                skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
-	              }
-	          }
+						v, _ := value.(string)
+						if ovalue, ok := update.OldValue[key]; ok {
+							ov, _ := ovalue.(string)
+							if ov == v {
+								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
+							}
+						}
 						if key == "consul_key" {
 							path = value.(string)
 							continue
@@ -196,13 +196,13 @@ func (cw *CWorker) Run(ctx context.Context){
 					path := ""
 					bidforce_value := ""
 					for key, value := range update.NewValue {
-	          v, _ := value.(string)
-	          if ovalue, ok := update.OldValue[key]; ok {
-	          	ov, _ := ovalue.(string)
-	              if ov == v {
-	                skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
-	              }
-	          }
+						v, _ := value.(string)
+						if ovalue, ok := update.OldValue[key]; ok {
+							ov, _ := ovalue.(string)
+							if ov == v {
+								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
+							}
+						}
 						if key == "consul_key" {
 							path = value.(string)
 							continue
