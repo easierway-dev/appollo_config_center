@@ -5,7 +5,6 @@ import (
 	"sort"
 	"context"
 	"strings"
-	"bytes"
 
 	"github.com/BurntSushi/toml"
   "github.com/shima-park/agollo"
@@ -209,7 +208,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							continue
 						}
 						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
-							bidforce_value = bidforce_value + "\n" + strings.TrimSpace(value.(string))
+							bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
 						} else {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
 							continue
