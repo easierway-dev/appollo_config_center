@@ -6,7 +6,7 @@
 # @File    : apollo_client_api.py
 # @Description:
 import requests
-import json
+import json,toml
 import sys
 
 from ast import literal_eval
@@ -355,7 +355,9 @@ class PrivateApolloClient(RequestClient):
         bidforce_config = toml.loads(value.strip())
         if "BidForceDeviceType" in bidforce_config :
             for real_key, value in bidforce_config["BidForceDeviceType"].items() :
-                real_value = bidforce_config["BidForceDeviceType"][real_key]
+                real_value = {}
+                real_value["BidForceDeviceType"]={}
+                real_value["BidForceDeviceType"][real_key] = value
                 __data = {
                         "key":real_key,
                         "value":toml.dumps(real_value),
