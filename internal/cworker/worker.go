@@ -6,9 +6,10 @@ import (
 	"context"
 	"strings"
 
-  "github.com/shima-park/agollo"
-  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
-  "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+	"github.com/BurntSushi/toml"
+	"github.com/shima-park/agollo"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -25,6 +26,32 @@ type WorkInfo struct {
 	Namespace []string
 	Tag string
 }
+
+type (
+	BidForce struct {
+		BidForceDevice map[string]*BidForceDeviceType `toml:"BidForceDeviceType"` // key="describe"
+
+		TargetAdxDevice map[string]*DeviceKV //key=adx
+	}
+	DeviceKV struct {
+		DeviceIds map[string]BidForceInfo //key=deviceId
+	}
+	BidForceDeviceType struct {
+		DeviceId    []string `toml:"DeviceId"`
+		DeviceIdMd5 []string `toml:"DeviceIdMd5"`
+		Adx         []string `toml:"Adx"`
+		BidForceInfo
+	}
+	BidForceInfo struct {
+		TargetCampaign  int64   `toml:"TargetCampaign"`
+		TargetTemplate  int32   `toml:"TargetTemplate"`
+		TargetTemplates []int32 `toml:"TargetTemplates"`
+		TargetPrice     float64 `toml:"TargetPrice"`
+		TargetRtToken   string  `toml:"TargetRtToken"`
+		TargetRtTriggerItem string   `toml:"TargetRtTriggerItem"`
+		User string
+	}
+)
 
 func (info *WorkInfo) Key() string {
   if info.Tag == "" {
@@ -137,13 +164,13 @@ func (cw *CWorker) Run(ctx context.Context){
 					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
 					for key, value := range update.NewValue {
-	          v, _ := value.(string)
-	          if ovalue, ok := update.OldValue[key]; ok {
-	          	ov, _ := ovalue.(string)
-	              if ov == v {
-	                skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
-	              }
-	          }
+						v, _ := value.(string)
+						if ovalue, ok := update.OldValue[key]; ok {
+							ov, _ := ovalue.(string)
+							if ov == v {
+								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
+							}
+						}
 						if key == "consul_key" {
 							path = value.(string)
 							continue
@@ -163,6 +190,32 @@ func (cw *CWorker) Run(ctx context.Context){
 						} else {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
 						}
+					}
+				} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
+					var bidforce_valuemap = BidForce{}
+					path := ""
+					bidforce_value := ""
+					for key, value := range update.NewValue {
+						v, _ := value.(string)
+						if ovalue, ok := update.OldValue[key]; ok {
+							ov, _ := ovalue.(string)
+							if ov == v {
+								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
+							}
+						}
+						if key == "consul_key" {
+							path = value.(string)
+							continue
+						}
+						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
+							bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
+						} else {
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
+							continue
+						}
+					}
+					if path != "" {
+						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value)
 					}
 				} else {
 					for path, value := range update.NewValue {
@@ -194,7 +247,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent = fmt.Sprintf("new=%s",update.NewValue)
 				}
 				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
+				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
 			}
 		}
 	}(cw)

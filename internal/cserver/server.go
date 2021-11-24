@@ -1,6 +1,7 @@
 package cserver
 
 import (
+	"fmt"
 	"time"
 	"context"
 	"sync"
@@ -137,6 +138,7 @@ func (s *AgolloServer) Watch() {
 					if err == nil {
 						worker.Run(s.ctx)
 						ccommon.CLogger.Info(ccommon.InitDingType,"will setup worker: ", k.(string))
+						fmt.Println("will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
@@ -150,6 +152,7 @@ func (s *AgolloServer) Watch() {
 				if _,ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
 					ccommon.CLogger.Info(ccommon.InitDingType,"will stop woker: ",k.(string), "wait 3s to envalid  !!!")
+					fmt.Println("will stop worker: ", k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
