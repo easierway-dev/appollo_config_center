@@ -45,8 +45,8 @@ type (
 	}
 	BidForceInfo struct {
 		TargetCampaign  int64   `toml:"TargetCampaign"`
-		TargetTemplate  string   `toml:"TargetTemplate"`
-		TargetTemplates []string `toml:"TargetTemplates"`
+		TargetTemplate  int32   `toml:"TargetTemplate"`
+		TargetTemplates []int32 `toml:"TargetTemplates"`
 		TargetPrice     float64 `toml:"TargetPrice"`
 		TargetRtToken   string  `toml:"TargetRtToken"`
 		TargetRtTriggerItem string   `toml:"TargetRtTriggerItem"`
@@ -248,7 +248,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent = fmt.Sprintf("new=%s",update.NewValue)
 				}
 				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Info(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
+				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
 			}
 		}
 	}(cw)

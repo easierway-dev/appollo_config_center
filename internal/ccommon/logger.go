@@ -71,8 +71,8 @@ func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string), "info")
-	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+	//dingkeys,dingusers := GetDingInfo(args[0].(string), "info")
+	//cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
 	this.Runtime.Info(args)
 }
 
