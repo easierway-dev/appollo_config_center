@@ -206,19 +206,19 @@ func (cw *CWorker) Run(ctx context.Context){
 							continue
 						}
 						var bidforce_value BidForceDeviceType
-						err := jsoniter.Unmarshal([]byte(value.(string)), &bidforce_value)
-						if err == nil {
-							bidforce_valuemap[key] = bidforce_value
+						if _, err := toml.Decode(value.(string), &bidforce_value);err == nil {
+							bidforce_valuemap[key] = &bidforce_value
 						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(bidforce_value failed, err:", err)
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
 						}
 					}
 					if path != "" {
-						v, err := toml.encode(bidforce_valuemap)
+						var buf bytes.Buffer
+						err := toml.NewEncoder(&buf).Encode(bidforce_valuemap)
 						if err != nil {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.encode(bidforce_valuemap) failed, err:", err)
 						} else {
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, strings.TrimSpace(buf.String()))
 						}
 					}
 				} else {
