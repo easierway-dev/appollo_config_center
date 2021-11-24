@@ -97,7 +97,7 @@ class InitApollo(object):
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
-                                            if namespace == "abtesting" :
+                                            if appid == "abtest" :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                             elif appid == "bidforce" :
                                                 create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -134,7 +134,7 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                if namespace == "abtesting" :
+                                                if appid == "abtest" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 elif appid == "bidforce" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -180,7 +180,7 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                if namespace == "abtesting" :
+                                                if appid == "abtest" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                 elif appid == "bidforce" :
                                                     create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
@@ -217,7 +217,7 @@ class InitApollo(object):
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
-                                                    if namespace == "abtesting" :
+                                                    if appid == "abtest" :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
                                                     elif appid == "bidforce" :
                                                         create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
