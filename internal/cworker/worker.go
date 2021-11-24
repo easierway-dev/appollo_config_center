@@ -45,8 +45,8 @@ type (
 	}
 	BidForceInfo struct {
 		TargetCampaign  int64   `toml:"TargetCampaign"`
-		TargetTemplate  int32   `toml:"TargetTemplate"`
-		TargetTemplates []int32 `toml:"TargetTemplates"`
+		TargetTemplate  string   `toml:"TargetTemplate"`
+		TargetTemplates []string `toml:"TargetTemplates"`
 		TargetPrice     float64 `toml:"TargetPrice"`
 		TargetRtToken   string  `toml:"TargetRtToken"`
 		TargetRtTriggerItem string   `toml:"TargetRtTriggerItem"`
@@ -193,8 +193,9 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 				} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
-					bidforce_valuemap := make(map[string]*BidForceDeviceType)
+					var bidforce_valuemap = BidForce{}
 					path := ""
+					bidforce_value := ""
 					for key, value := range update.NewValue {
 	          v, _ := value.(string)
 	          if ovalue, ok := update.OldValue[key]; ok {
@@ -207,21 +208,15 @@ func (cw *CWorker) Run(ctx context.Context){
 							path = value.(string)
 							continue
 						}
-						var bidforce_value BidForceDeviceType
-						if _, err := toml.Decode(value.(string), &bidforce_value);err == nil {
-							bidforce_valuemap[key] = &bidforce_value
+						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
+							bidforce_value = bidforce_value + "\n" + strings.TrimSpace(value.(string))
 						} else {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
+							continue
 						}
 					}
 					if path != "" {
-						var buf bytes.Buffer
-						err := toml.NewEncoder(&buf).Encode(bidforce_valuemap)
-						if err != nil {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.encode(bidforce_valuemap) failed, err:", err)
-						} else {
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, strings.TrimSpace(buf.String()))
-						}
+						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value)
 					}
 				} else {
 					for path, value := range update.NewValue {
