@@ -161,7 +161,7 @@ func (cw *CWorker) Run(ctx context.Context){
 			case update := <-watchCh:
 				skipped_keys := ""
 				//if update.Namespace == ccommon.ABTest {
-				if strings.Contains(cw.WkInfo.AppID, ABTestAppid) {
+				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					abtest_valuelist := make([]*abtesting.AbInfo,0)
 					path := ""
 					for key, value := range update.NewValue {
@@ -193,7 +193,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 				//} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
-				} else if strings.Contains(cw.WkInfo.AppID, BidForceAppid) {
+				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 					var bidforce_valuemap = BidForce{}
 					path := ""
 					bidforce_value := ""
