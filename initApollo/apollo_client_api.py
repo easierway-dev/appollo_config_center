@@ -16,7 +16,7 @@ class RequestClient(object):
         self._timeout = timeout
         self._authorization = authorization
 
-    def _request_get(self, url, token=""):
+    def _request_get(self, url, token):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
@@ -28,7 +28,7 @@ class RequestClient(object):
         else:
             return requests.get(url=url, params=params, timeout=self._timeout)
 
-    def _request_put(self, url, json_data, token=""):
+    def _request_put(self, url, json_data, token):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
@@ -54,7 +54,7 @@ class RequestClient(object):
         else:
             return requests.delete(url=url, params=params, timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
-    def _request_post(self, url, json_data, token=""):
+    def _request_post(self, url, json_data, token):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
@@ -96,7 +96,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url, token)
+            resp = self._request_get(url=__url, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -126,7 +126,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -148,7 +148,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url, token)
+            resp = self._request_get(url=__url, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -186,7 +186,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -209,7 +209,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url, token)
+            resp = self._request_get(url=__url, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -244,7 +244,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_put(url=__url, json_data=__data, token)
+            resp = self._request_put(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 return {"status_code":200}
             else :
@@ -282,7 +282,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 print(resp.json())
             else :
@@ -309,7 +309,7 @@ class PrivateApolloClient(RequestClient):
                 }
             print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
             try:
-                resp = self._request_post(url=__url, json_data=__data, token)
+                resp = self._request_post(url=__url, json_data=__data, token=token)
                 if resp.status_code is 200 :
                     print(resp.json())
                 else :
@@ -350,7 +350,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 print(resp.json())
             else :
@@ -373,7 +373,7 @@ class PrivateApolloClient(RequestClient):
                     }
                 print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
                 try:
-                    resp = self._request_post(url=__url, json_data=__data, token)
+                    resp = self._request_post(url=__url, json_data=__data, token=token)
                     if resp.status_code is 200 :
                         print(resp.json())
                     else :
@@ -413,7 +413,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -447,7 +447,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data, token)
+            resp = self._request_post(url=__url, json_data=__data, token=token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
