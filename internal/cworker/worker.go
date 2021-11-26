@@ -193,7 +193,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 				//} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
-				} else strings.Contains(cw.WkInfo.AppID, BidForceAppid) {
+				} else if strings.Contains(cw.WkInfo.AppID, BidForceAppid) {
 					var bidforce_valuemap = BidForce{}
 					path := ""
 					bidforce_value := ""
