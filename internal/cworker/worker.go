@@ -160,10 +160,13 @@ func (cw *CWorker) Run(ctx context.Context){
 				}
 			case update := <-watchCh:
 				skipped_keys := ""
-				if update.Namespace == ccommon.ABTest {
-					abtest_valuelist := make([]*abtesting.AbInfo,0)
+				//if update.Namespace == ccommon.ABTest {
+				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					path := ""
+					abtestvalue := ""
+					i := 0
 					for key, value := range update.NewValue {
+						i = i + 1
 						v, _ := value.(string)
 						if ovalue, ok := update.OldValue[key]; ok {
 							ov, _ := ovalue.(string)
@@ -178,20 +181,20 @@ func (cw *CWorker) Run(ctx context.Context){
 						var abtest_value abtesting.AbInfo
 						err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_value)
 						if err == nil {
-							abtest_valuelist = append(abtest_valuelist, &abtest_value)
+							if i < len(update.NewValue) {
+								abtestvalue = abtestvalue + value.(string) + ",\n"
+							} else {
+								abtestvalue = abtestvalue + value.(string) + "\n"
+							}
 						} else {
 							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(abtest_value failed, err:", err)
 						}
 					}
 					if path != "" {
-						v, err := jsoniter.Marshal(abtest_valuelist)
-						if err != nil {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Marshal(abtest_valuelist) failed, err:", err)
-						} else {
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, string(v))
-						}
+						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+abtestvalue+"]")
 					}
-				} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
+				//} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
+				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 					var bidforce_valuemap = BidForce{}
 					path := ""
 					bidforce_value := ""

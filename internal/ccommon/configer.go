@@ -22,6 +22,8 @@ const (
 )
 
 const (
+	ABTestAppid = "abtest"
+	BidForceAppid = "bidforce"
 	ABTest = "abtesting"
 	BidForceDsp = "dsp"
 	BidForceRtDsp = "rtdsp"
