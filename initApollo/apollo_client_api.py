@@ -28,7 +28,7 @@ class RequestClient(object):
         else:
             return requests.get(url=url, params=params, timeout=self._timeout)
 
-    def _request_put(self, url, json_data, token):
+    def _request_put(self, url, json_data, token=""):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
@@ -41,7 +41,7 @@ class RequestClient(object):
         else:
             return requests.put(url=url, data=json.dumps(json_data), timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
-    def _request_delete(self, url, params={}, token):
+    def _request_delete(self, url, params={}, token=""):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
@@ -54,7 +54,7 @@ class RequestClient(object):
         else:
             return requests.delete(url=url, params=params, timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
-    def _request_post(self, url, json_data, token):
+    def _request_post(self, url, json_data, token=""):
         if token.strip() != "" :
             self._authorization = token
         if self._authorization:
