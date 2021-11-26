@@ -16,7 +16,9 @@ class RequestClient(object):
         self._timeout = timeout
         self._authorization = authorization
 
-    def _request_get(self, url):
+    def _request_get(self, url, token=""):
+        if token.strip() != "" :
+            self._authorization = token
         if self._authorization:
             return requests.get(
                 url=url,
@@ -26,7 +28,9 @@ class RequestClient(object):
         else:
             return requests.get(url=url, params=params, timeout=self._timeout)
 
-    def _request_put(self, url, json_data):
+    def _request_put(self, url, json_data, token):
+        if token.strip() != "" :
+            self._authorization = token
         if self._authorization:
             return requests.put(
                 url=url,
@@ -37,7 +41,9 @@ class RequestClient(object):
         else:
             return requests.put(url=url, data=json.dumps(json_data), timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
-    def _request_delete(self, url, params={}):
+    def _request_delete(self, url, params={}, token):
+        if token.strip() != "" :
+            self._authorization = token
         if self._authorization:
             return requests.delete(
                 url=url,
@@ -48,8 +54,9 @@ class RequestClient(object):
         else:
             return requests.delete(url=url, params=params, timeout=self._timeout, headers={"Content-Type":"application/json;charset=UTF-8"})
 
-    def _request_post(self, url, json_data):
-        print(self._authorization)
+    def _request_post(self, url, json_data, token):
+        if token.strip() != "" :
+            self._authorization = token
         if self._authorization:
             return requests.post(
                 url=url,
@@ -77,7 +84,7 @@ class PrivateApolloClient(RequestClient):
         self._user = user
         self._commentlimit = 64
 
-    def get_cluster(self, appid='dsp', clusterName='dsp_ali_vg'):
+    def get_cluster(self, appid='dsp', clusterName='dsp_ali_vg', token=""):
         '''
         读取cluster
         :param appid: Cluster所属的AppId
@@ -89,7 +96,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url)
+            resp = self._request_get(url=__url, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -99,7 +106,7 @@ class PrivateApolloClient(RequestClient):
             print("get_cluster err", e)
             return {}
 
-    def create_cluster(self, appid='dsp', clusterName='dsp_ali_vg', dataChangeCreatedBy=""):
+    def create_cluster(self, appid='dsp', clusterName='dsp_ali_vg', dataChangeCreatedBy="", token=""):
         '''
         新增cluster
         :param appid: Cluster所属的AppId
@@ -119,7 +126,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -129,7 +136,7 @@ class PrivateApolloClient(RequestClient):
             print("creat_cluster err", e)
             return {}
 
-    def get_namespace(self, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application'):
+    def get_namespace(self, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', token=""):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -141,7 +148,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url)
+            resp = self._request_get(url=__url, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -151,7 +158,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace err", e)
             return {}
 
-    def create_namespace(self, appid='dsp', namespaceName='application', format='properties', isPublic=False, dataChangeCreatedBy="", comment=""):
+    def create_namespace(self, appid='dsp', namespaceName='application', format='properties', isPublic=False, dataChangeCreatedBy="", comment="", token=""):
         '''
         新增namespace
         :param appid: Namespace所属的AppId
@@ -179,7 +186,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -189,7 +196,7 @@ class PrivateApolloClient(RequestClient):
             print("creat_namespace err", e)
             return {}
 
-    def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application'):
+    def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', token=""):
         '''
         读取配置接口
         :param namespaceName: 所管理的Namespace的名称
@@ -202,7 +209,7 @@ class PrivateApolloClient(RequestClient):
         )
         print("%s: %s" %(sys._getframe().f_code.co_name, __url))
         try:
-            resp = self._request_get(url=__url)
+            resp = self._request_get(url=__url, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -212,7 +219,7 @@ class PrivateApolloClient(RequestClient):
             print("get_namespace_items_key err", e)
             return {}
 
-    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", comment=""):
+    def update_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", comment="", token=""):
         '''
         修改配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -237,7 +244,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_put(url=__url, json_data=__data)
+            resp = self._request_put(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 return {"status_code":200}
             else :
@@ -248,7 +255,7 @@ class PrivateApolloClient(RequestClient):
             return {}
 
 
-    def create_namespace_items_key_json(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
+    def create_namespace_items_key_json(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment="", token=""):
         '''
         新增abtest/abtest_info配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -275,7 +282,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 print(resp.json())
             else :
@@ -302,7 +309,7 @@ class PrivateApolloClient(RequestClient):
                 }
             print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
             try:
-                resp = self._request_post(url=__url, json_data=__data)
+                resp = self._request_post(url=__url, json_data=__data, token)
                 if resp.status_code is 200 :
                     print(resp.json())
                 else :
@@ -316,7 +323,7 @@ class PrivateApolloClient(RequestClient):
         else :
             return {"status_code":200}
 
-    def create_namespace_items_key_toml(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
+    def create_namespace_items_key_toml(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment="", token=""):
         '''
         新增bidforce配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -343,7 +350,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 print(resp.json())
             else :
@@ -366,7 +373,7 @@ class PrivateApolloClient(RequestClient):
                     }
                 print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
                 try:
-                    resp = self._request_post(url=__url, json_data=__data)
+                    resp = self._request_post(url=__url, json_data=__data, token)
                     if resp.status_code is 200 :
                         print(resp.json())
                     else :
@@ -381,7 +388,7 @@ class PrivateApolloClient(RequestClient):
             return {"status_code":200}
 
 
-    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment=""):
+    def create_namespace_items_key(self, key, value, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeCreatedBy="", comment="", token=""):
         '''
         新增配置接口
         :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
@@ -406,7 +413,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :
@@ -416,7 +423,7 @@ class PrivateApolloClient(RequestClient):
             print("create_namespace_items_key err", e)
             return {}
 
-    def releases(self, releaseTitle, releaseComment, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', releasedBy=""):
+    def releases(self, releaseTitle, releaseComment, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', releasedBy="", token=""):
         '''
         发布配置接口
         :param releaseTitle: 此次发布的标题，长度不能超过64个字符
@@ -440,7 +447,7 @@ class PrivateApolloClient(RequestClient):
             }
         print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
         try:
-            resp = self._request_post(url=__url, json_data=__data)
+            resp = self._request_post(url=__url, json_data=__data, token)
             if resp.status_code is 200 :
                 return resp.json()
             else :

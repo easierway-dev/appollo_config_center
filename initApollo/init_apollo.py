@@ -54,6 +54,12 @@ class InitApollo(object):
         self._waittime = 5    
         self.PrivateApolloClient = PrivateApolloClient( _portaddr, _user, _token, _appid, _env, _timeout)
 
+    def get_token(self, appid):
+        token = ""
+        if "usermap" in self.base_config_data and appid in self.base_config_data["usermap"]:
+             token = self.base_config_data["usermap"][appid]["token"]
+        return token
+
     def wait_update(self):
         time.sleep(self._waittime)
         
@@ -69,12 +75,12 @@ class InitApollo(object):
                         print("init consul:%s connection failed" %(cluster))
                         continue
                     #cluster已经创建
-                    if bool(self.PrivateApolloClient.get_cluster(appid, cluster)) :
+                    if bool(self.PrivateApolloClient.get_cluster(appid, cluster, token=self.get_token(appid))) :
                         #不使用默认namespace=application
                         if "namespace" in clusters : 
                             for namespace, consulkeylist in clusters["namespace"].items():
                                 #namespace已经创建
-                                get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace, token=self.get_token(appid))
                                 if bool(get_namespace_resp) :
                                     for key in consulkeylist :
                                         #value = operateConsul._getconsul(key.replace(".","/"))
@@ -84,12 +90,12 @@ class InitApollo(object):
                                         if value == "" and skipNull or value == "error":
                                             print("consul key=%s, will skip" %(key))
                                             continue
-                                        getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
+                                        getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace, token=self.get_token(appid))
                                         if bool(getResp) :
                                             if "value" in getResp :
                                                 old_value = getResp["value"] 
                                             if old_value != value :
-                                                update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 if bool (update_namespace_items_key_resp) :
                                                     key_num += 1
                                                 else :
@@ -97,20 +103,20 @@ class InitApollo(object):
                                             else :
                                                 print("noNeed to update !!!",getResp)
                                         else :
-                                            if appid == "abtest" :
-                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                            if appid == "m_abtest" or appid == "dsp_abtest" :
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                             elif appid == "bidforce" :
-                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                             else :
-                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                             if bool (create_namespace_items_key_resp) :
                                                 key_num += 1
                                             else :
                                                 print("create %s_%s_%s_%s failed" %(appid,cluster,namespace,key))
                                 else :
                                     #namespace创建
-                                    if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
-                                        self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                    if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace), token=self.get_token(appid))) :
+                                        self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace, token=self.get_token(appid))
                                         self.wait_update()
                                         namespace_num += 1
                                         for key in consulkeylist :
@@ -120,13 +126,13 @@ class InitApollo(object):
                                             if value == "" and skipNull or value == "error":
                                                 print("consul key=%s, will skip" %(key))
                                                 continue
-                                            getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
+                                            getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace, token=self.get_token(appid))
                                             old_value = ""
                                             if bool(getResp) :
                                                 if "value" in getResp :
                                                     old_value = getResp["value"]
                                                 if old_value != value :
-                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                     if bool(update_namespace_items_key_resp) :
                                                         key_num += 1
                                                     else :
@@ -134,30 +140,30 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                if appid == "abtest" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                if appid == "m_abtest" or appid == "dsp_abtest" :
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 elif appid == "bidforce" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 else :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 if bool (create_namespace_items_key_resp) :
                                                     key_num += 1
                                                 else :
                                                     print("create %s_%s_%s_%s failed" %(appid,cluster,namespace,key))                                                    
                                     else :
                                         print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
-                                self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace, token=self.get_token(appid))
                         else :
                             print("appid:%s namespace config not find failed" %(appid))
                     else :
                         #cluster创建
-                        if bool(self.PrivateApolloClient.create_cluster(appid, cluster)) :
+                        if bool(self.PrivateApolloClient.create_cluster(appid, cluster, token=self.get_token(appid))) :
                             cluster_num += 1
                             #不使用默认namespace=application
                             if "namespace" in clusters : 
                                 for namespace, consulkeylist in clusters["namespace"].items():
                                     #namespace已经创建
-                                    get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace)
+                                    get_namespace_resp = self.PrivateApolloClient.get_namespace(appid, cluster,namespace, token=self.get_token(appid))
                                     if bool(get_namespace_resp) :
                                         for key in consulkeylist :
                                             value = operateConsul._getconsul(key)
@@ -166,13 +172,13 @@ class InitApollo(object):
                                             if value == "" and skipNull or value == "error":
                                                 print("consul key=%s, will skip" %(key))
                                                 continue
-                                            getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
+                                            getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace, token=self.get_token(appid))
                                             old_value = ""
                                             if bool(getResp) :
                                                 if "value" in getResp :
                                                     old_value = getResp["value"]
                                                 if old_value != value :
-                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                     if bool(update_namespace_items_key_resp) :
                                                         key_num += 1
                                                     else :
@@ -180,20 +186,20 @@ class InitApollo(object):
                                                 else :
                                                     print("noNeed to update !!!",getResp)
                                             else :
-                                                if appid == "abtest" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                if appid == "m_abtest" or appid == "dsp_abtest" :
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 elif appid == "bidforce" :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 else :
-                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                 if bool (create_namespace_items_key_resp) :
                                                     key_num += 1
                                                 else :
                                                     print("create %s_%s_%s_%s failed" %(appid,cluster,namespace,key))
                                     else :
                                         #namespace创建
-                                        if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace))) :
-                                            self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                        if bool(self.PrivateApolloClient.create_namespace(appid, namespace,comment="create %s_%s" %(appid,namespace), token=self.get_token(appid))) :
+                                            self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace, token=self.get_token(appid))
                                             self.wait_update()
                                             namespace_num += 1
                                             for key in consulkeylist :
@@ -203,13 +209,13 @@ class InitApollo(object):
                                                 if value == "" and skipNull or value == "error":
                                                     print("consul key=%s, will skip" %(key))
                                                     continue
-                                                getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace)
+                                                getResp = self.PrivateApolloClient.get_namespace_items_key(key,appid,cluster,namespace, token=self.get_token(appid))
                                                 old_value = ""
                                                 if bool(getResp) :
                                                     if "value" in getResp :
                                                         old_value = getResp["value"]
                                                     if old_value != value :
-                                                        update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        update_namespace_items_key_resp = self.PrivateApolloClient.update_namespace_items_key(key, value,appid,cluster,namespace,comment="update %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                         if bool (update_namespace_items_key_resp) :
                                                             key_num += 1
                                                         else :
@@ -217,19 +223,19 @@ class InitApollo(object):
                                                     else :
                                                         print("noNeed to update !!!",getResp)
                                                 else :
-                                                    if appid == "abtest" :
-                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                    if appid == "m_abtest" or appid == "dsp_abtest" :
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_json(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                     elif appid == "bidforce" :
-                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key_toml(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                     else :
-                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key))
+                                                        create_namespace_items_key_resp = self.PrivateApolloClient.create_namespace_items_key(key, value,appid,cluster,namespace,comment="create %s_%s_%s_%s" %(appid,cluster,namespace,key), token=self.get_token(appid))
                                                     if bool (create_namespace_items_key_resp) :
                                                         key_num += 1
                                                     else :
                                                         print("create %s_%s_%s_%s failed" %(appid,cluster,namespace,key))                                                        
                                         else :
                                             print("create_namespace appid_%s cluster_%s namespace_%s failed" %(appid, cluster,namespace))
-                                    self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace)
+                                    self.PrivateApolloClient.releases("release", "release appid:%s cluster:%s"%(appid,cluster),appid, cluster,namespace, token=self.get_token(appid))
                             else :
                                 print("appid:%s namespace config not find" %(appid))
                                 continue        
