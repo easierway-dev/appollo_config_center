@@ -204,6 +204,15 @@ class PrivateApolloClient(RequestClient):
         :param key: 配置对应的key名称
         :return:
         '''
+        #目前apollo不支持key中包含/的查询
+        namespace_json = {}
+        if "/" in key :
+            namespace_json = self.get_namespace(appid=appid, clusterName=clusterName, namespaceName=namespaceName, token=token)
+        if "items" in namespace_json:
+            for i, val in enumerate(namespace_json["items"]):
+                if "key" in val and val["key"] == key :
+                    return val
+
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key.replace("/","\/")
         )
