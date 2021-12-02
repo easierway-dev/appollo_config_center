@@ -235,7 +235,7 @@ class PrivateApolloClient(RequestClient):
         #目前apollo不支持key中包含/的查询
         namespace_json = {}
         if "/" in key :
-            self.delete_namespace_items_key(key, appid=appid, clusterName=clusterName, namespaceName=namespaceName, dataChangeLastModifiedBy=dataChangeLastModifiedBy, token=token)
+            #self.delete_namespace_items_key(key, appid=appid, clusterName=clusterName, namespaceName=namespaceName, dataChangeLastModifiedBy="apollo", token=token)
             namespace_json = self.get_namespace(appid=appid, clusterName=clusterName, namespaceName=namespaceName, token=token)
         if "items" in namespace_json:
             for i, val in enumerate(namespace_json["items"]):

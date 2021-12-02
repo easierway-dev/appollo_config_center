@@ -110,16 +110,18 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 			}
 			if dyAgoCfg.ClusterConfig != nil && dyAgoCfg.ClusterConfig.ClusterMap != nil {
 				if _,ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster];ok {
-					consulAddr := dyAgoCfg.ClusterConfig.ClusterMap[cluster].ConsulAddr
 					if value == "" {
 						//ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
-						fmt.Println("value is nil, will not update consul!!! consul_addr[",consulAddr,"],key[",key,"]\n")
+						fmt.Println("value is nil, will not update consul!!! cluster[",cluster,"],key[",key,"]\n")
 						return
 					}
+					consulAddrList := dyAgoCfg.ClusterConfig.ClusterMap[cluster].ConsulAddr
 					//err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
-					err := cconsul.WriteOne(consulAddr, key, value)
-					if err != nil {
-						ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
+					for _,consulAddr := range consulAddrList {
+						err := cconsul.WriteOne(consulAddr, key, value)
+						if err != nil {
+							ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
+						}
 					}
 				} else {
 					ccommon.CLogger.Warn(ccommon.DefaultDingType,"cluster:",cluster,"not in  ccommon.DyAgolloConfiger[",namespace,"].ClusterConfig")
@@ -160,7 +162,6 @@ func (cw *CWorker) Run(ctx context.Context){
 				}
 			case update := <-watchCh:
 				skipped_keys := ""
-				//if update.Namespace == ccommon.ABTest {
 				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					path := ""
 					abtestvalue := ""
@@ -193,7 +194,6 @@ func (cw *CWorker) Run(ctx context.Context){
 					if path != "" {
 						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+abtestvalue+"]")
 					}
-				//} else if update.Namespace == ccommon.BidForceRtDsp || update.Namespace == ccommon.BidForceDsp || update.Namespace == ccommon.BidForcePioneer {
 				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 					var bidforce_valuemap = BidForce{}
 					path := ""
@@ -233,7 +233,8 @@ func (cw *CWorker) Run(ctx context.Context){
 						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v) 
 					}
 				}
-				updatecontent := ""			
+				updatecontent := ""
+				bidforecontent := ""			
 				if len(update.NewValue) == 0 {
 					updatecontent = fmt.Sprintf("clear_config or create_namesplace:%s[%s]",cw.WkInfo.Cluster,update.Namespace)
 				}
@@ -244,13 +245,17 @@ func (cw *CWorker) Run(ctx context.Context){
 						} else {
 							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, "", v)
 						}
+						bidforecontent = fmt.Sprintf("key=%s\n", k)
 					}
 				}
 				if updatecontent == "" {
-					updatecontent = fmt.Sprintf("new=%s",update.NewValue)
+					updatecontent = fmt.Sprintf("delelte key=%s",skipped_keys)
+				}
+				if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) && bidforecontent != "" {
+					updatecontent = bidforecontent
 				}
 				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Warn(cw.WkInfo.AppID,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nupdatecontent:(",updatecontent,") \nerror:(",update.Error,")\n")
+				ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
 			}
 		}
 	}(cw)
