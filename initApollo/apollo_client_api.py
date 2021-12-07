@@ -196,6 +196,34 @@ class PrivateApolloClient(RequestClient):
             print("creat_namespace err", e)
             return {}
 
+    def delete_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', dataChangeLastModifiedBy="", token=""):
+        '''
+        删除配置接口
+        :param namespaceName: 所管理的Namespace的名称，如果是非properties格式，需要加上后缀名，如sample.yml
+        :param key: 配置的key，需和url中的key值一致。非properties格式，key固定为content
+        :param dataChangeLastModifiedBy: item的修改人，格式为域账号，也就是sso系统的User ID
+        :return:
+        '''
+        __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}?operator={operator}'.format(
+            portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key, operator=dataChangeLastModifiedBy
+        )
+        __data = {
+                "key":"content",
+                "operator":dataChangeLastModifiedBy
+            }
+        print("%s: %s %s" %(sys._getframe().f_code.co_name, __url,__data))
+        try:
+            resp = self._request_delete(url=__url, params=__data, token=token)
+            if resp.status_code is 200 :
+                return {"status_code":200}
+            else :
+                print("%s: response code is %d" %(sys._getframe().f_code.co_name, resp.status_code))
+                return {}
+        except BaseException as e:
+            print("delete_namespace_items_key err", e)
+            return {}
+
+
     def get_namespace_items_key(self, key, appid='dsp', clusterName='dsp_ali_vg', namespaceName='application', token=""):
         '''
         读取配置接口
@@ -204,6 +232,16 @@ class PrivateApolloClient(RequestClient):
         :param key: 配置对应的key名称
         :return:
         '''
+        #目前apollo不支持key中包含/的查询
+        namespace_json = {}
+        if "/" in key :
+            #self.delete_namespace_items_key(key, appid=appid, clusterName=clusterName, namespaceName=namespaceName, dataChangeLastModifiedBy="apollo", token=token)
+            namespace_json = self.get_namespace(appid=appid, clusterName=clusterName, namespaceName=namespaceName, token=token)
+        if "items" in namespace_json:
+            for i, val in enumerate(namespace_json["items"]):
+                if "key" in val and val["key"] == key :
+                    return val
+
         __url = '{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key}'.format(
             portal_address=self._portal_address, env=self._env, appId=appid, clusterName=clusterName, namespaceName=namespaceName, key=key.replace("/","\/")
         )

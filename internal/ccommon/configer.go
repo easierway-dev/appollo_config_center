@@ -84,7 +84,7 @@ type AppClusterInfo struct {
 }
 
 type ClusterInfo struct {
-	ConsulAddr string `toml:"consul_addr"`
+	ConsulAddr []string `toml:"consul_addr"`
 }
 
 type ConfigInfo struct {
