@@ -13,6 +13,10 @@ white = [ "nowin",]
 
 [[mappingrules]]
 [mappingrules.rtdsp]
+white = [ "retargeting_dsp"]
+
+[[mappingrules]]
+[mappingrules.oldrtdsp]
 white = [ "rtdsp", "dsp-retarget", "rtrs", "RTRS",]
 
 [[mappingrules]]

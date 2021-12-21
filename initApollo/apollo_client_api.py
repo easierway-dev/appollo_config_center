@@ -341,7 +341,7 @@ class PrivateApolloClient(RequestClient):
                 continue
             __data = {
                     "key":real_key,
-                    "value":json.dumps(real_value),
+                    "value":json.dumps(real_value, sort_keys=True, indent=4, separators=(',', ':'),ensure_ascii=False),
                     "comment":comment,
                     "dataChangeCreatedBy":dataChangeCreatedBy
                 }
