@@ -1,4 +1,4 @@
-ipport = "ad7aea494e207499ca131efd2b8c54ca-1053202897.ap-southeast-1.elb.amazonaws.com:8080"
+ipport = "172.31.22.145:8080"
 appid = "global_config"
 cluster = "default"
 namespace = ["application"]
