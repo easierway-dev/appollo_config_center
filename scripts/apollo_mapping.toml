@@ -4,6 +4,10 @@
 white = [ "retargeting_dsp"]
 
 [[mappingrules]]
+[mappingrules.pioneer]
+white = [ "pioneer"]
+
+[[mappingrules]]
 [mappingrules.dmp]
 white = [ "dmp",]
 

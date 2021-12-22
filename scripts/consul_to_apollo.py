@@ -192,7 +192,8 @@ if __name__ == "__main__":
   special_key_value = {
     "abtesting":"abtest/abtest_info",
     "dsp_bidforce":"config/mvdsp/BidForce",
-    "rtdsp_bidforce":"config/dsp-retarget/server/BidForce"
+    "rtdsp_bidforce":"config/dsp-retarget/server/BidForce",
+    "m_bidforce":"config/pioneer/direct_recall"
   }
   """
   abtest_key = "abtesting"
