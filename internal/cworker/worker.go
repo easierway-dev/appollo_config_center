@@ -105,7 +105,7 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 				}
 			}
 			if !enUpdate {
-				ccommon.CLogger.Info(appid, "is not permit to update consul")
+				ccommon.CLogger.Warn(appid, "is not permit to update consul")
 				return
 			}
 			if dyAgoCfg.ClusterConfig != nil && dyAgoCfg.ClusterConfig.ClusterMap != nil {
@@ -234,7 +234,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					}
 				}
 				updatecontent := ""
-				bidforecontent := ""			
+				updatekey := ""		
 				if len(update.NewValue) == 0 {
 					updatecontent = fmt.Sprintf("clear_config or create_namesplace:%s[%s]",cw.WkInfo.Cluster,update.Namespace)
 				}
@@ -245,14 +245,14 @@ func (cw *CWorker) Run(ctx context.Context){
 						} else {
 							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, "", v)
 						}
-						bidforecontent = fmt.Sprintf("key=%s\n", k)
+						updatekey = fmt.Sprintf("key=%s\n", k)
 					}
 				}
 				if updatecontent == "" {
 					updatecontent = fmt.Sprintf("delelte key=%s",skipped_keys)
 				}
-				if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) && bidforecontent != "" {
-					updatecontent = bidforecontent
+				if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); ! find && updatekey != "" {
+					updatecontent = updatekey
 				}
 				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
 				ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
