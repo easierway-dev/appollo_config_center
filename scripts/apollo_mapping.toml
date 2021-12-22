@@ -1,5 +1,9 @@
 #white指白名单,black指黑名单
 [[mappingrules]]
+[mappingrules.rtdsp]
+white = [ "retargeting_dsp"]
+
+[[mappingrules]]
 [mappingrules.dmp]
 white = [ "dmp",]
 
@@ -10,10 +14,6 @@ white = [ "juno",]
 [[mappingrules]]
 [mappingrules.nowin]
 white = [ "nowin",]
-
-[[mappingrules]]
-[mappingrules.rtdsp]
-white = [ "retargeting_dsp"]
 
 [[mappingrules]]
 [mappingrules.oldrtdsp]
