@@ -93,7 +93,7 @@ rtdsp_bidforce = [ "config/dsp-retarget/server/BidForce",]
 
 [dmp.namespace]
 m_bidforce = [ "config/pioneer/direct_recall",]
-application = [ "config/dmp-server/bes_media_rta", "config/dmp-server/pkg_dict", "config/dmp-server/server_v2", "config/dmp-sync", "config/dsp-retarget/dmp-server", "mrpc/dmp-server", "mrpc/dmp-sync", "mrpc/dmp_client", "config/dmp-server/logic_audiences", "config/dmp-server/server", "config/dmp-server/tencent_ad_rta", "config/dsp-retarget/dmp-user-journey", "config/gatewaycommon/DmpClient", "config/gatewaycommon/adx/DmpClient", "config/gatewaycommon/dsp/DmpClient", "ops/release/dmp_server",]
+application = [ "config/dmp-server/bes_media_rta", "config/dmp-server/logic_audiences", "config/dmp-server/pkg_dict", "config/dmp-server/server_v2", "config/dmp-sync", "config/dsp-retarget/dmp-server", "mrpc/dmp-server", "mrpc/dmp-sync", "mrpc/dmp_client", "config/dmp-server/server", "config/dmp-server/tencent_ad_rta", "config/dsp-retarget/dmp-user-journey", "config/gatewaycommon/DmpClient", "config/gatewaycommon/adx/DmpClient", "config/gatewaycommon/dsp/DmpClient", "ops/release/dmp_server",]
 abtesting = [ "abtest/abtest_info",]
 dsp_bidforce = [ "config/mvdsp/BidForce",]
 rtdsp_bidforce = [ "config/dsp-retarget/server/BidForce",]
