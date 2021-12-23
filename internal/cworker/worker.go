@@ -10,6 +10,7 @@ import (
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/chttp"	
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -95,19 +96,6 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 			namespace = ccommon.DefaultNamespace
 		}
 		if dyAgoCfg,ok := ccommon.DyAgolloConfiger[namespace];ok {
-			enUpdate := false
-			if dyAgoCfg.AppConfig != nil {
-				enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
-				if dyAgoCfg.AppConfig.AppConfigMap != nil {
-					if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
-						enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
-					}
-				}
-			}
-			if !enUpdate {
-				ccommon.CLogger.Warn(appid, "is not permit to update consul")
-				return
-			}
 			if dyAgoCfg.ClusterConfig != nil && dyAgoCfg.ClusterConfig.ClusterMap != nil {
 				if _,ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster];ok {
 					if value == "" {
@@ -121,7 +109,7 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 						err := cconsul.WriteOne(consulAddr, key, value)
 						if err != nil {
 							ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
-						}
+						} 
 					}
 				} else {
 					ccommon.CLogger.Warn(ccommon.DefaultDingType,"cluster:",cluster,"not in  ccommon.DyAgolloConfiger[",namespace,"].ClusterConfig")
@@ -139,6 +127,41 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 		ccommon.CLogger.Warn(ccommon.DefaultDingType,"ccommon.DyAgolloConfiger = nil")
 	}
 	return
+}
+
+func GetAppInfo(appid, namespace string) {
+	enUpdate := false
+	accessToken := ""
+	if ccommon.DyAgolloConfiger != nil {
+		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
+			namespace = ccommon.DefaultNamespace
+		}
+		if dyAgoCfg,ok := ccommon.DyAgolloConfiger[namespace];ok {
+			if dyAgoCfg.AppConfig != nil {
+				enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
+				if dyAgoCfg.AppConfig.AppConfigMap != nil {
+					if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
+						enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+						accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
+					}
+				}
+			}
+		}
+	}
+	return enUpdate, accessToken
+}
+
+func GetModifyInfo(nsinfo interface{}, key string) {
+	modifier := ""
+	if itemsList,find := nsinfo["items"]; find {
+		for _,item := range itemsList {
+			if k,find := item["key"]; find && key == k {
+				modifier = item["dataChangeLastModifiedBy"]
+				return modifier
+			}
+		} 
+	}
+	return modifier
 }
 
 //work run
@@ -161,101 +184,132 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
-				skipped_keys := ""
-				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
-					path := ""
-					abtestvalue := ""
-					i := 0
-					for key, value := range update.NewValue {
-						i = i + 1
-						v, _ := value.(string)
-						if ovalue, ok := update.OldValue[key]; ok {
-							ov, _ := ovalue.(string)
-							if ov == v {
-								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
-							}
-						}
-						if key == "consul_key" {
-							path = value.(string)
-							continue
-						}
-						var abtest_value abtesting.AbInfo
-						err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_value)
-						if err == nil {
-							if i < len(update.NewValue) {
-								abtestvalue = abtestvalue + value.(string) + ",\n"
-							} else {
-								abtestvalue = abtestvalue + value.(string) + "\n"
-							}
-						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(abtest_value failed, err:", err)
-						}
-					}
-					if path != "" {
-						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+abtestvalue+"]")
-					}
-				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
-					var bidforce_valuemap = BidForce{}
-					path := ""
-					bidforce_value := ""
-					for key, value := range update.NewValue {
-						v, _ := value.(string)
-						if ovalue, ok := update.OldValue[key]; ok {
-							ov, _ := ovalue.(string)
-							if ov == v {
-								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, key)
-							}
-						}
-						if key == "consul_key" {
-							path = value.(string)
-							continue
-						}
-						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
-							bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
-						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
-							continue
-						}
-					}
-					if path != "" {
-						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value)
-					}
+				enConsul,token := EnableConsulUpdate(cw.WkInfo.AppID, update.Namespace)
+				if ! enConsul {
+					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
+					ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \n error:(",update.Error,")\n")
 				} else {
-					for path, value := range update.NewValue {
-						v, _ := value.(string)
-						if ovalue, ok := update.OldValue[path]; ok {
-							ov, _ := ovalue.(string)
-							if ov == v {
-								skipped_keys = fmt.Sprintf("%s,%s,", skipped_keys, path)
+					deleted_keys := ""
+					updatecontent := ""
+					updatekey := ""
+					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
+					ns_info := chttp.httpGet(url, token)
+					modifier_list := []string{}
+					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
+						path := ""
+						abtestvalue := ""
+						for key, value := range update.NewValue {
+							v, _ := value.(string)
+							skip := false
+							ovalue, ok := update.OldValue[key]
+							if ok {
+								ov, _ := ovalue.(string)
+								if ov == v {
+									skip = true
+								}
+							}
+							if ! skip {
+								modifier : = GetModifyInfo(ns_info, key)
+								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
+								updatekey = fmt.Sprintf("key=%s,%s\nmodifier=%s\n", updatekey, key, modifier)
+							  if modifier != "" {
+									modifier_list = append(modifier_list, modifier)
+								}								
+							}
+							if key == "consul_key" {
+								path = value.(string)
+								continue
+							}
+
+							var abtest_value abtesting.AbInfo
+							err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_value)
+							if err == nil {
+								if i < len(update.NewValue) {
+									abtestvalue = abtestvalue + value.(string) + ",\n"
+								} else {
+									abtestvalue = abtestvalue + value.(string) + "\n"
+								}
+							} else {
+								ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(abtest_value failed, err:", err)
+							}
+						}
+						if path != "" {
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+abtestvalue+"]")
+						}
+					} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
+						var bidforce_valuemap = BidForce{}
+						path := ""
+						bidforce_value := ""
+						for key, value := range update.NewValue {
+							v, _ := value.(string)
+							skip := false
+							ovalue, ok := update.OldValue[key]
+							if ok {
+								ov, _ := ovalue.(string)
+								if ov == v {
+									skip =true
+								}						
+							}
+							if ! skip {
+								modifier : = GetModifyInfo(ns_info, key)
+								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
+								updatekey = fmt.Sprintf("key=%s,%s\nmodifier=%s\n", updatekey, key, modifier)
+							  if modifier != "" {
+									modifier_list = append(modifier_list, modifier)
+								}								
+							}
+							if key == "consul_key" {
+								path = value.(string)
+								continue
+							}
+							if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
+								bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
+							} else {
+								ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
 								continue
 							}
 						}
-						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v) 
-					}
-				}
-				updatecontent := ""
-				updatekey := ""		
-				if len(update.NewValue) == 0 {
-					updatecontent = fmt.Sprintf("clear_config or create_namesplace:%s[%s]",cw.WkInfo.Cluster,update.Namespace)
-				}
-				for k, v := range update.NewValue {
-					if ! strings.Contains(skipped_keys, fmt.Sprintf(",%s,", k)) {
-						if _,ok := update.OldValue[k]; ok{
-							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, update.OldValue[k], v)
-						} else {
-							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s", updatecontent, k, "", v)
+						if path != "" {
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value)
 						}
-						updatekey = fmt.Sprintf("key=%s\n", k)
+					} else {
+						for path, value := range update.NewValue {
+							v, _ := value.(string)
+							ovalue, ok := update.OldValue[path]
+							if ok {
+								ov, _ := ovalue.(string)
+								if ov == v {
+									continue
+								}
+							}
+							modifier : = GetModifyInfo(ns_info, key)
+							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
+							updatekey = fmt.Sprintf("%s\nkey=%s  modifier=%s\n", updatekey, key, modifier)
+							if modifier != "" {
+								modifier_list = append(modifier_list, modifier)
+							}								
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v) 
+						}
 					}
+					//delete keys
+					for k, _ := range update.OldValue {
+						if _,ok := update.NewValue[k]; ! ok {
+							deleted_keys = fmt.Sprintf("%s,%s,", deleted_keys, k)
+						}
+					}
+					//record updatekey except abtest
+					if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); ! find && updatekey != "" {
+						updatecontent = updatekey
+					}
+					if deleted_keys != "" {					
+						updatecontent = fmt.Sprintf("%s \ndelelte_key=%s",updatecontent, deleted_keys)
+					}
+					if len(modifier_list) > 0 {
+						ccommon.CLogger.Warn(modifier_list, cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+					} else {
+						ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+					}					
 				}
-				if updatecontent == "" {
-					updatecontent = fmt.Sprintf("delelte key=%s",skipped_keys)
-				}
-				if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); ! find && updatekey != "" {
-					updatecontent = updatekey
-				}
-				//ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
 			}
 		}
 	}(cw)

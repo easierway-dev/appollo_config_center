@@ -80,9 +80,18 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string), "warn")
-	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
-	this.Runtime.Warn(args)
+	if _,ok:=interface{}(args[0]).(string);ok {
+		dingkeys,dingusers := GetDingInfo(args[0].(string), "warn")
+		
+		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+		this.Runtime.Warn(args)
+	} else {
+		dingkeys,dingusers := GetDingInfo(args[1].(string), "warn")
+		dingusers = append(dingusers, args[0]...)
+
+		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args[1:]),dingusers)
+		this.Runtime.Warn(args)
+	}
 }
 
 func (this *ccLogger) Error(args ...interface{}) {

@@ -54,7 +54,8 @@ type DyAgolloCfg struct {
 } 
 
 type AgolloCfg struct {
-	ConfigServerURL string                 `toml:"ipport"`
+	ConfigServerURL string                  `toml:"ipport"`
+	PortalURL string                 	`toml:"portalport"`
 	AppID string                 		`toml:"appid"`
 	Cluster string                 		`toml:"cluster"`
 	Namespace []string                 	`toml:"namespace"`
@@ -92,6 +93,7 @@ type ConfigInfo struct {
 	DingUsers       []string `toml:"ding_users"`
 	ChklogRate float64 `toml:"log_rate"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	AccessToken       string `toml:"access_token"`
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
