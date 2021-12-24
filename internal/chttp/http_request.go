@@ -24,7 +24,7 @@ func HttpGet(url,token string) (resp_body interface{}, err error) {
     return resp_body, nil
 }
 
-func HttpPostForm(url, token string, data map[string]interface{})(resp_body string, err error) {
+func HttpPostForm(url, token string, data map[string]interface{})(resp_body interface{}, err error) {
     client := &http.Client{}
     bytesData, _ := json.Marshal(data)
     req, _ := http.NewRequest("POST",url,bytes.NewReader(bytesData))
