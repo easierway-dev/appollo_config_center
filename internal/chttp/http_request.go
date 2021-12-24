@@ -27,7 +27,7 @@ type NamespaceInfo struct {
     DataChangeLastModifiedBy    string     `toml:"dataChangeLastModifiedBy"`
     DataChangeCreatedTime       string     `toml:"dataChangeCreatedTime"`
     DataChangeLastModifiedTime  string     `toml:"dataChangeLastModifiedTime"`
-    Items                       *ItemInfo  `toml:"items"`
+    Items                       []*ItemInfo  `toml:"items"`
 }
 
 func HttpGet(url,token string) (resp_body *NamespaceInfo, err error) {
