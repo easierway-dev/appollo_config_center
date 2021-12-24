@@ -17,7 +17,7 @@ func httpGet(url,token string){
     if err != nil {
         return resp_json, err
     }
-    err := json.Unmarshal(body, &resp_json)
+    err = json.Unmarshal(body, &resp_json)
     if err != nil {
     	return resp_json, err
     }
@@ -35,7 +35,7 @@ func httpPostForm(url string, token, data map[string]interface{}) {
     if err != nil {
         return resp_json, err
     }
-    err := json.Unmarshal(body, &resp_json)
+    err = json.Unmarshal(body, &resp_json)
     if err != nil {
     	return resp_json, err
     }

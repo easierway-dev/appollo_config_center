@@ -87,8 +87,13 @@ func (this *ccLogger) Warn(args ...interface{}) {
 		this.Runtime.Warn(args)
 	} else {
 		dingkeys,dingusers := GetDingInfo(args[1].(string), "warn")
-		dingusers = append(dingusers, args[0]...)
-
+		if listValue,ok := args[0].([]interface{}); ok {
+			keyStringValues := make([]string, len(listValue))
+			for i, arg := range listValue {
+			   keyStringValues[i] = arg.(string)
+			}
+			dingusers = append(dingusers, keyStringValues...)		
+		} 
 		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args[1:]),dingusers)
 		this.Runtime.Warn(args)
 	}

@@ -129,9 +129,7 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 	return
 }
 
-func GetAppInfo(appid, namespace string) {
-	enUpdate := false
-	accessToken := ""
+func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
 			namespace = ccommon.DefaultNamespace
@@ -148,16 +146,16 @@ func GetAppInfo(appid, namespace string) {
 			}
 		}
 	}
-	return enUpdate, accessToken
+	return
 }
 
-func GetModifyInfo(nsinfo interface{}, key string) {
+func GetModifyInfo(nsinfo interface{}, key string) string {
 	modifier := ""
 	if itemsList,find := nsinfo["items"]; find {
 		for _,item := range itemsList {
 			if k,find := item["key"]; find && key == k {
 				modifier = item["dataChangeLastModifiedBy"]
-				return modifier
+				break
 			}
 		} 
 	}
