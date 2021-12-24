@@ -189,7 +189,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					deleted_keys := ""
 					updatecontent := ""
 					updatekey := ""
-					modifier : = ""
+					modifier := ""
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
 					ns_info := chttp.HttpGet(url, token)
 					modifier_list := []string{}
