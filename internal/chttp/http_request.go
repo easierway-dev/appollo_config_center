@@ -7,7 +7,7 @@ import (
     "net/http"
 )
 
-func HttpGet(url,token string) (resp_body string, err error) {
+func HttpGet(url,token string) (resp_body interface{}, err error) {
     client := &http.Client{}
     req,_ := http.NewRequest("GET",url,nil)
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -17,7 +17,10 @@ func HttpGet(url,token string) (resp_body string, err error) {
     if err != nil {
         return "{}", err
     }
-    resp_body = string(body)
+    err = json.NewDecoder(resp.Body).Decode(&resp_body)
+    if err != nil {
+        return nil, err
+    }
     return resp_body, nil
 }
 
@@ -29,9 +32,9 @@ func HttpPostForm(url, token string, data map[string]interface{})(resp_body stri
     req.Header.Set("Authorization",token)
     resp, _ := client.Do(req)
     body, err := ioutil.ReadAll(resp.Body)
+    err = json.NewDecoder(resp.Body).Decode(&resp_body)
     if err != nil {
-        return "{}", err
+        return nil, err
     }
-    resp_body = string(body)
-    return string(resp_body), nil
+    return resp_body, nil
 }
