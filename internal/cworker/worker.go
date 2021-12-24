@@ -149,7 +149,7 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	return
 }
 
-func GetModifyInfo(nsinfo interface{}, key string) (modifier string) {
+func GetModifyInfo(nsinfo map[string]interface{}, key string) (modifier string) {
 	if itemsList,find := nsinfo["items"]; find {
 		for _,item := range itemsList {
 			if k,find := item["key"]; find && key == k {
