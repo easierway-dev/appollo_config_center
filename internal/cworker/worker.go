@@ -149,8 +149,7 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	return
 }
 
-func GetModifyInfo(nsinfo interface{}, key string) string {
-	modifier := ""
+func GetModifyInfo(nsinfo interface{}, key string) modifier string {
 	if itemsList,find := nsinfo["items"]; find {
 		for _,item := range itemsList {
 			if k,find := item["key"]; find && key == k {
@@ -159,7 +158,7 @@ func GetModifyInfo(nsinfo interface{}, key string) string {
 			}
 		} 
 	}
-	return modifier
+	return
 }
 
 //work run
@@ -182,7 +181,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
-				enConsul,token := EnableConsulUpdate(cw.WkInfo.AppID, update.Namespace)
+				enConsul,token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
 				if ! enConsul {
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
 					ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \n error:(",update.Error,")\n")
@@ -191,7 +190,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent := ""
 					updatekey := ""
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
-					ns_info := chttp.httpGet(url, token)
+					ns_info := chttp.HttpGet(url, token)
 					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 						path := ""
