@@ -149,15 +149,13 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	return
 }
 
-func GetModifyInfo(nsinfo chttp.NamespaceInfo, key string) (modifier string) {
-	if itemsList,find := nsinfo["items"]; find {
-		for _,item := range itemsList {
-			if k,find := item["key"]; find && key == k {
-				modifier = item["dataChangeLastModifiedBy"]
-				break
-			}
-		} 
-	}
+func GetModifyInfo(nsinfo *chttp.NamespaceInfo, key string) (modifier string) {
+	for _,item := range nsinfo.Items {
+		if key == item.Key {
+			modifier = item.DataChangeLastModifiedBy
+			break
+		}
+	} 
 	return
 }
 
