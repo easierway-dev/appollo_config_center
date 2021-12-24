@@ -149,7 +149,7 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	return
 }
 
-func GetModifyInfo(nsinfo interface{}, key string) modifier string {
+func GetModifyInfo(nsinfo interface{}, key string) (modifier string) {
 	if itemsList,find := nsinfo["items"]; find {
 		for _,item := range itemsList {
 			if k,find := item["key"]; find && key == k {
@@ -189,6 +189,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					deleted_keys := ""
 					updatecontent := ""
 					updatekey := ""
+					modifier : = ""
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
 					ns_info := chttp.HttpGet(url, token)
 					modifier_list := []string{}
@@ -206,7 +207,7 @@ func (cw *CWorker) Run(ctx context.Context){
 								}
 							}
 							if ! skip {
-								modifier : = GetModifyInfo(ns_info, key)
+								modifier = GetModifyInfo(ns_info, key)
 								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
 								updatekey = fmt.Sprintf("key=%s,%s\nmodifier=%s\n", updatekey, key, modifier)
 							  if modifier != "" {
@@ -248,7 +249,7 @@ func (cw *CWorker) Run(ctx context.Context){
 								}						
 							}
 							if ! skip {
-								modifier : = GetModifyInfo(ns_info, key)
+								modifier = GetModifyInfo(ns_info, key)
 								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
 								updatekey = fmt.Sprintf("key=%s,%s\nmodifier=%s\n", updatekey, key, modifier)
 							  if modifier != "" {
@@ -279,7 +280,7 @@ func (cw *CWorker) Run(ctx context.Context){
 									continue
 								}
 							}
-							modifier : = GetModifyInfo(ns_info, key)
+							modifier = GetModifyInfo(ns_info, key)
 							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
 							updatekey = fmt.Sprintf("%s\nkey=%s  modifier=%s\n", updatekey, key, modifier)
 							if modifier != "" {
