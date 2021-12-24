@@ -7,37 +7,29 @@ import (
     "net/http"
 )
 
-func httpGet(url,token string){
-	var resp_json interface{}
+func httpGet(url,token string) (resp_body string, err error) {
     client := &http.Client{}
     req,_ := http.NewRequest("GET",url,nil)
-    req.Header.Add("Authorization",token)
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    req.Header.Set("Authorization",token)
     resp,_ := client.Do(req)
-    body, err := ioutil.ReadAll(resp.Body)
+    resp_body, err = ioutil.ReadAll(resp.Body)
     if err != nil {
-        return resp_json, err
+        return "{}", err
     }
-    err = json.Unmarshal(body, &resp_json)
-    if err != nil {
-    	return resp_json, err
-    }
-    return resp_json, nil
+    return string(resp_body), nil
 }
 
 func httpPostForm(url string, token, data map[string]interface{}) {
-	var resp_json interface{}
     client := &http.Client{}
     bytesData, _ := json.Marshal(data)
     req, _ := http.NewRequest("POST",url,bytes.NewReader(bytesData))
-    req.Header.Add("Authorization",token)
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    req.Header.Set("Authorization",token)
     resp, _ := client.Do(req)
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
-        return resp_json, err
+        return "{}", err
     }
-    err = json.Unmarshal(body, &resp_json)
-    if err != nil {
-    	return resp_json, err
-    }
-    return resp_json, nil
+    return string(resp_body), nil
 }
