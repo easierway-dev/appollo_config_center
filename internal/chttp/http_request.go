@@ -38,7 +38,7 @@ func HttpGet(url,token string) (resp_body *NamespaceInfo, err error) {
     resp,_ := client.Do(req)
     body, err := ioutil.ReadAll(resp.Body)
     if err == nil {
-        err = json.Unmarshal(body, &resp_body{})
+        err = json.Unmarshal(body, &resp_body)
         if err != nil {
             return nil, err
         }
@@ -55,7 +55,7 @@ func HttpPostForm(url, token string, data map[string]interface{})(resp_body *Nam
     resp, _ := client.Do(req)
     body, err := ioutil.ReadAll(resp.Body)
     if err == nil {
-        err = json.Unmarshal(body, &resp_body{})
+        err = json.Unmarshal(body, &resp_body)
         if err != nil {
             return nil, err
         }
