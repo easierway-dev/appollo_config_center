@@ -13,11 +13,12 @@ func httpGet(url,token string) (resp_body string, err error) {
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Set("Authorization",token)
     resp,_ := client.Do(req)
-    resp_body, err = ioutil.ReadAll(resp.Body)
+    body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
         return "{}", err
     }
-    return string(resp_body), nil
+    resp_body = string(body)
+    return resp_body, nil
 }
 
 func httpPostForm(url string, token, data map[string]interface{}) {
@@ -31,5 +32,6 @@ func httpPostForm(url string, token, data map[string]interface{}) {
     if err != nil {
         return "{}", err
     }
+    resp_body = string(body)
     return string(resp_body), nil
 }
