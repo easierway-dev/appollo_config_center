@@ -191,7 +191,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatekey := ""
 					modifier := ""
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
-					ns_info := chttp.HttpGet(url, token)
+					ns_info,_ := chttp.HttpGet(url, token)
 					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 						path := ""
@@ -282,9 +282,9 @@ func (cw *CWorker) Run(ctx context.Context){
 									continue
 								}
 							}
-							modifier = GetModifyInfo(ns_info, key)
-							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-							updatekey = fmt.Sprintf("%s\nkey=%s  modifier=%s\n", updatekey, key, modifier)
+							modifier = GetModifyInfo(ns_info, path)
+							updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
+							updatekey = fmt.Sprintf("%s\nkey=%s  modifier=%s\n", updatekey, path, modifier)
 							if modifier != "" {
 								modifier_list = append(modifier_list, modifier)
 							}								
