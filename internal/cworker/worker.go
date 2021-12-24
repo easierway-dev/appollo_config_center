@@ -196,7 +196,9 @@ func (cw *CWorker) Run(ctx context.Context){
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 						path := ""
 						abtestvalue := ""
+						i := 0
 						for key, value := range update.NewValue {
+							i = i + 1
 							v, _ := value.(string)
 							skip := false
 							ovalue, ok := update.OldValue[key]
