@@ -192,7 +192,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 					if path != "" {
-						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+abtestvalue+"]")
+						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]")
 					}
 				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 					var bidforce_valuemap = BidForce{}
