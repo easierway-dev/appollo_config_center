@@ -5,8 +5,6 @@ import (
     "encoding/json"
     "io/ioutil"
     "net/http"
-
-    "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 )
 
 func HttpGet(url,token string) (resp_body string, err error) {
