@@ -1,6 +1,7 @@
 package chttp
 
 import (
+    "fmt"
     "bytes"
     "encoding/json"
     "io/ioutil"
@@ -8,6 +9,7 @@ import (
 )
 
 func HttpGet(url,token string) (resp_body []byte, err error) {
+    fmt.Println("debug url,token=",url,token)
     client := &http.Client{}
     req,_ := http.NewRequest("GET",url,nil)
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

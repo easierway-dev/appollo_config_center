@@ -150,6 +150,10 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 }
 
 func GetModifyInfo(nsinfo *capi.NamespaceInfo, key string) (modifier string) {
+	if nsinfo == nil {
+		fmt.Println("NamespaceInfo is nil")
+		return
+	}
 	for _,item := range nsinfo.Items {
 		if key == item.Key {
 			modifier = item.DataChangeLastModifiedBy
