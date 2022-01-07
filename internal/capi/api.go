@@ -1,6 +1,7 @@
 package capi
 
 import (
+    "encoding/json"
     "gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/chttp"
 )
 
@@ -27,7 +28,7 @@ type NamespaceInfo struct {
     Items                       []*ItemInfo  `toml:"items"`
 }
 
-func GetNamespaceInfo(url,token string) (resp_body *capi.NamespaceInfo, err error) {
+func GetNamespaceInfo(url,token string) (resp_body *NamespaceInfo, err error) {
     body, err := chttp.HttpGet(url,token)
     if err == nil {
         err = json.Unmarshal(body, &resp_body)
