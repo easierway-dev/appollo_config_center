@@ -10,7 +10,7 @@ import (
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cconsul"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/chttp"	
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"	
 	"gitlab.mobvista.com/voyager/abtesting"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -189,7 +189,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatekey := ""
 					modifier := ""
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
-					ns_info,_ := chttp.HttpGet(url, token)
+					ns_info,_ := capi.GetNamespaceInfo(url, token)
 					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 						path := ""
