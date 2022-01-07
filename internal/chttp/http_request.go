@@ -7,7 +7,7 @@ import (
     "net/http"
 )
 
-func HttpGet(url,token string) (resp_body interface{}, err error) {
+func HttpGet(url,token string) (resp_body []byte, err error) {
     client := &http.Client{}
     req,_ := http.NewRequest("GET",url,nil)
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -17,7 +17,7 @@ func HttpGet(url,token string) (resp_body interface{}, err error) {
     return 
 }
 
-func HttpPostForm(url, token string, data map[string]interface{})(resp_body interface{}, err error) {
+func HttpPostForm(url, token string, data map[string]interface{})(resp_body []byte, err error) {
     client := &http.Client{}
     bytesData, _ := json.Marshal(data)
     req, _ := http.NewRequest("POST",url,bytes.NewReader(bytesData))
