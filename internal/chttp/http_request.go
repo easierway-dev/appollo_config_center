@@ -13,7 +13,7 @@ func HttpGet(url,token string) (resp_body []byte, err error) {
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Set("Authorization",token)
     resp,_ := client.Do(req)
-    resp_body, err := ioutil.ReadAll(resp.Body)
+    resp_body, err = ioutil.ReadAll(resp.Body)
     return 
 }
 
@@ -24,6 +24,6 @@ func HttpPostForm(url, token string, data map[string]interface{})(resp_body []by
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Set("Authorization",token)
     resp, _ := client.Do(req)
-    resp_body, err := ioutil.ReadAll(resp.Body)
+    resp_body, err = ioutil.ReadAll(resp.Body)
     return 
 }
