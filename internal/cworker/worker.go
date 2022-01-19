@@ -161,7 +161,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
-				willUpdateConsul := true
+				willUpdateConsul := true  //默认会更新consul, 配置检查发现错误的时候，只提示报错信息，不再更新consul
 				skipped_keys := ""
 				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					path := ""
