@@ -161,6 +161,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
+				willUpdateConsul := true  //默认会更新consul, 配置检查发现错误的时候，只提示报错信息，不再更新consul
 				skipped_keys := ""
 				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					path := ""
@@ -188,10 +189,11 @@ func (cw *CWorker) Run(ctx context.Context){
 								abtestvalue = abtestvalue + value.(string) + "\n"
 							}
 						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"jsoniter.Unmarshal(abtest_value failed, err:", err)
+							willUpdateConsul = false
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
 						}
 					}
-					if path != "" {
+					if path != "" && willUpdateConsul {
 						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]")
 					}
 				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
@@ -213,7 +215,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
 							bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
 						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"toml.Decode(bidforce_value failed, err:", err)
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\ntoml.Decode(bidforce_value failed, err:", err)
 							continue
 						}
 					}
@@ -255,7 +257,11 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent = updatekey
 				}
 				ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+				if willUpdateConsul {
+					ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+				} else {
+					ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": !!! invalid config will not update consul !!!")
+				}
 			}
 		}
 	}(cw)
