@@ -161,12 +161,12 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
+				willUpdateConsul := true
 				skipped_keys := ""
 				if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
 					path := ""
 					abtestvalue := ""
 					i := 0
-					abUpdate := true
 					for key, value := range update.NewValue {
 						i = i + 1
 						v, _ := value.(string)
@@ -189,11 +189,11 @@ func (cw *CWorker) Run(ctx context.Context){
 								abtestvalue = abtestvalue + value.(string) + "\n"
 							}
 						} else {
-							abUpdate = false
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"_",cw.WkInfo.Cluster,"_",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
+							willUpdateConsul = false
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
 						}
 					}
-					if path != "" && abUpdate {
+					if path != "" && willUpdateConsul {
 						UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]")
 					}
 				} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
@@ -215,7 +215,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
 							bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
 						} else {
-							ccommon.CLogger.Error(cw.WkInfo.AppID,"_",cw.WkInfo.Cluster,"_",key,":", "\ntoml.Decode(bidforce_value failed, err:", err)
+							ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\ntoml.Decode(bidforce_value failed, err:", err)
 							continue
 						}
 					}
@@ -257,7 +257,9 @@ func (cw *CWorker) Run(ctx context.Context){
 					updatecontent = updatekey
 				}
 				ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \nskipped_keys:[",skipped_keys,"] error:(",update.Error,")\n")
-				ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+				if willUpdateConsul {
+					ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+				}
 			}
 		}
 	}(cw)
