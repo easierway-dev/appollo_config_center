@@ -130,6 +130,12 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 }
 
 func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
+	if ccommon.AppConfiger.AppConfigMap != nil {
+		if _,ok := AppConfiger.AppConfigMap[appid];ok {
+			enUpdate = AppConfiger.AppConfigMap[appid].EnUpdateConsul
+			accessToken = AppConfiger.AppConfigMap[appid].AccessToken
+		} 		
+	}
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
 			namespace = ccommon.DefaultNamespace
@@ -140,7 +146,9 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 				if dyAgoCfg.AppConfig.AppConfigMap != nil {
 					if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
 						enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
-						accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
+						if dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken != "" {
+							accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
+						}
 					}
 				}
 			}
@@ -193,7 +201,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					updated_keys := []string{}
 					modifier := ""
 					willUpdateConsul := true
-					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
+					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					ns_info,_ := capi.GetNamespaceInfo(url, token)
 					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
