@@ -188,9 +188,9 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
 					ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \n error:(",update.Error,")\n")
 				} else {
-					deleted_keys := []
+					deleted_keys := []string{}
 					updatecontent := ""
-					updated_keys := []
+					updated_keys := []string{}
 					modifier := ""
 					willUpdateConsul := true
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, update.Namespace)
@@ -298,7 +298,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					//delete keys
 					for k, _ := range update.OldValue {
 						if _,ok := update.NewValue[k]; ! ok {
-							deleted_keys = append(deleted_keys, key)
+							deleted_keys = append(deleted_keys, k)
 						}
 					}
 					//record updated_keys except abtest
