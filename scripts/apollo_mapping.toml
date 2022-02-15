@@ -1,5 +1,9 @@
 #white指白名单,black指黑名单
 [[mappingrules]]
+[mappingrules.cn_dsp]
+white = [ "cn_dsp"]
+
+[[mappingrules]]
 [mappingrules.rtdsp]
 white = [ "retargeting_dsp"]
 
