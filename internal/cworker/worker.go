@@ -131,9 +131,9 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 
 func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 	if ccommon.AppConfiger.AppConfigMap != nil {
-		if _,ok := AppConfiger.AppConfigMap[appid];ok {
-			enUpdate = AppConfiger.AppConfigMap[appid].EnUpdateConsul
-			accessToken = AppConfiger.AppConfigMap[appid].AccessToken
+		if _,ok := ccommon.AppConfiger.AppConfigMap[appid];ok {
+			enUpdate = ccommon.AppConfiger.AppConfigMap[appid].EnUpdateConsul
+			accessToken = ccommon.AppConfiger.AppConfigMap[appid].AccessToken
 		} 		
 	}
 	if ccommon.DyAgolloConfiger != nil {
@@ -226,7 +226,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							if ! skip {
 								modifier = GetModifyInfo(ns_info, key)
 								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s#modifier=%s",key, modifier))
+								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",key, modifier))
 							  if modifier != "" {
 									modifier_list = append(modifier_list, modifier)
 								}								
@@ -262,17 +262,17 @@ func (cw *CWorker) Run(ctx context.Context){
 									skip =true
 								}						
 							}
-							if ! skip {
-								modifier = GetModifyInfo(ns_info, key)
-								//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s#modifier=%s",key, modifier))
-							  if modifier != "" {
-									modifier_list = append(modifier_list, modifier)
-								}								
-							}
 							if key == "consul_key" {
 								path = value.(string)
 								continue
+							}
+							if ! skip {
+								modifier = GetModifyInfo(ns_info, key)
+								//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
+								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",key, modifier))
+							  if modifier != "" {
+									modifier_list = append(modifier_list, modifier)
+								}								
 							}
 							if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
 								bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
@@ -296,7 +296,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 							modifier = GetModifyInfo(ns_info, path)
 							//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
-							updated_keys = append(updated_keys, fmt.Sprintf("key=%s#modifier=%s",path, modifier))
+							updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",path, modifier))
 							if modifier != "" {
 								modifier_list = append(modifier_list, modifier)
 							}								

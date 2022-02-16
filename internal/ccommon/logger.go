@@ -36,18 +36,22 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []string) {
+func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []string, userMap map[string]string, isAtall bool) {
 	if appid == "" && itype == "info"{
-		return dingKeys, dingusers
+		return
 	}
 
         namespace := DefaultNamespace
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
+	userMap = AppConfiger.DingUserMap
+	isAtall = AppConfiger.isAtAll
 	if AppConfiger.AppConfigMap != nil {
 		if _,ok := AppConfiger.AppConfigMap[appid];ok {
 			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
 			dingusers = AppConfiger.AppConfigMap[appid].DingUsers
+			userMap = AppConfiger.AppConfigMap[appid].DingUserMap
+			isAtall = AppConfiger.AppConfigMap[appid].isAtAll
 		} 		
 	}
 	if DyAgolloConfiger != nil {
@@ -55,24 +59,28 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 			if dyAgoCfg.AppConfig != nil {
 				dingKeys = dyAgoCfg.AppConfig.DingKeys
 				dingusers = dyAgoCfg.AppConfig.DingUsers
+				userMap = dyAgoCfg.AppConfig.DingUserMap
+				isAtall = dyAgoCfg.AppConfig.isAtAll
 			}
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
 					dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
 					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
+					userMap = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap
+					isAtall = dyAgoCfg.AppConfig.AppConfigMap[appid].isAtAll
 				} 
 			}
 		}
         }
-	return dingKeys, dingusers
+	return
 }
 
 func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	//dingkeys,dingusers := GetDingInfo(args[0].(string), "info")
-	//cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+	//dingkeys,dingusers,_,isatall := GetDingInfo(args[0].(string), "info")
+	//cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers,isatall)
 	this.Runtime.Info(args)
 }
 
@@ -81,20 +89,25 @@ func (this *ccLogger) Warn(args ...interface{}) {
 		return
 	}
 	if _,ok:=interface{}(args[0]).(string);ok {
-		dingkeys,dingusers := GetDingInfo(args[0].(string), "warn")
+		dingkeys,dingusers,_,isatall := GetDingInfo(args[0].(string), "warn")
 		
-		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers,isatall)
 		this.Runtime.Warn(args)
 	} else {
-		dingkeys,dingusers := GetDingInfo(args[1].(string), "warn")
-		if listValue,ok := args[0].([]interface{}); ok {
-			keyStringValues := make([]string, len(listValue))
-			for i, arg := range listValue {
-			   keyStringValues[i] = arg.(string)
-			}
-			dingusers = append(dingusers, keyStringValues...)		
-		} 
-		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args[1:]),dingusers)
+		dingkeys,dingusers,usermap,isatall := GetDingInfo(args[1].(string), "warn")
+		switch t := args[0].(type) {
+		case []string:
+		    keyStringValues := []string{}
+		    for _, username := range t {
+		    	if userphone, ok := usermap[username]; ok {
+		    		keyStringValues = append(keyStringValues, userphone)
+		    	}
+		    }
+		    dingusers = append(dingusers, keyStringValues...)
+		default:
+		    fmt.Println("dingusers type error , need []string")
+		}
+		cnotify.SendText(dingkeys,fmt.Sprintf("%s",args[1:]),dingusers,isatall)
 		this.Runtime.Warn(args)
 	}
 }
@@ -103,8 +116,8 @@ func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string), "err")
-	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+	dingkeys,dingusers,_,isatall := GetDingInfo(args[0].(string), "err")
+	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers,isatall)
 	this.Runtime.Error(args)
 }
 

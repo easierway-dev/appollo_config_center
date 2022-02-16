@@ -74,6 +74,8 @@ type ClusterCfg struct {
 type AppCfg struct {
 	DingKeys       []string `toml:"ding_keys"`
 	DingUsers	[]string `toml:"ding_users"`
+	DingUserMap  map[string]string `toml:"ding_user_map"` 
+	isAtAll         bool `toml:"is_at_all"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
 	ChklogRate float64 `toml:"log_rate"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
@@ -91,8 +93,10 @@ type ClusterInfo struct {
 type ConfigInfo struct {
 	DingKeys []string `toml:"ding_keys"`
 	DingUsers       []string `toml:"ding_users"`
-	ChklogRate float64 `toml:"log_rate"`
+	DingUserMap  map[string]string `toml:"ding_user_map"`
+	isAtAll         bool `toml:"is_at_all"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	ChklogRate float64 `toml:"log_rate"`
 	AccessToken       string `toml:"access_token"`
 }
 
