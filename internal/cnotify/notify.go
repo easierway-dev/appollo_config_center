@@ -31,8 +31,17 @@ func SendTextUnit(token, dingContent string, dingusers []string, isatall bool) {
 
 	// text类型
 	atMobiles := robot.SendWithAtMobiles(dingusers)
-	
+
 	isAtAll := robot.SendWithIsAtAll(isatall)
+
+    var err error
+    if isatall {
+            isAtAll := robot.SendWithIsAtAll(isatall)
+            err = dt.RobotSendText(dingContent, atMobiles, isAtAll)
+    } else {
+            err = dt.RobotSendText(dingContent, atMobiles)
+    }
+    if err != nil {
 
 	if err := dt.RobotSendText(dingContent, atMobiles, isAtAll); err != nil {
 		glog.Fatal("send ding failed err: ",err)

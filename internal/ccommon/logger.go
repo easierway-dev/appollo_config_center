@@ -40,34 +40,47 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 	if appid == "" && itype == "info"{
 		return
 	}
-
+	//local config
         namespace := DefaultNamespace
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
 	userMap = AppConfiger.DingUserMap
-	isAtall = AppConfiger.isAtAll
+	isAtall = AppConfiger.IsAtAll
 	if AppConfiger.AppConfigMap != nil {
 		if _,ok := AppConfiger.AppConfigMap[appid];ok {
 			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
 			dingusers = AppConfiger.AppConfigMap[appid].DingUsers
 			userMap = AppConfiger.AppConfigMap[appid].DingUserMap
-			isAtall = AppConfiger.AppConfigMap[appid].isAtAll
+			isAtall = AppConfiger.AppConfigMap[appid].IsAtAll
 		} 		
 	}
+	//apollo global_config
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {
-				dingKeys = dyAgoCfg.AppConfig.DingKeys
-				dingusers = dyAgoCfg.AppConfig.DingUsers
-				userMap = dyAgoCfg.AppConfig.DingUserMap
-				isAtall = dyAgoCfg.AppConfig.isAtAll
+				if len(dyAgoCfg.AppConfig.DingKeys) > 0 {
+					dingKeys = ddyAgoCfg.AppConfig.DingKeys
+				}
+				if len(dyAgoCfg.AppConfig.DingUsers) > 0{
+					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
+				}					
+				for key,value := range dyAgoCfg.AppConfig.DingUserMap {
+					userMap[key] = value
+				}
+				isAtall = dyAgoCfg.AppConfig.IsAtAll
 			}
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
-					dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
-					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
-					userMap = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap
-					isAtall = dyAgoCfg.AppConfig.AppConfigMap[appid].isAtAll
+					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys) > 0 {
+						dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
+					}
+					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers) > 0{
+						dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
+					}					
+					for key,value := range dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap {
+						userMap[key] = value
+					}
+					isAtall = dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll
 				} 
 			}
 		}
