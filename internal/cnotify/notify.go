@@ -32,8 +32,6 @@ func SendTextUnit(token, dingContent string, dingusers []string, isatall bool) {
 	// text类型
 	atMobiles := robot.SendWithAtMobiles(dingusers)
 
-	isAtAll := robot.SendWithIsAtAll(isatall)
-
     var err error
     if isatall {
             isAtAll := robot.SendWithIsAtAll(isatall)
