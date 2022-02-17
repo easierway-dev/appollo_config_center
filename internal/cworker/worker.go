@@ -252,6 +252,12 @@ func (cw *CWorker) Run(ctx context.Context){
 						if path != "" && willUpdateConsul {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]", consulMode)
 						}
+						//delete keys
+						for k, _ := range update.OldValue {
+							if _,ok := update.NewValue[k]; ! ok {
+								deleted_keys = append(deleted_keys, k)
+							}
+						}
 					} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 						var bidforce_valuemap = BidForce{}
 						path := ""
@@ -288,6 +294,12 @@ func (cw *CWorker) Run(ctx context.Context){
 						if path != "" {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value, consulMode)
 						}
+						//delete keys
+						for k, _ := range update.OldValue {
+							if _,ok := update.NewValue[k]; ! ok {
+								deleted_keys = append(deleted_keys, k)
+							}
+						}
 					} else {
 						//新增、更新
 						for path, value := range update.NewValue {
@@ -320,22 +332,11 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 						}
 					}
-					//delete keys
-					if len(deleted_keys) > 0 {
-						if ! enDelete {
-							deleted_keys = []string{}
-						}
-					} else {
-						for k, _ := range update.OldValue {
-							if _,ok := update.NewValue[k]; ! ok {
-								deleted_keys = append(deleted_keys, k)
-							}
-						}
-					}
-					//record updated_keys except abtest
+					//只有abtest显示更新内容的详情，其他都只提示变更的key
 					if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); ! find && len(updated_keys) > 0 {
 						updatecontent = strings.Join(updated_keys, "\n")
 					}
+					//记录删除的key
 					if len(deleted_keys) > 0 {					
 						updatecontent = fmt.Sprintf("%s\n\ndelelte_key=%s",updatecontent, strings.Join(deleted_keys, "#"))
 					}
