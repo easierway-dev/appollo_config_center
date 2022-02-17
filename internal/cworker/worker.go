@@ -167,7 +167,8 @@ func GetAppInfo(appid, namespace string) (enUpdate, enDelete int,accessToken str
 }
 
 func GetModifyInfo(nsinfo *capi.NamespaceInfo, key string) (modifier string) {
-	if nsinfo == nil！＝tln("NamespaceInfo is nil")
+	if nsinfo == nil{
+		fmt.Println("NamespaceInfo is nil")
 		return
 	}
 	for _,item := range nsinfo.Items {
