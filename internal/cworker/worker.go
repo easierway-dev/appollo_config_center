@@ -129,10 +129,11 @@ func UpdateConsul(appid, namespace, cluster, key, value , mode string){
 	return
 }
 
-func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
+func GetAppInfo(appid, namespace string) (enUpdate bool, enDelete bool,accessToken string) {
 	if ccommon.AppConfiger.AppConfigMap != nil {
 		if _,ok := ccommon.AppConfiger.AppConfigMap[appid];ok {
 			enUpdate = ccommon.AppConfiger.AppConfigMap[appid].EnUpdateConsul
+			enDelete = ccommon.AppConfiger.AppConfigMap[appid].EnDelConsul
 			accessToken = ccommon.AppConfiger.AppConfigMap[appid].AccessToken
 		} 		
 	}
@@ -143,9 +144,11 @@ func GetAppInfo(appid, namespace string) (enUpdate bool, accessToken string) {
 		if dyAgoCfg,ok := ccommon.DyAgolloConfiger[namespace];ok {
 			if dyAgoCfg.AppConfig != nil {
 				enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
+				enDelete = dyAgoCfg.AppConfig.EnDelConsul
 				if dyAgoCfg.AppConfig.AppConfigMap != nil {
 					if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok{
 						enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+						enDelete = dyAgoCfg.AppConfig.AppConfigMap[appid].EnDelConsul
 						if dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken != "" {
 							accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
 						}
@@ -192,7 +195,7 @@ func (cw *CWorker) Run(ctx context.Context){
 				}
 			case update := <-watchCh:
 				consulMode := "write"
-				enConsul,token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
+				enConsul, enDelete, token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
 				if ! enConsul {
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
 					ccommon.CLogger.Info(ccommon.DefaultDingType,"Apollo cluster(",cw.WkInfo.Cluster,") namespace(",update.Namespace,") \nold_value:(", update.OldValue,") \nnew_value:(",update.NewValue,") \n error:(",update.Error,")\n")
@@ -306,11 +309,13 @@ func (cw *CWorker) Run(ctx context.Context){
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode) 
 						}
 						//删除
-						for path, value := range update.OldValue {
-							if _,ok := update.NewValue[path]; ! ok {
-								v, _ := value.(string)
-								consulMode = "del"
-								UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode)
+						if enDelete {
+							for path, value := range update.OldValue {
+								if _,ok := update.NewValue[path]; ! ok {
+									v, _ := value.(string)
+									consulMode = "del"
+									UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode)
+								}
 							}
 						}
 					}

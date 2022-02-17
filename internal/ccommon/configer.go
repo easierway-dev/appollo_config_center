@@ -77,6 +77,7 @@ type AppCfg struct {
 	DingUserMap  map[string]string `toml:"ding_user_map"` 
 	IsAtAll         bool `toml:"is_at_all"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	EnDelConsul	bool `toml:"enable_delete_consul"`
 	ChklogRate float64 `toml:"log_rate"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
@@ -96,6 +97,7 @@ type ConfigInfo struct {
 	DingUserMap  map[string]string `toml:"ding_user_map"`
 	IsAtAll         bool `toml:"is_at_all"`
 	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	EnDelConsul	bool `toml:"enable_delete_consul"`
 	ChklogRate float64 `toml:"log_rate"`
 	AccessToken       string `toml:"access_token"`
 }
