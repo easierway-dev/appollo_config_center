@@ -312,7 +312,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if enDelete {
 							for path, value := range update.OldValue {
 								if _,ok := update.NewValue[path]; ! ok {
-									deleted_keys = append(deleted_keys, k)
+									deleted_keys = append(deleted_keys, path)
 									v, _ := value.(string)
 									consulMode = "del"
 									UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode)
