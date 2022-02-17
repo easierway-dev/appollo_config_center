@@ -269,11 +269,13 @@ func (cw *CWorker) Run(ctx context.Context){
 					updated_keys := []string{}
 					modifier := ""
 					willUpdateConsul := true
+					modifier_list := []string{}
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					ns_info,_ := capi.GetNamespaceInfo(url, token)
-					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) || strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
-						updatecontent, updateconsulvalue, path, updated_keys, modifier_list, willUpdateConsul := MergeUpdate(cw.WkInfo.AppID, cw.WkInfo.Cluster, update.NewValue, update.OldValue, ns_info)
+						updateconsulvalue := ""
+						path := ""
+						updatecontent, updateconsulvalue, path, updated_keys, modifier_list, willUpdateConsul = MergeUpdate(cw.WkInfo.AppID, cw.WkInfo.Cluster, update.NewValue, update.OldValue, ns_info)
 						if path != "" {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, updateconsulvalue, consulMode)
 						}
