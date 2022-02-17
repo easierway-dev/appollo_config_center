@@ -47,7 +47,7 @@ func WriteData(client *api.Client, pair *api.KVPair) error {
 
 func GetData(client *api.Client, pair *api.KVPair) error {
 	kv := client.KV()
-	_, err := kv.Get(pair.Key, nil)
+	_,_, err := kv.Get(pair.Key, nil)
 	return err
 }
 
