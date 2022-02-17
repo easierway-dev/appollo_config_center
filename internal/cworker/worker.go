@@ -90,7 +90,7 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 	return work, nil
 }
 
-func UpdateConsul(appid, namespace, cluster, key, value string){
+func UpdateConsul(appid, namespace, cluster, key, value , mode string){
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
 			namespace = ccommon.DefaultNamespace
@@ -106,7 +106,7 @@ func UpdateConsul(appid, namespace, cluster, key, value string){
 					consulAddrList := dyAgoCfg.ClusterConfig.ClusterMap[cluster].ConsulAddr
 					//err := cconsul.WriteOne(consulAddr, strings.Replace(key, ".", "/", -1), value)
 					for _,consulAddr := range consulAddrList {
-						err := cconsul.WriteOne(consulAddr, key, value)
+						err := cconsul.WriteOne(consulAddr, key, value, mode)
 						if err != nil {
 							ccommon.CLogger.Error(ccommon.DefaultDingType,"consul_addr[",consulAddr,"],key[",key,"], err[", err,"]\n")
 						} 
@@ -191,6 +191,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
 				}
 			case update := <-watchCh:
+				consulMode := "write"
 				enConsul,token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
 				if ! enConsul {
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
@@ -225,8 +226,8 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 							if ! skip {
 								modifier = GetModifyInfo(ns_info, key)
-								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",key, modifier))
+								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=@%s\n", updatecontent, key, ovalue, value, modifier)
+								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",key, modifier))
 							  if modifier != "" {
 									modifier_list = append(modifier_list, modifier)
 								}								
@@ -246,7 +247,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 						}
 						if path != "" && willUpdateConsul {
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]")
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]", consulMode)
 						}
 					} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 						var bidforce_valuemap = BidForce{}
@@ -269,7 +270,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							if ! skip {
 								modifier = GetModifyInfo(ns_info, key)
 								//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",key, modifier))
+								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",key, modifier))
 							  if modifier != "" {
 									modifier_list = append(modifier_list, modifier)
 								}								
@@ -282,25 +283,35 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 						}
 						if path != "" {
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value)
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, bidforce_value, consulMode)
 						}
 					} else {
+						//新增、更新
 						for path, value := range update.NewValue {
 							v, _ := value.(string)
 							ovalue, ok := update.OldValue[path]
 							if ok {
 								ov, _ := ovalue.(string)
+								//未发生变化的key，跳过不更新
 								if ov == v {
 									continue
 								}
 							}
 							modifier = GetModifyInfo(ns_info, path)
 							//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
-							updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=%s",path, modifier))
+							updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",path, modifier))
 							if modifier != "" {
 								modifier_list = append(modifier_list, modifier)
 							}								
-							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v) 
+							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode) 
+						}
+						//删除
+						for path, value := range update.OldValue {
+							if _,ok := update.NewValue[path]; ! ok {
+								v, _ := value.(string)
+								consulMode = "del"
+								UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode)
+							}
 						}
 					}
 					//delete keys

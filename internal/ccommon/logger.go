@@ -42,10 +42,12 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 	}
 	//local config
         namespace := DefaultNamespace
+        //default config
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
 	userMap = AppConfiger.DingUserMap
 	isAtall = AppConfiger.IsAtAll
+	//uniq appid config
 	if AppConfiger.AppConfigMap != nil {
 		if _,ok := AppConfiger.AppConfigMap[appid];ok {
 			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
@@ -57,6 +59,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 	//apollo global_config
 	if DyAgolloConfiger != nil {
 		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
+			//default config
 			if dyAgoCfg.AppConfig != nil {
 				if len(dyAgoCfg.AppConfig.DingKeys) > 0 {
 					dingKeys = dyAgoCfg.AppConfig.DingKeys
@@ -69,6 +72,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 				}
 				isAtall = dyAgoCfg.AppConfig.IsAtAll
 			}
+			//uniq appid config
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
 					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys) > 0 {
