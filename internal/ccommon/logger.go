@@ -60,7 +60,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 				userMap[key] = value
 			}
 			if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
-				isAtallTmp = dyAgoCfg.AppConfig.IsAtAll
+				isAtallTmp = AppConfiger.AppConfigMap[appid].IsAtAll
 			}
 		} 		
 	}
