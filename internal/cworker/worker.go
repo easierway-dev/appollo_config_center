@@ -229,8 +229,8 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 							if ! skip {
 								modifier = GetModifyInfo(ns_info, key)
-								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=@%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",key, modifier))
+								updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nchangedby=%s\n", updatecontent, key, ovalue, value, modifier)
+								updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s",key, modifier))
 							  if modifier != "" {
 									modifier_list = append(modifier_list, modifier)
 								}								
@@ -273,7 +273,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							if ! skip {
 								modifier = GetModifyInfo(ns_info, key)
 								//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, key, ovalue, value, modifier)
-								updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",key, modifier))
+								updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s",key, modifier))
 							  if modifier != "" {
 									modifier_list = append(modifier_list, modifier)
 								}								
@@ -302,7 +302,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							}
 							modifier = GetModifyInfo(ns_info, path)
 							//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
-							updated_keys = append(updated_keys, fmt.Sprintf("key=%s__modifier=@%s",path, modifier))
+							updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s",path, modifier))
 							if modifier != "" {
 								modifier_list = append(modifier_list, modifier)
 							}								
@@ -312,6 +312,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						if enDelete {
 							for path, value := range update.OldValue {
 								if _,ok := update.NewValue[path]; ! ok {
+									deleted_keys = append(deleted_keys, k)
 									v, _ := value.(string)
 									consulMode = "del"
 									UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, v, consulMode)
@@ -320,9 +321,15 @@ func (cw *CWorker) Run(ctx context.Context){
 						}
 					}
 					//delete keys
-					for k, _ := range update.OldValue {
-						if _,ok := update.NewValue[k]; ! ok {
-							deleted_keys = append(deleted_keys, k)
+					if len(deleted_keys) > 0 {
+						if ! enDelete {
+							deleted_keys = []string{}
+						}
+					} else {
+						for k, _ := range update.OldValue {
+							if _,ok := update.NewValue[k]; ! ok {
+								deleted_keys = append(deleted_keys, k)
+							}
 						}
 					}
 					//record updated_keys except abtest
