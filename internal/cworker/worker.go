@@ -180,8 +180,7 @@ func GetModifyInfo(nsinfo *capi.NamespaceInfo, key string) (modifier string) {
 	return
 }
 
-func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *capi.NamespaceInfo) (updatecontent, updateconsulvalue, path string, updated_keys []string, willUpdateConsul bool) {
-	path := ""
+func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[string]interface{}, nsinfo *capi.NamespaceInfo) (updatecontent, updateconsulvalue, path string, updated_keys, modifier_list []string, willUpdateConsul bool) {
 	modifier := ""
 	bidforce_value := ""
 	abtest_value := ""
@@ -211,26 +210,26 @@ func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *
 			}								
 		}
 
-		if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) {
+		if strings.Contains(appID, ccommon.ABTestAppid) {
 			var abtest_valuemap abtesting.AbInfo
 			err := jsoniter.Unmarshal([]byte(value.(string)), &abtest_valuemap)
 			if err == nil {
-				if i < len(update.NewValue) {
+				if i < len(updateNewValue) {
 					abtest_value = abtest_value + value.(string) + ",\n"
 				} else {
 					abtest_value = abtest_value + value.(string) + "\n"
 				}
 			} else {
 				willUpdateConsul = false
-				ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
+				ccommon.CLogger.Error(appID,"#",cluster,"#",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
 			}
 			updateconsulvalue = "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]"
-		} else if strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
+		} else if strings.Contains(appID, ccommon.BidForceAppid) {
 			var bidforce_valuemap = BidForce{}
 			if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
 				bidforce_value = bidforce_value + strings.TrimSpace(value.(string)) + "\n"
 			} else {
-				ccommon.CLogger.Error(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",key,":", "\ntoml.Decode(bidforce_value failed, err:", err)
+				ccommon.CLogger.Error(appID,"#",cluster,"#",key,":", "\ntoml.Decode(bidforce_value failed, err:", err)
 				continue
 			}
 			updateconsulvalue = bidforce_value
@@ -274,7 +273,7 @@ func (cw *CWorker) Run(ctx context.Context){
 					ns_info,_ := capi.GetNamespaceInfo(url, token)
 					modifier_list := []string{}
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) || strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
-						updatecontent, updateconsulvalue, path, updated_keys, willUpdateConsul := MergeUpdate(update.NewValue,update.OldValue,ns_info)
+						updatecontent, updateconsulvalue, path, updated_keys, modifier_list, willUpdateConsul := MergeUpdate(cw.WkInfo.AppID, cw.WkInfo.Cluster, update.NewValue, update.OldValue, ns_info)
 						if path != "" {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, updateconsulvalue, consulMode)
 						}
