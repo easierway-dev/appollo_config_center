@@ -223,7 +223,7 @@ func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[strin
 				willUpdateConsul = false
 				ccommon.CLogger.Error(appID,"#",cluster,"#",key,":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
 			}
-			updateconsulvalue = "["+strings.Trim(strings.Trim(abtestvalue, "\n"),",")+"]"
+			updateconsulvalue = "["+strings.Trim(strings.Trim(abtest_value, "\n"),",")+"]"
 		} else if strings.Contains(appID, ccommon.BidForceAppid) {
 			var bidforce_valuemap = BidForce{}
 			if _, err := toml.Decode(value.(string), &bidforce_valuemap);err == nil {
