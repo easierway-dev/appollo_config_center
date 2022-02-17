@@ -75,9 +75,9 @@ type AppCfg struct {
 	DingKeys       []string `toml:"ding_keys"`
 	DingUsers	[]string `toml:"ding_users"`
 	DingUserMap  map[string]string `toml:"ding_user_map"` 
-	IsAtAll         bool `toml:"is_at_all"`
-	EnUpdateConsul	bool `toml:"enable_update_consul"`
-	EnDelConsul	bool `toml:"enable_delete_consul"`
+	IsAtAll         int `toml:"is_at_all"`
+	EnUpdateConsul	int `toml:"enable_update_consul"`
+	EnDelConsul	int `toml:"enable_delete_consul"`
 	ChklogRate float64 `toml:"log_rate"`
 	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
 }
@@ -92,14 +92,14 @@ type ClusterInfo struct {
 }
 
 type ConfigInfo struct {
-	DingKeys []string `toml:"ding_keys"`
-	DingUsers       []string `toml:"ding_users"`
-	DingUserMap  map[string]string `toml:"ding_user_map"`
-	IsAtAll         bool `toml:"is_at_all"`
-	EnUpdateConsul	bool `toml:"enable_update_consul"`
-	EnDelConsul	bool `toml:"enable_delete_consul"`
+	DingKeys []string `toml:"ding_keys"` //ding token
+	DingUsers       []string `toml:"ding_users"` //default ding @list
+	DingUserMap  map[string]string `toml:"ding_user_map"` //config real editor ding @list
+	IsAtAll         int `toml:"is_at_all"`  //1: atall 2:not atall
+	EnUpdateConsul	int `toml:"enable_update_consul"`  //1: enable update consul 2:not
+	EnDelConsul	int `toml:"enable_delete_consul"`  //1: enable delete consul 2:not
 	ChklogRate float64 `toml:"log_rate"`
-	AccessToken       string `toml:"access_token"`
+	AccessToken       string `toml:"access_token"` //apollo api auth token
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {

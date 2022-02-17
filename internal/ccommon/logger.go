@@ -46,14 +46,22 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
 	userMap = AppConfiger.DingUserMap
-	isAtall = AppConfiger.IsAtAll
+	isAtallTmp := AppConfiger.IsAtAll
 	//uniq appid config
 	if AppConfiger.AppConfigMap != nil {
 		if _,ok := AppConfiger.AppConfigMap[appid];ok {
-			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
-			dingusers = AppConfiger.AppConfigMap[appid].DingUsers
-			userMap = AppConfiger.AppConfigMap[appid].DingUserMap
-			isAtall = AppConfiger.AppConfigMap[appid].IsAtAll
+			if len(AppConfiger.AppConfigMap[appid].DingKeys) > 0 {
+				dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
+			}
+			if len(AppConfiger.AppConfigMap[appid].DingUsers) > 0{
+				dingusers = AppConfiger.AppConfigMap[appid].DingUsers
+			}					
+			for key,value := range AppConfiger.AppConfigMap[appid].DingUserMap {
+				userMap[key] = value
+			}
+			if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
+				isAtallTmp = dyAgoCfg.AppConfig.IsAtAll
+			}
 		} 		
 	}
 	//apollo global_config
@@ -70,7 +78,9 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 				for key,value := range dyAgoCfg.AppConfig.DingUserMap {
 					userMap[key] = value
 				}
-				isAtall = dyAgoCfg.AppConfig.IsAtAll
+				if dyAgoCfg.AppConfig.IsAtAll != 0 {
+					isAtallTmp = dyAgoCfg.AppConfig.IsAtAll
+				}
 			}
 			//uniq appid config
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
@@ -84,10 +94,15 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 					for key,value := range dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap {
 						userMap[key] = value
 					}
-					isAtall = dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll
+					if dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll != 0 {
+						isAtallTmp = dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll
+					}
 				} 
 			}
 		}
+        }
+        if isAtallTmp == 1 {
+        	isAtall = true
         }
 	return
 }
