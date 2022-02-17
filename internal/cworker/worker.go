@@ -187,11 +187,11 @@ func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *
 	abtest_value := ""
 	willUpdateConsul = true
 	i := 0
-	for key, value := range update.NewValue {
+	for key, value := range updateNewValue {
 		i = i + 1
 		v, _ := value.(string)
 		skip := false
-		ovalue, ok := update.OldValue[key]
+		ovalue, ok := updateOldValue[key]
 		if ok {
 			ov, _ := ovalue.(string)
 			if ov == v {
@@ -203,7 +203,7 @@ func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *
 			continue
 		}
 		if ! skip {
-			modifier = GetModifyInfo(ns_info, key)
+			modifier = GetModifyInfo(nsinfo, key)
 			updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nchangedby=%s\n", updatecontent, key, ovalue, value, modifier)
 			updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s",key, modifier))
 			if modifier != "" {
