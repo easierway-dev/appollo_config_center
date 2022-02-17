@@ -180,7 +180,7 @@ func GetModifyInfo(nsinfo *capi.NamespaceInfo, key string) (modifier string) {
 	return
 }
 
-func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *capi.NamespaceInfo) (updatecontent, updateconsulvalue, path string, updated_keys []string{}, willUpdateConsul bool) {
+func MergeUpdate(updateNewValue, updateOldValue map[string]interface{}, nsinfo *capi.NamespaceInfo) (updatecontent, updateconsulvalue, path string, updated_keys []string, willUpdateConsul bool) {
 	path := ""
 	modifier := ""
 	bidforce_value := ""
