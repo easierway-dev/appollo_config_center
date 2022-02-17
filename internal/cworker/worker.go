@@ -276,7 +276,7 @@ func (cw *CWorker) Run(ctx context.Context){
 						updateconsulvalue := ""
 						path := ""
 						updatecontent, updateconsulvalue, path, updated_keys, modifier_list, willUpdateConsul = MergeUpdate(cw.WkInfo.AppID, cw.WkInfo.Cluster, update.NewValue, update.OldValue, ns_info)
-						if path != "" {
+						if path != "" && willUpdateConsul {
 							UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, updateconsulvalue, consulMode)
 						}
 						//delete keys

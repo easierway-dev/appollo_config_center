@@ -57,6 +57,9 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 				dingusers = AppConfiger.AppConfigMap[appid].DingUsers
 			}					
 			for key,value := range AppConfiger.AppConfigMap[appid].DingUserMap {
+                                if userMap == nil {
+                                        userMap = map[string]string{}
+                                }
 				userMap[key] = value
 			}
 			if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
@@ -76,6 +79,9 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
 				}					
 				for key,value := range dyAgoCfg.AppConfig.DingUserMap {
+	                                if userMap == nil {
+	                                        userMap = map[string]string{}
+	                                }
 					userMap[key] = value
 				}
 				if dyAgoCfg.AppConfig.IsAtAll != 0 {
@@ -92,6 +98,9 @@ func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []stri
 						dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
 					}					
 					for key,value := range dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap {
+		                                if userMap == nil {
+		                                        userMap = map[string]string{}
+		                                }
 						userMap[key] = value
 					}
 					if dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll != 0 {
