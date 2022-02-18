@@ -94,8 +94,8 @@ func RemoveDuplicatesSlice(elements []string) []string {
 	if len(elements) <= 1 {
 		return elements
 	}
-	anyMap := make(map[int64]struct{}, len(elements))
-	ret := make([]int64, 0, len(elements))
+	anyMap := make(map[string]struct{}, len(elements))
+	ret := make([]string, 0, len(elements))
 	for _, ele := range elements {
 		if _, ok := anyMap[ele]; ok {
 			continue
