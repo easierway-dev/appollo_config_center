@@ -90,6 +90,22 @@ func Setup(wInfo WorkInfo)(*CWorker,error){
 	return work, nil
 }
 
+func RemoveDuplicatesSlice(elements []string) []string {
+	if len(elements) <= 1 {
+		return elements
+	}
+	anyMap := make(map[int64]struct{}, len(elements))
+	ret := make([]int64, 0, len(elements))
+	for _, ele := range elements {
+		if _, ok := anyMap[ele]; ok {
+			continue
+		}
+		ret = append(ret, ele)
+		anyMap[ele] = struct{}{}
+	}
+	return ret
+}
+
 func UpdateConsul(appid, namespace, cluster, key, value , mode string){
 	if ccommon.DyAgolloConfiger != nil {
 		if _,ok := ccommon.DyAgolloConfiger[namespace];!ok {
@@ -298,7 +314,7 @@ func (cw *CWorker) Run(ctx context.Context){
 								}
 							}
 							modifier = GetModifyInfo(ns_info, path)
-							//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
+							//updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\dunnew=%s\nmodifier=%s\n", updatecontent, path, ovalue, value, modifier)
 							updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s",path, modifier))
 							if modifier != "" {
 								modifier_list = append(modifier_list, modifier)
@@ -331,7 +347,7 @@ func (cw *CWorker) Run(ctx context.Context){
 							updatecontent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=",enDelete, " (1: support)")
 						}
 						if len(modifier_list) > 0 {
-							ccommon.CLogger.Warn(modifier_list, cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
+							ccommon.CLogger.Warn(RemoveDuplicatesSlice(modifier_list), cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
 						} else {
 							ccommon.CLogger.Warn(cw.WkInfo.AppID,"#",cw.WkInfo.Cluster,"#",update.Namespace,": \nupdatecontent:\n",updatecontent)
 						}
