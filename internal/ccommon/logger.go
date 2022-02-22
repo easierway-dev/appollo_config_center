@@ -149,6 +149,7 @@ func (this *ccLogger) Errorf(format string, args ...interface{}) {
 func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, userMap map[string]string, isAtAllTmp int) ([]string, []string, map[string]string, int) {
 	var dingKeys []string
 	var dingUsers []string
+	fmt.Println("userMap=",userMap)
 	if len(appConfigMap[appid].DingKeys) > 0 {
 		dingKeys = appConfigMap[appid].DingKeys
 	}
@@ -170,6 +171,7 @@ func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, userMap 
 func InitDyAppConfigMap(dyAppConfigMap *AppCfg, appid string, userMap map[string]string, isAtAllTmp int) ([]string, []string, map[string]string, int) {
 	var dingKeys []string
 	var dingUsers []string
+	fmt.Println("userMap=",userMap)
 	if len(dyAppConfigMap.AppConfigMap[appid].DingKeys) > 0 {
 		dingKeys = dyAppConfigMap.AppConfigMap[appid].DingKeys
 	}
