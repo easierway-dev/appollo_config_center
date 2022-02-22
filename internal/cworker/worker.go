@@ -120,16 +120,16 @@ func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
 	dyAgoCfg, ok := ccommon.DyAgolloConfiger[namespace]
 	if !ok {
 		namespace = ccommon.DefaultNamespace
-		if dyAgoCfg,ok= ccommon.DyAgolloConfiger[namespace];!ok{
+		if dyAgoCfg, ok = ccommon.DyAgolloConfiger[namespace]; !ok {
 			ccommon.CLogger.Warn(ccommon.DefaultDingType, namespace, " not in ccommon.DyAgolloConfiger[", ccommon.DyAgolloConfiger, "]")
 			return
 		}
 	}
-	if dyAgoCfg.ClusterConfig == nil  {
+	if dyAgoCfg.ClusterConfig == nil {
 		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
 		return
 	}
-	if dyAgoCfg.ClusterConfig.ClusterMap == nil{
+	if dyAgoCfg.ClusterConfig.ClusterMap == nil {
 		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
 		return
 	}
@@ -160,15 +160,18 @@ func GetAppInfo(appid, namespace string) (enUpdate, enDelete int, accessToken st
 	enDelete = ccommon.AppConfiger.AppConfigMap[appid].EnDelConsul
 	accessToken = ccommon.AppConfiger.AppConfigMap[appid].AccessToken
 	dyAgoCfg, ok := ccommon.DyAgolloConfiger[namespace]
-	//apollo global config
 	if !ok {
 		namespace = ccommon.DefaultNamespace
+		if dyAgoCfg, ok = ccommon.DyAgolloConfiger[namespace]; !ok {
+			return
+		}
+	}
+	if dyAgoCfg.AppConfig == nil {
 		return
 	}
-	if dyAgoCfg.AppConfig == nil && dyAgoCfg.AppConfig.AppConfigMap == nil {
+	if dyAgoCfg.AppConfig.AppConfigMap == nil {
 		return
 	}
-
 	enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
 	enDelete = dyAgoCfg.AppConfig.EnDelConsul
 
@@ -246,7 +249,7 @@ func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[strin
 		} else if strings.Contains(appID, ccommon.BidForceAppid) {
 			var bidForceValueMap = BidForce{}
 			_, err := toml.Decode(value.(string), &bidForceValueMap)
-			if  err != nil {
+			if err != nil {
 				ccommon.CLogger.Error(appID, "#", cluster, "#", key, ":", "\ntoml.Decode(bidforce_value failed, err:", err)
 				continue
 			}
@@ -307,7 +310,7 @@ func (cw *CWorker) Run(ctx context.Context) {
 					} else {
 						//新增、更新
 						for path, value := range update.NewValue {
-							if oValue, ok := update.OldValue[path];ok {
+							if oValue, ok := update.OldValue[path]; ok {
 								//未发生变化的key，跳过不更新
 								if oValue.(string) == value.(string) {
 									continue
