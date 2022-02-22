@@ -3,7 +3,6 @@ package ccommon
 import (
 	"errors"
 	"fmt"
-	"unicode"
 
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cnotify"
 	"gitlab.mobvista.com/voyager/zlog"
@@ -37,17 +36,16 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string, itype string) ( []string,  []string,  map[string]string,  bool) {
+func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []string, userMap map[string]string, isAtall bool) {
 	if appid == "" && itype == "info" {
 		return
 	}
 	//local config
 	namespace := DefaultNamespace
 	//default config
-	dingKeys := AppConfiger.DingKeys
-	dingusers := AppConfiger.DingUsers
-	userMap := make(map[string]string)
-	//userMap1 := make(map[string]string)
+	dingKeys = AppConfiger.DingKeys
+	dingusers = AppConfiger.DingUsers
+	userMap = AppConfiger.DingUserMap
 	isAtallTmp := AppConfiger.IsAtAll
 	//uniq appid config
 	if AppConfiger.AppConfigMap != nil {
@@ -151,14 +149,15 @@ func (this *ccLogger) Errorf(format string, args ...interface{}) {
 func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, userMap map[string]string, isAtAllTmp int) ([]string, []string, map[string]string, int) {
 	var dingKeys []string
 	var dingUsers []string
-	fmt.Println("3userMap=",userMap)
+	fmt.Println("userMap=",userMap)
+	fmt.Println("appConfigMap=",appConfigMap)
 	if len(appConfigMap[appid].DingKeys) > 0 {
 		dingKeys = appConfigMap[appid].DingKeys
 	}
 	if len(appConfigMap[appid].DingUsers) > 0 {
 		dingUsers = appConfigMap[appid].DingUsers
 	}
-
+	fmt.Println("count2:",len( appConfigMap[appid].DingUserMap))
 	for key, value := range appConfigMap[appid].DingUserMap {
 		if len(appConfigMap[appid].DingUserMap) == 0 {
 			break
@@ -174,13 +173,15 @@ func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, userMap 
 func InitDyAppConfigMap(dyAppConfigMap *AppCfg, appid string, userMap map[string]string, isAtAllTmp int) ([]string, []string, map[string]string, int) {
 	var dingKeys []string
 	var dingUsers []string
-	fmt.Println("1dyAppConfigMap",dyAppConfigMap)
+	fmt.Println("1userMap=",userMap)
+	fmt.Println("dyAppConfigMap=",dyAppConfigMap)
 	if len(dyAppConfigMap.AppConfigMap[appid].DingKeys) > 0 {
 		dingKeys = dyAppConfigMap.AppConfigMap[appid].DingKeys
 	}
 	if len(dyAppConfigMap.AppConfigMap[appid].DingUsers) > 0 {
 		dingUsers = dyAppConfigMap.AppConfigMap[appid].DingUsers
 	}
+	fmt.Println("count1:",len(dyAppConfigMap.AppConfigMap[appid].DingUserMap))
 	for key, value := range dyAppConfigMap.AppConfigMap[appid].DingUserMap {
 		if len(dyAppConfigMap.AppConfigMap[appid].DingUserMap) == 0 {
 			break
