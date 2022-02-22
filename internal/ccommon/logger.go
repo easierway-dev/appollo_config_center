@@ -47,12 +47,32 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	dingusers = AppConfiger.DingUsers
 	userMap = AppConfiger.DingUserMap
 	isAtAllTmp := AppConfiger.IsAtAll
+	for _,v := range dingKeys{
+		fmt.Println("dingKey为:"+v + "\n")
+	}
+	for _,v := range dingusers{
+		fmt.Println("dingusers为:"+v + "\n")
+	}
+	for k,v := range userMap{
+		fmt.Println("userMapKey为:"+k+" "+"userMapValue为"+v+"\n")
+	}
+	fmt.Println("isAtAllTmp为:"+string(isAtAllTmp))
 	//uniq appid config
 
 	dingKeys, dingusers, userMap, isAtAllTmp = InitAppConfigMap(AppConfiger.AppConfigMap, appid, isAtAllTmp)
+	for _,v := range dingKeys{
+		fmt.Println("dingKey为:"+v + "\n")
+	}
+	for _,v := range dingusers{
+		fmt.Println("dingusers为:"+v + "\n")
+	}
+	for k,v := range userMap{
+		fmt.Println("userMapKey为:"+k+" "+"userMapValue为"+v+"\n")
+	}
 	if DyAgolloConfiger == nil {
 		return
 	}
+	fmt.Println("isAtAllTmp为:"+string(isAtAllTmp))
 	//apollo global_config
 	dyAgoCfg, ok := DyAgolloConfiger[namespace]
 	if !ok {
@@ -60,8 +80,28 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	}
 	//default config
 	dingKeys, dingusers, userMap, isAtAllTmp = InitDyAppConfigMap(dyAgoCfg.AppConfig, appid, isAtAllTmp)
+	for _,v := range dingKeys{
+		fmt.Println("dingKey为:"+v + "\n")
+	}
+	for _,v := range dingusers{
+		fmt.Println("dingusers为:"+v + "\n")
+	}
+	for k,v := range userMap{
+		fmt.Println("userMapKey为:"+k+" "+"userMapValue为"+v+"\n")
+	}
+	fmt.Println("isAtAllTmp为:"+string(isAtAllTmp))
 	//uniq appid config
 	dingKeys, dingusers, userMap, isAtAllTmp = InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap, appid, isAtAllTmp)
+	for _,v := range dingKeys{
+		fmt.Println("dingKey为:"+v + "\n")
+	}
+	for _,v := range dingusers{
+		fmt.Println("dingusers为:"+v + "\n")
+	}
+	for k,v := range userMap{
+		fmt.Println("userMapKey为:"+k+" "+"userMapValue为"+v+"\n")
+	}
+	fmt.Println("isAtAllTmp为:"+string(isAtAllTmp))
 	if isAtAllTmp == 1 {
 		isAtAll = true
 	}
