@@ -48,68 +48,19 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	userMap = AppConfiger.DingUserMap
 	isAtAllTmp := AppConfiger.IsAtAll
 	//uniq appid config
-	if AppConfiger.AppConfigMap != nil {
-		if _, ok := AppConfiger.AppConfigMap[appid]; ok {
-			if len(AppConfiger.AppConfigMap[appid].DingKeys) > 0 {
-				dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
-			}
-			if len(AppConfiger.AppConfigMap[appid].DingUsers) > 0 {
-				dingusers = AppConfiger.AppConfigMap[appid].DingUsers
-			}
-			for key, value := range AppConfiger.AppConfigMap[appid].DingUserMap {
-				if userMap == nil {
-					userMap = map[string]string{}
-				}
-				userMap[key] = value
-			}
-			if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
-				isAtAllTmp = AppConfiger.AppConfigMap[appid].IsAtAll
-			}
-		}
+	InitAppConfigMap(AppConfiger.AppConfigMap,appid,isAtAllTmp)
+	if DyAgolloConfiger == nil {
+		return
 	}
 	//apollo global_config
-	if DyAgolloConfiger != nil {
-		if dyAgoCfg, ok := DyAgolloConfiger[namespace]; ok {
-			//default config
-			if dyAgoCfg.AppConfig != nil {
-				if len(dyAgoCfg.AppConfig.DingKeys) > 0 {
-					dingKeys = dyAgoCfg.AppConfig.DingKeys
-				}
-				if len(dyAgoCfg.AppConfig.DingUsers) > 0 {
-					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
-				}
-				for key, value := range dyAgoCfg.AppConfig.DingUserMap {
-					if userMap == nil {
-						userMap = map[string]string{}
-					}
-					userMap[key] = value
-				}
-				if dyAgoCfg.AppConfig.IsAtAll != 0 {
-					isAtAllTmp = dyAgoCfg.AppConfig.IsAtAll
-				}
-			}
-			//uniq appid config
-			if dyAgoCfg.AppConfig.AppConfigMap != nil {
-				if _, ok := dyAgoCfg.AppConfig.AppConfigMap[appid]; ok {
-					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys) > 0 {
-						dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
-					}
-					if len(dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers) > 0 {
-						dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
-					}
-					for key, value := range dyAgoCfg.AppConfig.AppConfigMap[appid].DingUserMap {
-						if userMap == nil {
-							userMap = map[string]string{}
-						}
-						userMap[key] = value
-					}
-					if dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll != 0 {
-						isAtAllTmp = dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll
-					}
-				}
-			}
-		}
+	dyAgoCfg, ok := DyAgolloConfiger[namespace]
+	if !ok {
+		return
 	}
+	//default config
+	InitDyAppConfigMap(dyAgoCfg.AppConfig,appid,isAtAllTmp)
+	//uniq appid config
+	InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap,appid,isAtAllTmp)
 	if isAtAllTmp == 1 {
 		isAtAll = true
 	}
@@ -181,4 +132,49 @@ func (this *ccLogger) Errorf(format string, args ...interface{}) {
 		return
 	}
 	this.Runtime.Errorf(format, args)
+}
+func InitAppConfigMap(appConfigMap map[string]ConfigInfo,appid string,isAtAllTmp int) (dingKeys []string, dingusers []string, userMap map[string]string, isAtAll bool){
+	if appConfigMap == nil {
+		return
+	}
+	if _, ok := appConfigMap[appid]; !ok {
+		return
+	}
+	if len(appConfigMap[appid].DingKeys) > 0 {
+		dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
+	}
+	if len(AppConfiger.AppConfigMap[appid].DingUsers) > 0 {
+		dingusers = AppConfiger.AppConfigMap[appid].DingUsers
+	}
+	for key, value := range AppConfiger.AppConfigMap[appid].DingUserMap {
+		if userMap == nil {
+			userMap = map[string]string{}
+		}
+		userMap[key] = value
+	}
+	if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
+		isAtAllTmp = AppConfiger.AppConfigMap[appid].IsAtAll
+	}
+	return
+}
+func InitDyAppConfigMap(dyAppConfigMap *AppCfg,appid string,isAtAllTmp int) (dingKeys []string, dingusers []string, userMap map[string]string, isAtAll bool){
+	if dyAppConfigMap == nil {
+		return
+	}
+	if len(dyAppConfigMap.AppConfigMap[appid].DingKeys) > 0 {
+		dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
+	}
+	if len(AppConfiger.AppConfigMap[appid].DingUsers) > 0 {
+		dingusers = AppConfiger.AppConfigMap[appid].DingUsers
+	}
+	for key, value := range AppConfiger.AppConfigMap[appid].DingUserMap {
+		if userMap == nil {
+			userMap = map[string]string{}
+		}
+		userMap[key] = value
+	}
+	if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
+		isAtAllTmp = AppConfiger.AppConfigMap[appid].IsAtAll
+	}
+	return
 }
