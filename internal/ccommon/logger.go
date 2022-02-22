@@ -76,6 +76,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	if isAtallTmp == 1 {
 		isAtall = true
 	}
+	fmt.Println("dingKeys=", dingKeys, "dingUsers=", dingusers, "appid=", appid, "userMap=", userMap)
 	return
 }
 
