@@ -1,14 +1,14 @@
 package cserver
 
 import (
-	"fmt"
-	"time"
 	"context"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/shima-park/agollo"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cworker"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cworker"
 )
 
 // NewAgolloServer 创建一个新的 AgolloServer
@@ -138,7 +138,7 @@ func (s *AgolloServer) Watch() {
 					if err == nil {
 						worker.Run(s.ctx)
 						ccommon.CLogger.Info(ccommon.InitDingType,"will setup worker: ", k.(string))
-						fmt.Println("will setup worker: ", k.(string))
+						fmt.Println(time.Now().Format("2006-01-02 15:04:05")+"will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k,worker)
 					} else {
