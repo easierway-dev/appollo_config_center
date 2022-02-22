@@ -45,12 +45,15 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	//default config
 	dingKeys = AppConfiger.DingKeys
 	dingusers = AppConfiger.DingUsers
-	userMap = AppConfiger.DingUserMap
+	userMap = make(map[string]string)
 	isAtallTmp := AppConfiger.IsAtAll
 	//uniq appid config
 	if AppConfiger.AppConfigMap != nil {
 		if _, ok := AppConfiger.AppConfigMap[appid]; ok {
-			dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(AppConfiger.AppConfigMap, appid, userMap,isAtallTmp)
+			dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(AppConfiger.AppConfigMap, appid,isAtallTmp)
+			for k, v := range userMap {
+				fmt.Println("userMapKey为:" + k + " " + "userMapValue为" + v + "\n")
+			}
 		}
 	}
 	for _, v := range dingKeys {
@@ -68,7 +71,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 		if dyAgoCfg, ok := DyAgolloConfiger[namespace]; ok {
 			//default config
 			if dyAgoCfg.AppConfig != nil {
-				dingKeys, dingusers, userMap, isAtallTmp = InitDyAppConfigMap(dyAgoCfg.AppConfig, appid, userMap,isAtallTmp)
+				dingKeys, dingusers, userMap, isAtallTmp = InitDyAppConfigMap(dyAgoCfg.AppConfig, appid,isAtallTmp)
 			}
 			for _, v := range dingKeys {
 				fmt.Println("dingKey为:" + v + "\n")
@@ -170,23 +173,15 @@ func (this *ccLogger) Errorf(format string, args ...interface{}) {
 	}
 	this.Runtime.Errorf(format, args)
 }
-func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, m map[string]string,isAtAllTmp int) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtAll int) {
+func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, isAtAllTmp int) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtAll int) {
+
 	if len(appConfigMap[appid].DingKeys) > 0 {
 		dingKeys = appConfigMap[appid].DingKeys
 	}
 	if len(appConfigMap[appid].DingUsers) > 0 {
 		dingUsers = appConfigMap[appid].DingUsers
 	}
-	for key, value := range m {
-		if m == nil {
-			break
-		}
-		userMap[key] = value
-	}
 	for key, value := range appConfigMap[appid].DingUserMap {
-		if userMap == nil {
-			userMap = map[string]string{}
-		}
 		userMap[key] = value
 	}
 	if appConfigMap[appid].IsAtAll != 0 {
@@ -194,23 +189,14 @@ func InitAppConfigMap(appConfigMap map[string]ConfigInfo, appid string, m map[st
 	}
 	return
 }
-func InitDyAppConfigMap(dyAppConfigMap *AppCfg, appid string, m map[string]string,isAtAllTmp int) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtAll int) {
+func InitDyAppConfigMap(dyAppConfigMap *AppCfg, appid string,isAtAllTmp int) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtAll int) {
 	if len(dyAppConfigMap.AppConfigMap[appid].DingKeys) > 0 {
 		dingKeys = dyAppConfigMap.AppConfigMap[appid].DingKeys
 	}
 	if len(dyAppConfigMap.AppConfigMap[appid].DingUsers) > 0 {
 		dingUsers = dyAppConfigMap.AppConfigMap[appid].DingUsers
 	}
-	for key, value := range m {
-		if m == nil {
-			break
-		}
-		userMap[key] = value
-	}
 	for key, value := range dyAppConfigMap.AppConfigMap[appid].DingUserMap {
-		if userMap == nil {
-			userMap = map[string]string{}
-		}
 		userMap[key] = value
 	}
 	if dyAppConfigMap.AppConfigMap[appid].IsAtAll != 0 {
