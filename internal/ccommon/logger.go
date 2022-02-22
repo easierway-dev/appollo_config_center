@@ -75,7 +75,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 			//if AppConfiger.AppConfigMap[appid].IsAtAll != 0 {
 			//	isAtallTmp = AppConfiger.AppConfigMap[appid].IsAtAll
 			//}
-			InitAppConfigMap(AppConfiger.AppConfigMap,appid,isAtallTmp)
+			dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(AppConfiger.AppConfigMap, appid, isAtallTmp)
 		}
 	}
 	for _, v := range dingKeys {
@@ -108,7 +108,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 				//if dyAgoCfg.AppConfig.IsAtAll != 0 {
 				//	isAtallTmp = dyAgoCfg.AppConfig.IsAtAll
 				//}
-				InitDyAppConfigMap(dyAgoCfg.AppConfig,appid,isAtallTmp)
+				dingKeys, dingusers, userMap, isAtallTmp = InitDyAppConfigMap(dyAgoCfg.AppConfig,appid,isAtallTmp)
 			}
 			//uniq appid config
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
@@ -128,7 +128,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 					//if dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll != 0 {
 					//	isAtallTmp = dyAgoCfg.AppConfig.AppConfigMap[appid].IsAtAll
 					//}
-					InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap,appid,isAtallTmp)
+					dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap,appid,isAtallTmp)
 				}
 			}
 		}
