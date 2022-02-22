@@ -108,28 +108,33 @@ func RemoveDuplicatesSlice(elements []string) []string {
 }
 
 func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
+	if value == "" {
+		//ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
+		fmt.Println("value is nil, will not update consul!!! cluster[", cluster, "],key[", key, "]\n")
+		return
+	}
 	if ccommon.DyAgolloConfiger == nil {
 		ccommon.CLogger.Warn(ccommon.DefaultDingType, "ccommon.DyAgolloConfiger = nil")
+		return
 	}
 	dyAgoCfg, ok := ccommon.DyAgolloConfiger[namespace]
 	if !ok {
 		namespace = ccommon.DefaultNamespace
-		ccommon.CLogger.Warn(ccommon.DefaultDingType, namespace, " not in ccommon.DyAgolloConfiger[", ccommon.DyAgolloConfiger, "]")
-		return
+		if dyAgoCfg,ok= ccommon.DyAgolloConfiger[namespace];!ok{
+			ccommon.CLogger.Warn(ccommon.DefaultDingType, namespace, " not in ccommon.DyAgolloConfiger[", ccommon.DyAgolloConfiger, "]")
+			return
+		}
 	}
-	if dyAgoCfg.ClusterConfig == nil && dyAgoCfg.ClusterConfig.ClusterMap == nil {
+	if dyAgoCfg.ClusterConfig == nil  {
 		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
 		return
 	}
-
+	if dyAgoCfg.ClusterConfig.ClusterMap == nil{
+		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
+		return
+	}
 	if _, ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster]; !ok {
 		ccommon.CLogger.Warn(ccommon.DefaultDingType, "cluster:", cluster, "not in  ccommon.DyAgolloConfiger[", namespace, "].ClusterConfig")
-		return
-
-	}
-	if value == "" {
-		//ccommon.CLogger.Warn(ccommon.DefaultDingType,"value is nil !!! consul_addr[",consulAddr,"],key[",key,"]\n")
-		fmt.Println("value is nil, will not update consul!!! cluster[", cluster, "],key[", key, "]\n")
 		return
 	}
 	consulAddrList := dyAgoCfg.ClusterConfig.ClusterMap[cluster].ConsulAddr
