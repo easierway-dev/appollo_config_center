@@ -175,21 +175,21 @@ func InitDyAppConfigMap(dyAppConfigMap *AppCfg, appid string, userMap map[string
 	var dingUsers []string
 	fmt.Println("1userMap=",userMap)
 	fmt.Println("dyAppConfigMap=",dyAppConfigMap)
-	if len(dyAppConfigMap.AppConfigMap[appid].DingKeys) > 0 {
-		dingKeys = dyAppConfigMap.AppConfigMap[appid].DingKeys
+	if len(dyAppConfigMap.DingKeys) > 0 {
+		dingKeys = dyAppConfigMap.DingKeys
 	}
-	if len(dyAppConfigMap.AppConfigMap[appid].DingUsers) > 0 {
-		dingUsers = dyAppConfigMap.AppConfigMap[appid].DingUsers
+	if len(dyAppConfigMap.DingUsers) > 0 {
+		dingUsers = dyAppConfigMap.DingUsers
 	}
-	fmt.Println("count1:",len(dyAppConfigMap.AppConfigMap[appid].DingUserMap))
-	for key, value := range dyAppConfigMap.AppConfigMap[appid].DingUserMap {
-		if len(dyAppConfigMap.AppConfigMap[appid].DingUserMap) == 0 {
+	fmt.Println("count1:",len(dyAppConfigMap.DingUserMap))
+	for key, value := range dyAppConfigMap.DingUserMap {
+		if len(dyAppConfigMap.DingUserMap) == 0 {
 			break
 		}
 		userMap[key] = value
 	}
-	if dyAppConfigMap.AppConfigMap[appid].IsAtAll != 0 {
-		isAtAllTmp = dyAppConfigMap.AppConfigMap[appid].IsAtAll
+	if dyAppConfigMap.IsAtAll != 0 {
+		isAtAllTmp = dyAppConfigMap.IsAtAll
 	}
 	fmt.Println("2userMap=",userMap)
 	return dingKeys, dingUsers, userMap, isAtAllTmp
