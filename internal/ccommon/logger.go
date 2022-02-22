@@ -50,7 +50,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	//uniq appid config
 	if AppConfiger.AppConfigMap != nil {
 		if _, ok := AppConfiger.AppConfigMap[appid]; ok {
-			dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(AppConfiger, appid, userMap, isAtallTmp)
+			dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(AppConfiger, userMap, isAtallTmp)
 			fmt.Println("dingKeys=", dingKeys, "dingUsers=", dingusers, "appid=", appid, "AppConfiger.AppConfigMap=", AppConfiger.AppConfigMap)
 		}
 	}
@@ -59,14 +59,14 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 		if dyAgoCfg, ok := DyAgolloConfiger[namespace]; ok {
 			//default config
 			if dyAgoCfg.AppConfig != nil {
-				dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(dyAgoCfg.AppConfig, appid, userMap, isAtallTmp)
+				dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(dyAgoCfg.AppConfig, userMap, isAtallTmp)
 				fmt.Println("dingKeys=", dingKeys, "dingUsers=", dingusers, "appid=", appid, "dyAgoCfg.AppConfig =", dyAgoCfg.AppConfig)
 			}
 
 			//uniq appid config
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _, ok := dyAgoCfg.AppConfig.AppConfigMap[appid]; ok {
-					dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(dyAgoCfg.AppConfig, appid, userMap, isAtallTmp)
+					dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(dyAgoCfg.AppConfig, userMap, isAtallTmp)
 				}
 				fmt.Println("dingKeys=", dingKeys, "dingUsers=", dingusers, "appid=", appid, "dyAgoCfg.AppConfig.AppConfigMap=", dyAgoCfg.AppConfig.AppConfigMap)
 			}
