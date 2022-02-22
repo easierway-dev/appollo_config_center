@@ -86,7 +86,7 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 			//uniq appid config
 			if dyAgoCfg.AppConfig.AppConfigMap != nil {
 				if _, ok := dyAgoCfg.AppConfig.AppConfigMap[appid]; ok {
-					dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap, appid, userMap,isAtallTmp)
+					//dingKeys, dingusers, userMap, isAtallTmp = InitAppConfigMap(dyAgoCfg.AppConfig.AppConfigMap, appid, userMap,isAtallTmp)
 				}
 			}
 		}
