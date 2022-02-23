@@ -216,9 +216,11 @@ func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
 	return nil
 }
 func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigInfo) {
+	configInfo := &ConfigInfo{}
 	// 本地配置文件初始化
 	fmt.Println("appConfig=",appConfig)
-	ConfigerInfo.InitDyConfigerInfo(appConfig, appid, appConfig.AppConfigMap)
+	configInfo.InitDyConfigerInfo(appConfig, appid, appConfig.AppConfigMap)
+	fmt.Println("configInfo1=",configInfo)
 	dyAgoCfg, ok := DyAgolloConfiger[namespace]
 	if !ok {
 		namespace = DefaultNamespace
@@ -228,11 +230,11 @@ func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigI
 	}
 	// Apollo global_config初始化
 	fmt.Println("dyAgoCfg.AppConfig=",dyAgoCfg.AppConfig)
-	ConfigerInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
-	return ConfigerInfo
+	configInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
+	fmt.Println("configInfo2=",configInfo)
+	return configInfo
 }
-func(conFigInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
-	configInfo := &ConfigInfo{}
+func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
 	if appcfg == nil{
 		return
 	}
