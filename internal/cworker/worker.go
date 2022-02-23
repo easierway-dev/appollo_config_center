@@ -283,6 +283,7 @@ func (cw *CWorker) Run(ctx context.Context) {
 			case update := <-watchCh:
 				consulMode := "write"
 				ccommon.Configer = ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
+				fmt.Println("ccommon.Configer=",ccommon.Configer)
 				enConsul := ccommon.Configer.EnUpdateConsul
 				enDelete := ccommon.Configer.EnDelConsul
 				token := ccommon.Configer.AccessToken
