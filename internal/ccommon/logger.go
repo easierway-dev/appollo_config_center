@@ -40,15 +40,13 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingUsers []str
 		return
 	}
 	//local config
-	namespace := DefaultNamespace
 	//default config
 	isAtallTmp := 0
 	//uniq appid config
-	configInfo := InitAppCfgMap(AppConfiger, appid, namespace)
-	dingKeys = configInfo.DingKeys
-	dingUsers = configInfo.DingUsers
-	userMap = configInfo.DingUserMap
-	isAtallTmp = configInfo.IsAtAll
+	dingKeys = Configer.DingKeys
+	dingUsers = Configer.DingUsers
+	userMap = Configer.DingUserMap
+	isAtallTmp = Configer.IsAtAll
 	if isAtallTmp == 1 {
 		isAtall = true
 	}

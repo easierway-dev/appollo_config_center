@@ -12,6 +12,7 @@ var AgolloConfiger *AgolloCfg
 var DyAgolloConfiger map[string]*DyAgolloCfg
 
 var AppConfiger *AppCfg
+var Configer *ConfigInfo
 var ChklogRamdom float64
 var ChklogRate float64
 
@@ -214,22 +215,22 @@ func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
 
 	return nil
 }
-func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigInfo) {
+func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) *ConfigInfo {
 	configInfo := &ConfigInfo{}
 	// 本地配置文件初始化
-	configInfo.InitDyConfigerInfo(appConfig, appid, appConfig.AppConfigMap)
+	configInfo.InitDyConfigerInfo(appConfig, appid)
 	dyAgoCfg, ok := DyAgolloConfiger[namespace]
 	if !ok {
 		namespace = DefaultNamespace
 		if dyAgoCfg, ok = DyAgolloConfiger[namespace]; !ok {
-			return
+			return configInfo
 		}
 	}
 	// Apollo global_config初始化
-	configInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
+	configInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid)
 	return configInfo
 }
-func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
+func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string){
 	if appcfg == nil{
 		return
 	}
@@ -240,34 +241,34 @@ func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg 
 	configInfo.EnUpdateConsul = appcfg.EnUpdateConsul
 	configInfo.EnDelConsul = appcfg.EnDelConsul
 	configInfo.ChklogRate = appcfg.ChklogRate
-	if cfg == nil {
+	if appcfg.AppConfigMap == nil {
 		return
 	}
-	if _,ok := cfg[appid];!ok{
+	if _,ok := appcfg.AppConfigMap[appid];!ok{
 		return
 	}
-	if len(cfg[appid].DingKeys) > 0 {
-		configInfo.DingKeys = cfg[appid].DingKeys
+	if len(appcfg.AppConfigMap[appid].DingKeys) > 0 {
+		configInfo.DingKeys = appcfg.AppConfigMap[appid].DingKeys
 	}
-	if len(cfg[appid].DingUsers) > 0 {
-		configInfo.DingUsers = cfg[appid].DingUsers
+	if len(appcfg.AppConfigMap[appid].DingUsers) > 0 {
+		configInfo.DingUsers = appcfg.AppConfigMap[appid].DingUsers
 	}
-	for key, value := range cfg[appid].DingUserMap {
+	for key, value := range appcfg.AppConfigMap[appid].DingUserMap {
 		if configInfo.DingUserMap == nil {
 			configInfo.DingUserMap = make(map[string]string)
 		}
 		configInfo.DingUserMap[key] = value
 	}
-	if cfg[appid].IsAtAll != 0 {
-		configInfo.IsAtAll = cfg[appid].IsAtAll
+	if appcfg.AppConfigMap[appid].IsAtAll != 0 {
+		configInfo.IsAtAll = appcfg.AppConfigMap[appid].IsAtAll
 	}
-	if cfg[appid].EnUpdateConsul != 0 {
-		configInfo.EnUpdateConsul = cfg[appid].EnUpdateConsul
+	if appcfg.AppConfigMap[appid].EnUpdateConsul != 0 {
+		configInfo.EnUpdateConsul = appcfg.AppConfigMap[appid].EnUpdateConsul
 	}
-	if cfg[appid].EnDelConsul != 0 {
-		configInfo.EnDelConsul = cfg[appid].EnDelConsul
+	if appcfg.AppConfigMap[appid].EnDelConsul != 0 {
+		configInfo.EnDelConsul = appcfg.AppConfigMap[appid].EnDelConsul
 	}
-	if cfg[appid].AccessToken != "" {
-		configInfo.AccessToken = cfg[appid].AccessToken
+	if appcfg.AppConfigMap[appid].AccessToken != "" {
+		configInfo.AccessToken = appcfg.AppConfigMap[appid].AccessToken
 	}
 }

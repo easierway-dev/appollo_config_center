@@ -281,10 +281,10 @@ func (cw *CWorker) Run(ctx context.Context) {
 				}
 			case update := <-watchCh:
 				consulMode := "write"
-				configInfo := ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
-				enConsul := configInfo.EnUpdateConsul
-				enDelete := configInfo.EnDelConsul
-				token := configInfo.AccessToken
+				ccommon.Configer = ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
+				enConsul := ccommon.Configer.EnUpdateConsul
+				enDelete := ccommon.Configer.EnDelConsul
+				token := ccommon.Configer.AccessToken
 				//enConsul, enDelete, token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
 				if enConsul != 1 {
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
