@@ -9,6 +9,6 @@ require (
 	github.com/json-iterator/go v1.1.9
 	github.com/shima-park/agollo v1.2.10
 	github.com/stretchr/objx v0.1.1 // indirect
-	//gitlab.mobvista.com/voyager/abtesting v0.1.8
-	//gitlab.mobvista.com/voyager/zlog v0.0.9
+	gitlab.mobvista.com/voyager/abtesting v0.1.8
+	gitlab.mobvista.com/voyager/zlog v0.0.9
 )

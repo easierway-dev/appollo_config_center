@@ -226,7 +226,7 @@ func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[strin
 		}
 		if !skip {
 			modifier = GetModifyInfo(nsinfo, key)
-			updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nchangedby=%s\n", updatecontent, key, oValue, value, modifier)
+			updatecontent = fmt.Sprintf("%s\nkey=%s\nold=%s\nnew=%s\nchangedby=%s\n", updatecontent, key, oValue.(string), value, modifier)
 			updated_keys = append(updated_keys, fmt.Sprintf("update_key=%s__changedby=%s", key, modifier))
 			if modifier != "" {
 				modifier_list = append(modifier_list, modifier)
