@@ -13,7 +13,7 @@ white = [ "pioneer"]
 
 [[mappingrules]]
 [mappingrules.dmp]
-white = [ "dmp",]
+white = [ "dmp_server",]
 
 [[mappingrules]]
 [mappingrules.juno]
