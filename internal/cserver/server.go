@@ -135,6 +135,7 @@ func (s *AgolloServer) Watch() {
 			s.regworkers.Range(func(k, v interface{}) bool {
 				if _, ok := s.runningworkers.Load(k); !ok {
 					worker, err := cworker.Setup(v.(cworker.WorkInfo))
+``					fmt.Println("cworker.WorkInfo=",v.(cworker.WorkInfo))
 					if err == nil {
 						worker.Run(s.ctx)
 						ccommon.CLogger.Info(ccommon.InitDingType, "will setup worker: ", k.(string))

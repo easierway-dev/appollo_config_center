@@ -352,7 +352,7 @@ func (cw *CWorker) Run(ctx context.Context) {
 					ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
 					if willUpdateConsul {
 						if updateContent == "" {
-							updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=", enDelete, " (1: support)")
+							updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=", string(enDelete), " (1: support)")
 						}
 						if len(modifierList) > 0 {
 							ccommon.CLogger.Warn(RemoveDuplicatesSlice(modifierList), cw.WkInfo.AppID, "#", cw.WkInfo.Cluster, "#", update.Namespace, ": \nupdatecontent:\n", updateContent)
