@@ -3,7 +3,6 @@ package ccommon
 import (
 	"errors"
 	"fmt"
-
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cnotify"
 	"gitlab.mobvista.com/voyager/zlog"
 )
@@ -36,7 +35,7 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []string, userMap map[string]string, isAtall bool) {
+func GetDingInfo(appid string, itype string) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtall bool) {
 	if appid == "" && itype == "info" {
 		return
 	}
@@ -45,12 +44,11 @@ func GetDingInfo(appid string, itype string) (dingKeys []string, dingusers []str
 	//default config
 	isAtallTmp := 0
 	//uniq appid config
-	dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(AppConfiger, appid)
-	if DyAgolloConfiger != nil {
-		if dyAgoCfg, ok := DyAgolloConfiger[namespace]; ok {
-			dingKeys, dingusers, userMap, isAtallTmp = InitAppCfgMap(dyAgoCfg.AppConfig, appid)
-		}
-	}
+	configInfo := InitAppCfgMap(AppConfiger, appid, namespace)
+	dingKeys = configInfo.DingKeys
+	dingUsers = configInfo.DingUsers
+	userMap = configInfo.DingUserMap
+	isAtallTmp = configInfo.IsAtAll
 	if isAtallTmp == 1 {
 		isAtall = true
 	}
@@ -123,34 +121,4 @@ func (this *ccLogger) Errorf(format string, args ...interface{}) {
 	}
 	this.Runtime.Errorf(format, args)
 }
-func InitAppCfgMap(appConfig *AppCfg, appid string) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtAllTmp int) {
-	if appConfig == nil{
-		return
-	}
-	dingKeys = appConfig.DingKeys
-	dingUsers = appConfig.DingUsers
-	userMap = appConfig.DingUserMap
-	isAtAllTmp = appConfig.IsAtAll
-	if appConfig.AppConfigMap == nil {
-		return
-	}
-	if _,ok := appConfig.AppConfigMap[appid];!ok{
-		return
-	}
-	if len(appConfig.AppConfigMap[appid].DingKeys) > 0 {
-		dingKeys = appConfig.AppConfigMap[appid].DingKeys
-	}
-	if len(appConfig.AppConfigMap[appid].DingUsers) > 0 {
-		dingUsers = appConfig.AppConfigMap[appid].DingUsers
-	}
-	for key, value := range appConfig.AppConfigMap[appid].DingUserMap {
-		if userMap == nil {
-			userMap = make(map[string]string)
-		}
-		userMap[key] = value
-	}
-	if appConfig.AppConfigMap[appid].IsAtAll != 0 {
-		isAtAllTmp = appConfig.AppConfigMap[appid].IsAtAll
-	}
-	return
-}
+

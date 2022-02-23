@@ -281,7 +281,11 @@ func (cw *CWorker) Run(ctx context.Context) {
 				}
 			case update := <-watchCh:
 				consulMode := "write"
-				enConsul, enDelete, token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
+				configInfo := ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
+				enConsul := configInfo.EnUpdateConsul
+				enDelete := configInfo.EnDelConsul
+				token := configInfo.AccessToken
+				//enConsul, enDelete, token := GetAppInfo(cw.WkInfo.AppID, update.Namespace)
 				if enConsul != 1 {
 					ccommon.CLogger.Warn(cw.WkInfo.AppID, "is not permit to update consul")
 					ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
