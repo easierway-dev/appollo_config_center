@@ -54,7 +54,7 @@ rtdsp_bidforce = [ "config/dsp-retarget/server/BidForce",]
 
 [pioneer.namespace]
 m_bidforce = [ "config/pioneer/direct_recall",]
-application = [ "clb/pioneer/cpu_threshold.json", "clb/pioneer/instance_factor.json", "clb/pioneer/onlinelab_factor.json", "clb/pioneer/zone_cpu.json", "config/pioneer/abtest", "config/pioneer/hystrix", "config/pioneer/log", "config/pioneer/redis", "config/pioneer/server", "consul/pioneer/factor_map.json",]
+application = [ "clb/pioneer/cpu_threshold.json", "clb/pioneer/instance_factor.json", "clb/pioneer/onlinelab_factor.json", "clb/pioneer/zone_cpu.json", "config/pioneer/abtest", "config/pioneer/hystrix", "config/pioneer/log", "config/pioneer/redis", "config/pioneer/server", "consul/pioneer/factor_map.json", "mrpc/pioneer-server",]
 abtesting = [ "abtest/abtest_info",]
 dsp_bidforce = [ "config/mvdsp/BidForce",]
 rtdsp_bidforce = [ "config/dsp-retarget/server/BidForce",]
