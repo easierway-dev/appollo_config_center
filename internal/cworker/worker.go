@@ -130,7 +130,7 @@ func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
 		return
 	}
 	if dyAgoCfg.ClusterConfig.ClusterMap == nil {
-		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
+		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger.ClusterConfig[", namespace, "]=", dyAgoCfg.ClusterConfig)
 		return
 	}
 	if _, ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster]; !ok {
@@ -148,48 +148,48 @@ func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
 	return
 }
 
-func GetAppInfo(appid, namespace string) (enUpdate, enDelete int, accessToken string) {
-	//local config
-	if ccommon.AppConfiger.AppConfigMap == nil && ccommon.DyAgolloConfiger == nil {
-		return
-	}
-	if _, ok := ccommon.AppConfiger.AppConfigMap[appid]; !ok {
-		return
-	}
-	enUpdate = ccommon.AppConfiger.AppConfigMap[appid].EnUpdateConsul
-	enDelete = ccommon.AppConfiger.AppConfigMap[appid].EnDelConsul
-	accessToken = ccommon.AppConfiger.AppConfigMap[appid].AccessToken
-	dyAgoCfg, ok := ccommon.DyAgolloConfiger[namespace]
-	if !ok {
-		namespace = ccommon.DefaultNamespace
-		if dyAgoCfg, ok = ccommon.DyAgolloConfiger[namespace]; !ok {
-			return
-		}
-	}
-	if dyAgoCfg.AppConfig == nil {
-		return
-	}
-	if dyAgoCfg.AppConfig.AppConfigMap == nil {
-		return
-	}
-	enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
-	enDelete = dyAgoCfg.AppConfig.EnDelConsul
-
-	if _, ok := dyAgoCfg.AppConfig.AppConfigMap[appid]; !ok {
-		return
-	}
-
-	if dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul != 0 {
-		enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
-	}
-	if dyAgoCfg.AppConfig.AppConfigMap[appid].EnDelConsul != 0 {
-		enDelete = dyAgoCfg.AppConfig.AppConfigMap[appid].EnDelConsul
-	}
-	if dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken != "" {
-		accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
-	}
-	return
-}
+//func GetAppInfo(appid, namespace string) (enUpdate, enDelete int, accessToken string) {
+//	//local config
+//	if ccommon.AppConfiger.AppConfigMap == nil && ccommon.DyAgolloConfiger == nil {
+//		return
+//	}
+//	if _, ok := ccommon.AppConfiger.AppConfigMap[appid]; !ok {
+//		return
+//	}
+//	enUpdate = ccommon.AppConfiger.AppConfigMap[appid].EnUpdateConsul
+//	enDelete = ccommon.AppConfiger.AppConfigMap[appid].EnDelConsul
+//	accessToken = ccommon.AppConfiger.AppConfigMap[appid].AccessToken
+//	dyAgoCfg, ok := ccommon.DyAgolloConfiger[namespace]
+//	if !ok {
+//		namespace = ccommon.DefaultNamespace
+//		if dyAgoCfg, ok = ccommon.DyAgolloConfiger[namespace]; !ok {
+//			return
+//		}
+//	}
+//	if dyAgoCfg.AppConfig == nil {
+//		return
+//	}
+//	if dyAgoCfg.AppConfig.AppConfigMap == nil {
+//		return
+//	}
+//	enUpdate = dyAgoCfg.AppConfig.EnUpdateConsul
+//	enDelete = dyAgoCfg.AppConfig.EnDelConsul
+//
+//	if _, ok := dyAgoCfg.AppConfig.AppConfigMap[appid]; !ok {
+//		return
+//	}
+//
+//	if dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul != 0 {
+//		enUpdate = dyAgoCfg.AppConfig.AppConfigMap[appid].EnUpdateConsul
+//	}
+//	if dyAgoCfg.AppConfig.AppConfigMap[appid].EnDelConsul != 0 {
+//		enDelete = dyAgoCfg.AppConfig.AppConfigMap[appid].EnDelConsul
+//	}
+//	if dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken != "" {
+//		accessToken = dyAgoCfg.AppConfig.AppConfigMap[appid].AccessToken
+//	}
+//	return
+//}
 
 func GetModifyInfo(nsinfo *capi.NamespaceInfo, key string) (modifier string) {
 	if nsinfo == nil {
@@ -239,6 +239,7 @@ func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[strin
 			if err != nil {
 				willUpdateConsul = false
 				ccommon.CLogger.Error(appID, "#", cluster, "#", key, ":", "\njsoniter.Unmarshal(abtest_value failed, err:", err)
+				return
 			}
 			if i < len(updateNewValue) {
 				abtestValue += value.(string) + ",\n"
