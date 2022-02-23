@@ -217,6 +217,7 @@ func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
 }
 func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigInfo) {
 	// 本地配置文件初始化
+	fmt.Println("appConfig=",appConfig)
 	ConfigerInfo.InitDyConfigerInfo(appConfig, appid, appConfig.AppConfigMap)
 	dyAgoCfg, ok := DyAgolloConfiger[namespace]
 	if !ok {
@@ -226,6 +227,7 @@ func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigI
 		}
 	}
 	// Apollo global_config初始化
+	fmt.Println("dyAgoCfg.AppConfig=",dyAgoCfg.AppConfig)
 	ConfigerInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
 	return ConfigerInfo
 }
