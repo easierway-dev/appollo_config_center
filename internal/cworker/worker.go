@@ -298,6 +298,8 @@ func (cw *CWorker) Run(ctx context.Context) {
 					modifier := ""
 					willUpdateConsul := true
 					var modifierList []string
+					fmt.Println("update.New=",update.NewValue)
+					fmt.Println("update.Old=",update.OldValue)
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					nsInfo, _ := capi.GetNamespaceInfo(url, token)
 					if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) || strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
