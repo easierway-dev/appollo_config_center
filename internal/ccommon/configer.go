@@ -231,7 +231,8 @@ func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigI
 	ConfigerInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
 	return ConfigerInfo
 }
-func(configInfo ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
+func(conFigInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
+	configInfo := &ConfigInfo{}
 	if appcfg == nil{
 		return
 	}
