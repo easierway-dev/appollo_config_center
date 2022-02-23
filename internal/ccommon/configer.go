@@ -227,9 +227,9 @@ func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) (cfgInfo *ConfigI
 	}
 	// Apollo global_config初始化
 	ConfigerInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid,dyAgoCfg.AppConfig.AppConfigMap)
-	return
+	return ConfigerInfo
 }
-func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
+func(configInfo ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string,cfg map[string]ConfigInfo){
 	if appcfg == nil{
 		return
 	}
