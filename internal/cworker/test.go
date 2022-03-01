@@ -53,7 +53,7 @@ func (cw *CWorker) Run1(ctx context.Context) {
 					url2 := fmt.Sprintf("http://%s/openapi/v1/apps",ccommon.AgolloConfiger.PortalURL)
 					appInfo, _ := capi.GetAppInfo(url2, ccommon.Configer.AccessToken)
 					fmt.Println("url2=",url2)
-					fmt.Println("ecinfo=",appInfo)
+					fmt.Println("appInfo=",appInfo)
 					// 除dsp之外的业务线
 					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul,nsInfo)
 					if !isSuccess{

@@ -59,15 +59,14 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 	}
 	return
 }
-func GetEnvClustersInfo(url, token string) (respBody *EnvClustersInfo, err error) {
+func GetEnvClustersInfo(url, token string) (respBody []*EnvClustersInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
 	fmt.Println("envBody=",body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
 	}
-	var envClustersInfo []EnvClustersInfo
-	err = json.Unmarshal([]byte(body), &envClustersInfo)
+	err = json.Unmarshal([]byte(body), &respBody)
 	//fmt.Println("\nxxdebugresp_body=",resp_body, "\nxxdebugerr=",err)
 	if err != nil {
 		fmt.Println("Unmarshal EnvClustersInfo err=", err)
@@ -75,14 +74,13 @@ func GetEnvClustersInfo(url, token string) (respBody *EnvClustersInfo, err error
 	}
 	return
 }
-func GetAppInfo(url, token string) (respBody *AppInfo, err error) {
+func GetAppInfo(url, token string) (respBody []*AppInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
 	}
-	var appInfo []AppInfo
-	err = json.Unmarshal([]byte(body), &appInfo)
+	err = json.Unmarshal([]byte(body), &respBody)
 	//fmt.Println("\nxxdebugresp_body=",resp_body, "\nxxdebugerr=",err)
 	if err != nil {
 		fmt.Println("Unmarshal AppInfo err=", err)
