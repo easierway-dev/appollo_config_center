@@ -34,7 +34,6 @@ func (cw *CWorker) Run1(ctx context.Context) {
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType, "Error:", err)
 				}
 			case update := <-watchCh:
-				consulMode := "write"
 				// 全局配置
 				ccommon.Configer = ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
 				fmt.Println("ccommon.Configer=", ccommon.Configer)
@@ -46,13 +45,24 @@ func (cw *CWorker) Run1(ctx context.Context) {
 				} else {
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					nsInfo, _ := capi.GetNamespaceInfo(url, ccommon.Configer.AccessToken)
+					fmt.Println("cw.WkInfo.AppID=",cw.WkInfo.AppID)
+					url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters",ccommon.AgolloConfiger.PortalURL,cw.WkInfo.AppID)
+					ecinfo, _ := capi.GetEnvClustersInfo(url1, ccommon.Configer.AccessToken)
+					fmt.Println("url1=",url1)
+					fmt.Println("ecinfo=",ecinfo)
+					url2 := fmt.Sprintf("http://%s/openapi/v1/apps",ccommon.AgolloConfiger.PortalURL)
+					appInfo, _ := capi.GetAppInfo(url2, ccommon.Configer.AccessToken)
+					fmt.Println("url2=",url2)
+					fmt.Println("ecinfo=",appInfo)
 					// 除dsp之外的业务线
-					isSuccess := isContainsExceptDsp(cw, update, consulMode, updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul,nsInfo)
+					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul,nsInfo)
 					if !isSuccess{
-						//新增、更新
-						updatedKeys, modifierList = newAndCreate(cw, update,nsInfo,consulMode)
-						//删除
-						deletedKeys = del(cw,ccommon.Configer.EnDelConsul,update,consulMode)
+						// 获取更新的key更新consul
+						updatedKeys, modifierList = getUpdatedKey(cw, update,nsInfo,"write")
+						// 删除操作并更新consul
+						if ccommon.Configer.EnDelConsul == 1{
+							deletedKeys = getDeleteKey(cw,update,"del")
+						}
 					}
 					//只有abtest显示更新内容的详情，其他都只提示变更的key
 					if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); !find && len(updatedKeys) > 0 {
@@ -63,13 +73,13 @@ func (cw *CWorker) Run1(ctx context.Context) {
 						updateContent = fmt.Sprintf("%s\n\ndelelte_key=%s", updateContent, strings.Join(deletedKeys, "#"))
 					}
 					ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
-					isLogUpdateConsuelInfo(cw,willUpdateConsul,update,updateContent,modifierList)
+					//isLogUpdateContentToDingDing(cw,willUpdateConsul,update,updateContent,modifierList)
 				}
 			}
 		}
 	}(cw)
 }
-func isLogUpdateConsuelInfo(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse,updateContent string,modifierList []string) {
+func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse,updateContent string,modifierList []string) {
 	if willUpdateConsul {
 		if updateContent == "" {
 			updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=%s", string(ccommon.Configer.EnDelConsul), " (1: support)")
@@ -101,7 +111,7 @@ func isContainsExceptDsp(cw *CWorker,update *agollo.ApolloResponse,consulMode st
 	}
 	return false
 }
-func newAndCreate(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.NamespaceInfo,consulMode string)(updatedKeys []string,modifierList []string) {
+func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.NamespaceInfo,consulMode string)(updatedKeys []string,modifierList []string) {
 	//新增、更新
 	for path, value := range update.NewValue {
 		if oValue, ok := update.OldValue[path]; ok {
@@ -120,15 +130,13 @@ func newAndCreate(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.Namesp
 	}
 	return
 }
-func del(cw *CWorker, enDelete int, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string){
+func getDeleteKey(cw *CWorker, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string){
 	//删除
-	if enDelete == 1 {
 		for path, value := range update.OldValue {
 			if _, ok := update.NewValue[path]; !ok {
 				deletedKeys = append(deletedKeys, path)
 				UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, value.(string), consulMode)
 			}
 		}
-	}
 	return
 }
