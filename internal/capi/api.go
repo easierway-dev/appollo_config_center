@@ -47,6 +47,7 @@ type AppInfo struct {
 
 func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
+	fmt.Println("nameSpacebody=",body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
@@ -61,6 +62,7 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 }
 func GetEnvClustersInfo(url, token string) (respBody *EnvClustersInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
+	fmt.Println("envBody=",body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
@@ -76,6 +78,7 @@ func GetEnvClustersInfo(url, token string) (respBody *EnvClustersInfo, err error
 }
 func GetAppInfo(url, token string) (respBody *AppInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
+	fmt.Println("appBody=",body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
