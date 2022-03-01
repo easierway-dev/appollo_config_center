@@ -30,7 +30,7 @@ type NamespaceInfo struct {
 }
 type EnvClustersInfo struct {
 	Env      string              `toml:"env"`
-	Clusters map[string][]string `toml:"clusters"`
+	Clusters []string `toml:"clusters"`
 }
 type AppInfo struct {
 	Name                       string `toml:"name"`
