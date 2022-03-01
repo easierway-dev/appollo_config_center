@@ -50,9 +50,9 @@ func (cw *CWorker) Run1(ctx context.Context) {
 					isSuccess := isContainsExceptDsp(cw, update, consulMode, updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul,nsInfo)
 					if !isSuccess{
 						//新增、更新
-						newAndCreate(cw, update,updatedKeys,modifierList,nsInfo,consulMode)
+						updatedKeys, modifierList = newAndCreate(cw, update,nsInfo,consulMode)
 						//删除
-						del(cw,ccommon.Configer.EnDelConsul,update,deletedKeys,consulMode)
+						deletedKeys = del(cw,ccommon.Configer.EnDelConsul,update,consulMode)
 					}
 					//只有abtest显示更新内容的详情，其他都只提示变更的key
 					if find := strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid); !find && len(updatedKeys) > 0 {
@@ -101,7 +101,7 @@ func isContainsExceptDsp(cw *CWorker,update *agollo.ApolloResponse,consulMode st
 	}
 	return false
 }
-func newAndCreate(cw *CWorker, update *agollo.ApolloResponse,updatedKeys []string,modifierList []string,nsInfo *capi.NamespaceInfo,consulMode string) {
+func newAndCreate(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.NamespaceInfo,consulMode string)(updatedKeys []string,modifierList []string) {
 	//新增、更新
 	for path, value := range update.NewValue {
 		if oValue, ok := update.OldValue[path]; ok {
@@ -118,8 +118,9 @@ func newAndCreate(cw *CWorker, update *agollo.ApolloResponse,updatedKeys []strin
 		}
 		UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, value.(string), consulMode)
 	}
+	return
 }
-func del(cw *CWorker, enDelete int, update *agollo.ApolloResponse, deletedKeys []string, consulMode string) {
+func del(cw *CWorker, enDelete int, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string){
 	//删除
 	if enDelete == 1 {
 		for path, value := range update.OldValue {
@@ -129,4 +130,5 @@ func del(cw *CWorker, enDelete int, update *agollo.ApolloResponse, deletedKeys [
 			}
 		}
 	}
+	return
 }
