@@ -65,7 +65,8 @@ func GetEnvClustersInfo(url, token string) (respBody *EnvClustersInfo, err error
 		fmt.Println("get body err:", err)
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(body), &respBody)
+	marshal, _ := json.Marshal(body)
+	err = json.Unmarshal(marshal, &respBody)
 	//fmt.Println("\nxxdebugresp_body=",resp_body, "\nxxdebugerr=",err)
 	if err != nil {
 		fmt.Println("Unmarshal EnvClustersInfo err=", err)
@@ -79,7 +80,8 @@ func GetAppInfo(url, token string) (respBody *AppInfo, err error) {
 		fmt.Println("get body err:", err)
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(body), &respBody)
+	marshal, _ := json.Marshal(body)
+	err = json.Unmarshal(marshal, &respBody)
 	//fmt.Println("\nxxdebugresp_body=",resp_body, "\nxxdebugerr=",err)
 	if err != nil {
 		fmt.Println("Unmarshal AppInfo err=", err)
