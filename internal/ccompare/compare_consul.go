@@ -36,7 +36,7 @@ func getEnvClustersInfo(){
 func GetApolloGlobalConfig() (globalConfig *GlobalConfig){
 	var agollo1 agollo.Agollo
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
-		dycfg, err := ccommon.ParseDyConfig(agollo1.Get("cluster_map", agollo.WithNamespace(ns)), s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
+		dycfg, err := ccommon.ParseDyConfig(agollo1.Get("cluster_map", agollo.WithNamespace(ns)), agollo1.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
 			panic(err)
