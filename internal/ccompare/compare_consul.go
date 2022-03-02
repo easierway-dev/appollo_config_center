@@ -5,6 +5,7 @@ import (
 	"github.com/shima-park/agollo"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"os"
 )
 
 type GlobalConfig struct {
@@ -34,17 +35,16 @@ func getEnvClustersInfo(){
 	fmt.Println("ecinfo=", ecinfo)
 }
 func GetApolloGlobalConfig() (globalConfig *GlobalConfig){
-	var agollo1 agollo.Agollo
+	server, _ := NewAgolloServer(ccommon.AgolloConfiger)
 	globalConfig = &GlobalConfig{}
-	fmt.Println("Namespace=",ccommon.AgolloConfiger.Namespace)
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
-		dycfg, err := ccommon.ParseDyConfig(agollo1.Get("cluster_map", agollo.WithNamespace(ns)), agollo1.Get("app_config_map", agollo.WithNamespace(ns)))
+		dycfg, err := ccommon.ParseDyConfig(server.Get("cluster_map", agollo.WithNamespace(ns)), server.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
 			panic(err)
 		}
 		globalConfig.ClusterMap = dycfg.ClusterConfig.ClusterMap
-		cfg, err := ccommon.ParseAppClusterConfig(agollo1.Get("app_cluster_map", agollo.WithNamespace(ns)))
+		cfg, err := ccommon.ParseAppClusterConfig(server.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseAppClusterConfig error: ", err.Error())
 			panic(err)
@@ -52,5 +52,21 @@ func GetApolloGlobalConfig() (globalConfig *GlobalConfig){
 		globalConfig.AppClusterMap = cfg.AppClusterMap
 	}
 	fmt.Println("globalConfig=",globalConfig)
+	return
+}
+func NewAgolloServer(agolloCfg *ccommon.AgolloCfg) (newAgo agollo.Agollo,err error){
+	newAgo, err = agollo.New(
+		agolloCfg.ConfigServerURL,
+		agolloCfg.AppID,
+		agollo.Cluster(agolloCfg.Cluster),
+		agollo.PreloadNamespaces(agolloCfg.Namespace...),
+		agollo.AutoFetchOnCacheMiss(),
+		agollo.FailTolerantOnBackupExists(),
+		agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
+	)
+	if err != nil {
+		fmt.Println("Build_Global_Agollo err: %s\n", err.Error())
+		return nil,err
+	}
 	return
 }
