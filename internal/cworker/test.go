@@ -45,23 +45,23 @@ func (cw *CWorker) Run1(ctx context.Context) {
 				} else {
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					nsInfo, _ := capi.GetNamespaceInfo(url, ccommon.Configer.AccessToken)
-					fmt.Println("cw.WkInfo.AppID=",cw.WkInfo.AppID)
-					url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters",ccommon.AgolloConfiger.PortalURL,cw.WkInfo.AppID)
+					fmt.Println("cw.WkInfo.AppID=", cw.WkInfo.AppID)
+					url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, cw.WkInfo.AppID)
 					ecinfo, _ := capi.GetEnvClustersInfo(url1, ccommon.Configer.AccessToken)
-					fmt.Println("url1=",url1)
-					fmt.Println("ecinfo=",ecinfo)
-					url2 := fmt.Sprintf("http://%s/openapi/v1/apps",ccommon.AgolloConfiger.PortalURL)
+					fmt.Println("url1=", url1)
+					fmt.Println("ecinfo=", ecinfo)
+					url2 := fmt.Sprintf("http://%s/openapi/v1/apps", ccommon.AgolloConfiger.PortalURL)
 					appInfo, _ := capi.GetAppInfo(url2, ccommon.Configer.AccessToken)
-					fmt.Println("url2=",url2)
-					fmt.Println("appInfo=",appInfo)
+					fmt.Println("url2=", url2)
+					fmt.Println("appInfo=", appInfo)
 					// 除dsp之外的业务线
-					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul,nsInfo)
-					if !isSuccess{
+					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul, nsInfo)
+					if !isSuccess {
 						// 获取更新的key更新consul
-						updatedKeys, modifierList = getUpdatedKey(cw, update,nsInfo,"write")
+						updatedKeys, modifierList = getUpdatedKey(cw, update, nsInfo, "write")
 						// 删除操作并更新consul
-						if ccommon.Configer.EnDelConsul == 1{
-							deletedKeys = getDeleteKey(cw,update,"del")
+						if ccommon.Configer.EnDelConsul == 1 {
+							deletedKeys, willUpdateConsul = getDeleteKey(cw, update, "del")
 						}
 					}
 					//只有abtest显示更新内容的详情，其他都只提示变更的key
@@ -79,7 +79,7 @@ func (cw *CWorker) Run1(ctx context.Context) {
 		}
 	}(cw)
 }
-func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse,updateContent string,modifierList []string) {
+func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse, updateContent string, modifierList []string) {
 	if willUpdateConsul {
 		if updateContent == "" {
 			updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=%s", string(ccommon.Configer.EnDelConsul), " (1: support)")
@@ -93,7 +93,7 @@ func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *ag
 		ccommon.CLogger.Warn(cw.WkInfo.AppID, "#", cw.WkInfo.Cluster, "#", update.Namespace, ": !!! invalid config will not update consul !!!")
 	}
 }
-func isContainsExceptDsp(cw *CWorker,update *agollo.ApolloResponse,consulMode string,updateContent string,updatedKeys,deletedKeys,modifierList[]string,willUpdateConsul bool,nsInfo *capi.NamespaceInfo) bool{
+func isContainsExceptDsp(cw *CWorker, update *agollo.ApolloResponse, consulMode string, updateContent string, updatedKeys, deletedKeys, modifierList []string, willUpdateConsul bool, nsInfo *capi.NamespaceInfo) bool {
 	if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) || strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 		updateConsulValue := ""
 		path := ""
@@ -111,7 +111,7 @@ func isContainsExceptDsp(cw *CWorker,update *agollo.ApolloResponse,consulMode st
 	}
 	return false
 }
-func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.NamespaceInfo,consulMode string)(updatedKeys []string,modifierList []string) {
+func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse, nsInfo *capi.NamespaceInfo, consulMode string) (updatedKeys []string, modifierList []string) {
 	//新增、更新
 	for path, value := range update.NewValue {
 		if oValue, ok := update.OldValue[path]; ok {
@@ -130,13 +130,17 @@ func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse,nsInfo *capi.Names
 	}
 	return
 }
-func getDeleteKey(cw *CWorker, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string){
+func getDeleteKey(cw *CWorker, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string,willUpdateConsul bool) {
 	//删除
-		for path, value := range update.OldValue {
-			if _, ok := update.NewValue[path]; !ok {
-				deletedKeys = append(deletedKeys, path)
-				UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, value.(string), consulMode)
-			}
+	if len(update.NewValue) == 0 {
+		return
+	}
+	for path, value := range update.OldValue {
+		if _, ok := update.NewValue[path]; !ok {
+			deletedKeys = append(deletedKeys, path)
+			UpdateConsul(cw.WkInfo.AppID, update.Namespace, cw.WkInfo.Cluster, path, value.(string), consulMode)
 		}
+	}
+	willUpdateConsul = true
 	return
 }

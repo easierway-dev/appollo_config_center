@@ -74,7 +74,7 @@ func GetEnvClustersInfo(url, token string) (respBody []*EnvClustersInfo, err err
 	}
 	return
 }
-func GetAppInfo(url, token string) (respBody []*AppInfo, err error) {
+func GetAppInfo(url, token string) (respBody []AppInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
 	if err != nil {
 		fmt.Println("get body err:", err)
