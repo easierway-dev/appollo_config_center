@@ -11,8 +11,8 @@ import (
 	_ "net/http/pprof"
 
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
 )
 
 // AppVersion 版本信息
