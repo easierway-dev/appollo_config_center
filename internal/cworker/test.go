@@ -45,15 +45,6 @@ func (cw *CWorker) Run1(ctx context.Context) {
 				} else {
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					nsInfo, _ := capi.GetNamespaceInfo(url, ccommon.Configer.AccessToken)
-					fmt.Println("cw.WkInfo.AppID=", cw.WkInfo.AppID)
-					url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, cw.WkInfo.AppID)
-					ecinfo, _ := capi.GetEnvClustersInfo(url1, ccommon.Configer.AccessToken)
-					fmt.Println("url1=", url1)
-					fmt.Println("ecinfo=", ecinfo)
-					url2 := fmt.Sprintf("http://%s/openapi/v1/apps", ccommon.AgolloConfiger.PortalURL)
-					appInfo, _ := capi.GetAppInfo(url2, ccommon.Configer.AccessToken)
-					fmt.Println("url2=", url2)
-					fmt.Println("appInfo=", appInfo)
 					// 除dsp之外的业务线
 					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul, nsInfo)
 					if !isSuccess {
