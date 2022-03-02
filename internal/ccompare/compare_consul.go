@@ -35,6 +35,7 @@ func getEnvClustersInfo(){
 }
 func GetApolloGlobalConfig() (globalConfig *GlobalConfig){
 	var agollo1 agollo.Agollo
+	globalConfig = &GlobalConfig{}
 	fmt.Println("Namespace=",ccommon.AgolloConfiger.Namespace)
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dycfg, err := ccommon.ParseDyConfig(agollo1.Get("cluster_map", agollo.WithNamespace(ns)), agollo1.Get("app_config_map", agollo.WithNamespace(ns)))
@@ -42,12 +43,13 @@ func GetApolloGlobalConfig() (globalConfig *GlobalConfig){
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
 			panic(err)
 		}
+		globalConfig.ClusterMap = dycfg.ClusterConfig.ClusterMap
 		cfg, err := ccommon.ParseAppClusterConfig(agollo1.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseAppClusterConfig error: ", err.Error())
 			panic(err)
 		}
-		globalConfig = &GlobalConfig{AppClusterMap: cfg.AppClusterMap, ClusterMap: dycfg.ClusterConfig.ClusterMap}
+		globalConfig.AppClusterMap = cfg.AppClusterMap
 	}
 	fmt.Println("globalConfig=",globalConfig)
 	return
