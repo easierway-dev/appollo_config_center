@@ -124,6 +124,7 @@ func in(target string, str_array []string) bool {
 }
 func applyProperty() error {
 	var isContainDEV bool
+	apolloProperty = &ApolloProperty{}
 	isContainDsp := in(DSP, appID)
 	if !isContainDsp {
 		return errors.New("not contain Dsp")
