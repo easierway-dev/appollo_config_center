@@ -123,11 +123,11 @@ func in(target string, str_array []string) bool {
 	}
 	return false
 }
-func applyProperty() (apolloProperty *ApolloProperty ,err error){
+func applyProperty() (apolloProperty *ApolloProperty, err error) {
 	var isContainDEV bool
 	isContainDsp := in(DSP, appID)
 	if !isContainDsp {
-		return nil,errors.New("not contain Dsp")
+		return nil, errors.New("not contain Dsp")
 	}
 	// 获取全局集群信息
 	getEnvClustersInfo(DSP)
@@ -136,27 +136,27 @@ func applyProperty() (apolloProperty *ApolloProperty ,err error){
 			isContainDEV = true
 			isContainDspALiVg := in(DSPALIVG, envClustersInfo[i].Clusters)
 			if !isContainDspALiVg {
-				return nil,errors.New("not contain DspALiVg")
+				return nil, errors.New("not contain DspALiVg")
 			}
 		}
 		if !isContainDEV {
-			return nil,errors.New("not contain DEV")
+			return nil, errors.New("not contain DEV")
 		}
 	}
 	apolloProperty = &ApolloProperty{AppID: DSP, Env: DEV, ClusterName: DSPALIVG}
-	return apolloProperty,nil
+	return apolloProperty, nil
 }
 
 // 通过集群名，appID，namespace查找对应的信息：获取集群下所有Namespace信息接口，在进行细分每一个namespace
-func (apolloProperty *ApolloProperty) GetNameSpaceInfo() {
-	
+func (apolloProperty *ApolloProperty) GetNameSpaceInfo() (respBody []*capi.NamespaceInfo) {
+
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", ccommon.AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppID, apolloProperty.ClusterName)
-	fmt.Println("url=",url)
+	fmt.Println("url=", url)
 	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, globalConfig.AccessToken[apolloProperty.AppID])
 	fmt.Println("nSAllInfo=", nSAllInfo)
-
+	return nSAllInfo
 }
-func NewNameSpaceInfo() {
+func GetNameSpaceInfo() error {
 	// 获取全局配置
 	GetApolloGlobalConfig()
 	// 获取全局AppID
@@ -164,12 +164,21 @@ func NewNameSpaceInfo() {
 
 	// 验证DSP并赋值
 	apolloProperty, err := applyProperty()
-	if err != nil{
-		fmt.Println("err=",err)
+	if err != nil {
+		fmt.Println("err=", err)
 	}
-	fmt.Println("apolloProperty=",apolloProperty)
+	fmt.Println("apolloProperty=", apolloProperty)
 	// 获取对应namespace的信息
-	apolloProperty.GetNameSpaceInfo()
+	nameSpaceInfo := apolloProperty.GetNameSpaceInfo()
+	if nameSpaceInfo == nil {
+		return errors.New(apolloProperty.ClusterName + "nameSpacesInfo is nil")
+	}
+	for i, info := range nameSpaceInfo {
+		if nameSpaceInfo[i].NamespaceName == "Application" {
+			fmt.Println("value=", info.Items[0].Value)
+		}
+	}
+	return nil
 }
 func getDspToken(m map[string]string) (token string, err error) {
 	for _, token = range m {
