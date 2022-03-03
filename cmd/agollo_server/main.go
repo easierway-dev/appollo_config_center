@@ -49,7 +49,7 @@ func main() {
 	server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
 	ccommon.CLogger.Info(ccommon.InitDingType,"agollo_server start success !!! will listen appolo update ...")
-	ccompare.GetNameSpaceInfo()
+	ccompare.ApolloCompareWithConsul()
 	handleKillSignal()
 	server.GracefulStop()
 }
