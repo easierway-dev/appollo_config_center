@@ -34,10 +34,13 @@ var appID []string
 var envClustersInfo []*capi.EnvClustersInfo
 var apolloProperty *ApolloProperty
 var globalConfig *GlobalConfig
-
 func getAppID() error{
 	url2 := fmt.Sprintf("http://%s/openapi/v1/apps", ccommon.AgolloConfiger.PortalURL)
-	appInfo, _ := capi.GetAppInfo(url2, ccommon.Configer.AccessToken)
+	token, err := getDspToken(globalConfig.AccessToken)
+	if err != nil {
+		return err
+	}
+	appInfo, _ := capi.GetAppInfo(url2,token)
 	fmt.Println("url2=", url2)
 	fmt.Println("appInfo=", appInfo)
 	if len(appInfo) == 0 {
@@ -52,7 +55,11 @@ func getAppID() error{
 }
 func getEnvClustersInfo() error{
 	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, ccommon.AgolloConfiger.AppID)
-	envClustersInfo, _ = capi.GetEnvClustersInfo(url1, ccommon.Configer.AccessToken)
+	token, err := getDspToken(globalConfig.AccessToken)
+	if err != nil {
+		return err
+	}
+	envClustersInfo, _ = capi.GetEnvClustersInfo(url1,token)
 	if len(envClustersInfo) == 0 {
 		fmt.Println("appInfo is nil ")
 		return errors.New("appInfo is nil ")
@@ -66,6 +73,7 @@ func getEnvClustersInfo() error{
 func GetApolloGlobalConfig() {
 	// 生成一个agolloServer
 	server, _ := NewAgolloServer(ccommon.AgolloConfiger)
+	globalConfig = &GlobalConfig{}
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dyCfg, err := ccommon.ParseDyConfig(server.Get("cluster_map", agollo.WithNamespace(ns)), server.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
@@ -149,4 +157,12 @@ func NewNameSpaceInfo()  {
 	applyProperty()
 	// 获取对应namespace的信息
 	apolloProperty.GetNameSpaceInfo()
+}
+func getDspToken(m map[string]string) (token string ,err error){
+	for _, token = range m{
+		if _,ok:=m[DSP];ok{
+			return
+		}
+	}
+	return "",errors.New("not contain DspToken")
 }
