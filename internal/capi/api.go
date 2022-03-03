@@ -61,7 +61,6 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 }
 func GetAllNamespaceInfo(url, token string) (respBody []*NamespaceInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
-	fmt.Println("body=",body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err

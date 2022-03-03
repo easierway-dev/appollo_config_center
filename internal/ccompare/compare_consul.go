@@ -33,7 +33,6 @@ var (
 )
 var appID []string
 var envClustersInfo []*capi.EnvClustersInfo
-var apolloProperty *ApolloProperty
 var globalConfig *GlobalConfig
 
 func getAppID() error {
@@ -124,32 +123,32 @@ func in(target string, str_array []string) bool {
 	}
 	return false
 }
-func applyProperty() error {
+func applyProperty() (apolloProperty *ApolloProperty ,err error){
 	var isContainDEV bool
 	apolloProperty = &ApolloProperty{}
 	isContainDsp := in(DSP, appID)
 	if !isContainDsp {
-		return errors.New("not contain Dsp")
+		return nil,errors.New("not contain Dsp")
 	}
 	for i := 0; i < len(envClustersInfo); i++ {
 		if envClustersInfo[i].Env == DEV {
 			isContainDEV = true
 			isContainDspALiVg := in(DSPALIVG, envClustersInfo[i].Clusters)
 			if !isContainDspALiVg {
-				return errors.New("not contain DspALiVg")
+				return nil,errors.New("not contain DspALiVg")
 			}
 		}
 		if !isContainDEV {
-			return errors.New("not contain DEV")
+			return nil,errors.New("not contain DEV")
 		}
 	}
 	apolloProperty = &ApolloProperty{AppID: DSP, Env: DEV, ClusterName: DSPALIVG}
-	return nil
+	return apolloProperty,nil
 }
 
 // 通过集群名，appID，namespace查找对应的信息：获取集群下所有Namespace信息接口，在进行细分每一个namespace
 func (apolloProperty *ApolloProperty) GetNameSpaceInfo() {
-
+	
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", ccommon.AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppID, apolloProperty.ClusterName)
 	fmt.Println("url=",url)
 	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, globalConfig.AccessToken[apolloProperty.AppID])
@@ -164,7 +163,7 @@ func NewNameSpaceInfo() {
 	// 获取全局集群信息
 	getEnvClustersInfo()
 	// 验证DSP并赋值
-	applyProperty()
+	apolloProperty, _ := applyProperty()
 	// 获取对应namespace的信息
 	apolloProperty.GetNameSpaceInfo()
 }
