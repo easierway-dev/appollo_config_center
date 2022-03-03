@@ -162,7 +162,10 @@ func NewNameSpaceInfo() {
 	// 获取全局集群信息
 	getEnvClustersInfo()
 	// 验证DSP并赋值
-	apolloProperty, _ := applyProperty()
+	apolloProperty, err := applyProperty()
+	if err != nil{
+		fmt.Println("err=",err)
+	}
 	fmt.Println("apolloProperty=",apolloProperty)
 	// 获取对应namespace的信息
 	apolloProperty.GetNameSpaceInfo()
