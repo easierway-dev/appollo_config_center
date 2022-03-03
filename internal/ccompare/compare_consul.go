@@ -83,6 +83,9 @@ func GetApolloGlobalConfig() {
 		fmt.Println("dyCfg=",dyCfg.AppConfig.AppConfigMap)
 		globalConfig.ClusterMap = dyCfg.ClusterConfig.ClusterMap
 		for key, info := range dyCfg.AppConfig.AppConfigMap {
+			if globalConfig.AccessToken == nil{
+				globalConfig.AccessToken = make(map[string]string)
+			}
 			globalConfig.AccessToken[key] = info.AccessToken
 		}
 		cfg, err := ccommon.ParseAppClusterConfig(server.Get("app_cluster_map", agollo.WithNamespace(ns)))
