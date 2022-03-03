@@ -151,6 +151,7 @@ func applyProperty() error {
 func (apolloProperty *ApolloProperty) GetNameSpaceInfo() {
 
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", ccommon.AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppID, apolloProperty.ClusterName)
+	fmt.Println("url=",url)
 	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, globalConfig.AccessToken[apolloProperty.AppID])
 	fmt.Println("nSAllInfo=", nSAllInfo)
 
