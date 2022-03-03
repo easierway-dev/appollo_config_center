@@ -54,8 +54,8 @@ func getAppID() error {
 	fmt.Println("appID=", appID)
 	return nil
 }
-func getEnvClustersInfo() error {
-	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, ccommon.AgolloConfiger.AppID)
+func getEnvClustersInfo(appID string) error {
+	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, appID)
 	token, err := getDspToken(globalConfig.AccessToken)
 	if err != nil {
 		return err
@@ -129,6 +129,8 @@ func applyProperty() (apolloProperty *ApolloProperty ,err error){
 	if !isContainDsp {
 		return nil,errors.New("not contain Dsp")
 	}
+	// 获取全局集群信息
+	getEnvClustersInfo(DSP)
 	for i := 0; i < len(envClustersInfo); i++ {
 		if envClustersInfo[i].Env == DEV {
 			isContainDEV = true
@@ -159,8 +161,7 @@ func NewNameSpaceInfo() {
 	GetApolloGlobalConfig()
 	// 获取全局AppID
 	getAppID()
-	// 获取全局集群信息
-	getEnvClustersInfo()
+
 	// 验证DSP并赋值
 	apolloProperty, err := applyProperty()
 	if err != nil{
