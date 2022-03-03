@@ -3,7 +3,8 @@ package ccompare
 import "fmt"
 
 const Application = "application"
-var key []string
+var notExistKey []string
+var notEqualKey []string
 func ApolloCompareWithConsul() error{
 	apolloKV, err := GetSingleNameSpaceInfo(Application)
 	if err != nil{
@@ -15,12 +16,15 @@ func ApolloCompareWithConsul() error{
 	}
 	for k, apolloValue := range apolloKV {
 		if consulValue,ok:= consulKV[k];ok{
-			if apolloValue == consulValue{
+			if apolloValue != consulValue{
+				notEqualKey = append(notEqualKey,k)
+			}else {
 				continue
 			}
 		}
-		key = append(key,k)
+		notExistKey = append(notExistKey,k)
 	}
-	fmt.Println("key=",key)
+	fmt.Println("notEqualKey=",notEqualKey)
+	fmt.Println("notExistKey=",notExistKey)
 	return nil
 }
