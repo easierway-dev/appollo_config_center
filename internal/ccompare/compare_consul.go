@@ -25,6 +25,7 @@ type ApolloProperty struct {
 	AppID       string
 	Env         string
 	ClusterName string
+	NameSpace   string
 }
 
 var (
@@ -34,13 +35,14 @@ var appID []string
 var envClustersInfo []*capi.EnvClustersInfo
 var apolloProperty *ApolloProperty
 var globalConfig *GlobalConfig
-func getAppID() error{
+
+func getAppID() error {
 	url2 := fmt.Sprintf("http://%s/openapi/v1/apps", ccommon.AgolloConfiger.PortalURL)
 	token, err := getDspToken(globalConfig.AccessToken)
 	if err != nil {
 		return err
 	}
-	appInfo, _ := capi.GetAppInfo(url2,token)
+	appInfo, _ := capi.GetAppInfo(url2, token)
 	fmt.Println("url2=", url2)
 	fmt.Println("appInfo=", appInfo)
 	if len(appInfo) == 0 {
@@ -53,13 +55,13 @@ func getAppID() error{
 	fmt.Println("appID=", appID)
 	return nil
 }
-func getEnvClustersInfo() error{
+func getEnvClustersInfo() error {
 	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, ccommon.AgolloConfiger.AppID)
 	token, err := getDspToken(globalConfig.AccessToken)
 	if err != nil {
 		return err
 	}
-	envClustersInfo, _ = capi.GetEnvClustersInfo(url1,token)
+	envClustersInfo, _ = capi.GetEnvClustersInfo(url1, token)
 	if len(envClustersInfo) == 0 {
 		fmt.Println("appInfo is nil ")
 		return errors.New("appInfo is nil ")
@@ -80,10 +82,10 @@ func GetApolloGlobalConfig() {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
 			panic(err)
 		}
-		fmt.Println("dyCfg=",dyCfg.AppConfig.AppConfigMap)
+		fmt.Println("dyCfg=", dyCfg.AppConfig.AppConfigMap)
 		globalConfig.ClusterMap = dyCfg.ClusterConfig.ClusterMap
 		for key, info := range dyCfg.AppConfig.AppConfigMap {
-			if globalConfig.AccessToken == nil{
+			if globalConfig.AccessToken == nil {
 				globalConfig.AccessToken = map[string]string{}
 			}
 			globalConfig.AccessToken[key] = info.AccessToken
@@ -147,11 +149,13 @@ func applyProperty() error {
 
 // 通过集群名，appID，namespace查找对应的信息：获取集群下所有Namespace信息接口，在进行细分每一个namespace
 func (apolloProperty *ApolloProperty) GetNameSpaceInfo() {
+
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", ccommon.AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppID, apolloProperty.ClusterName)
-	nSAllInfo, _ := capi.GetNamespaceInfo(url, globalConfig.AccessToken[apolloProperty.AppID])
+	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, globalConfig.AccessToken[apolloProperty.AppID])
 	fmt.Println("nSAllInfo=", nSAllInfo)
+
 }
-func NewNameSpaceInfo()  {
+func NewNameSpaceInfo() {
 	// 获取全局配置
 	GetApolloGlobalConfig()
 	// 获取全局AppID
@@ -163,11 +167,11 @@ func NewNameSpaceInfo()  {
 	// 获取对应namespace的信息
 	apolloProperty.GetNameSpaceInfo()
 }
-func getDspToken(m map[string]string) (token string ,err error){
-	for _, token = range m{
-		if _,ok:=m[DSP];ok{
+func getDspToken(m map[string]string) (token string, err error) {
+	for _, token = range m {
+		if _, ok := m[DSP]; ok {
 			return
 		}
 	}
-	return "",errors.New("not contain DspToken")
+	return "", errors.New("not contain DspToken")
 }
