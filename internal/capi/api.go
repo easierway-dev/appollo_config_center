@@ -29,7 +29,7 @@ type NamespaceInfo struct {
 	Items                      []ItemInfo `toml:"items"`
 }
 type EnvClustersInfo struct {
-	Env      string              `toml:"env"`
+	Env      string   `toml:"env"`
 	Clusters []string `toml:"clusters"`
 }
 type AppInfo struct {
@@ -61,7 +61,7 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 }
 func GetEnvClustersInfo(url, token string) (respBody []*EnvClustersInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
-	fmt.Println("envBody=",body)
+	fmt.Println("envBody=", body)
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,7 +12,6 @@ import (
 	_ "net/http/pprof"
 
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cserver"
 )
 
@@ -46,10 +46,10 @@ func main() {
 	if err = cserver.Init(server); err != nil {
 		panic(err)
 	}
-	ccompare.GetApolloGlobalConfig()
 	server.Run()
 	fmt.Println("agollo_server start success !!! will listen appolo update ...")
 	ccommon.CLogger.Info(ccommon.InitDingType,"agollo_server start success !!! will listen appolo update ...")
+	ccompare.NewNameSpaceInfo()
 	handleKillSignal()
 	server.GracefulStop()
 }
