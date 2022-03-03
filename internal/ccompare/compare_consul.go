@@ -125,7 +125,6 @@ func in(target string, str_array []string) bool {
 }
 func applyProperty() (apolloProperty *ApolloProperty ,err error){
 	var isContainDEV bool
-	apolloProperty = &ApolloProperty{}
 	isContainDsp := in(DSP, appID)
 	if !isContainDsp {
 		return nil,errors.New("not contain Dsp")
@@ -164,6 +163,7 @@ func NewNameSpaceInfo() {
 	getEnvClustersInfo()
 	// 验证DSP并赋值
 	apolloProperty, _ := applyProperty()
+	fmt.Println("apolloProperty=",apolloProperty)
 	// 获取对应namespace的信息
 	apolloProperty.GetNameSpaceInfo()
 }
