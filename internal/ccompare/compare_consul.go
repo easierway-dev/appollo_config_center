@@ -17,14 +17,12 @@ func ApolloCompareWithConsul() error {
 		return err
 	}
 	for k, apolloValue := range apolloKV {
-		if consulValue, ok := consulKV[k]; ok {
-			if apolloValue != consulValue {
-				notEqualKey = append(notEqualKey, k)
-			} else {
-				continue
-			}
-		} else {
+		consulValue, ok := consulKV[k]
+		if !ok {
 			notExistKey = append(notExistKey, k)
+		}
+		if apolloValue != consulValue {
+			notEqualKey = append(notEqualKey, k)
 		}
 	}
 	fmt.Println("notEqualKey=", notEqualKey)
