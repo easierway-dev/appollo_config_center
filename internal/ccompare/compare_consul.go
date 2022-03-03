@@ -47,8 +47,8 @@ func getAppID() error{
 		fmt.Println("appInfo is nil ")
 		return errors.New("appInfo is nil ")
 	}
-	for k, v := range appInfo {
-		appID[k] = v.AppId
+	for _, v := range appInfo {
+		appID = append(appID, v.AppId)
 	}
 	fmt.Println("appID=", appID)
 	return nil
@@ -74,7 +74,6 @@ func GetApolloGlobalConfig() {
 	// 生成一个agolloServer
 	server, _ := NewAgolloServer(ccommon.AgolloConfiger)
 	globalConfig = &GlobalConfig{}
-	m := make(map[string]string)
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
 		dyCfg, err := ccommon.ParseDyConfig(server.Get("cluster_map", agollo.WithNamespace(ns)), server.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
@@ -85,7 +84,7 @@ func GetApolloGlobalConfig() {
 		globalConfig.ClusterMap = dyCfg.ClusterConfig.ClusterMap
 		for key, info := range dyCfg.AppConfig.AppConfigMap {
 			if globalConfig.AccessToken == nil{
-				globalConfig.AccessToken = m
+				globalConfig.AccessToken = map[string]string{}
 			}
 			globalConfig.AccessToken[key] = info.AccessToken
 		}
