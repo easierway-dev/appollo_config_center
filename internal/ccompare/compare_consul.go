@@ -174,6 +174,7 @@ func GetNameSpaceInfo() error {
 		return errors.New(apolloProperty.ClusterName + "nameSpacesInfo is nil")
 	}
 	for i, info := range nameSpaceInfo {
+		fmt.Println("namespace =", nameSpaceInfo[i].NamespaceName)
 		if nameSpaceInfo[i].NamespaceName == "application" {
 			fmt.Println("value=", info.Items[0].Value)
 		}
