@@ -80,6 +80,7 @@ func GetApolloGlobalConfig() {
 			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
 			panic(err)
 		}
+		fmt.Println("dyCfg=",dyCfg)
 		globalConfig.ClusterMap = dyCfg.ClusterConfig.ClusterMap
 		for key, info := range dyCfg.AppConfig.AppConfigMap {
 			globalConfig.AccessToken[key] = info.AccessToken
