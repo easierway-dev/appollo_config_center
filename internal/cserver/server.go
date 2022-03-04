@@ -137,7 +137,7 @@ func (s *AgolloServer) Watch() {
 					worker, err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
 						//worker.Run(s.ctx)
-						worker.Run1(s.ctx)
+						worker.Run(s.ctx)
 						ccommon.CLogger.Info(ccommon.InitDingType, "will setup worker: ", k.(string))
 						fmt.Println(time.Now().Format("2006-01-02 15:04:05")+" will setup worker: ", k.(string))
 						s.wg.Add(1)
