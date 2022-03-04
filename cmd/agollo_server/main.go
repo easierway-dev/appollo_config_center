@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
 	"os"
 	"os/signal"
 	"syscall"
