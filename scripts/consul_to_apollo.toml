@@ -33,7 +33,7 @@ cluster = [ "as_ali_vg", "as_aws_vg", "as_aws_sg", "as_aws_fk", "as_aws_se", "ds
 
 [make_money_dsp.namespace]
 m_bidforce = [ "config/pioneer/direct_recall",]
-application = [ "config/make_money_dsp/DataStreamerSetting", "config/make_money_dsp/NPSRankClientSetting", "config/make_money_dsp/RelayDataSetting", "config/make_money_dsp/RelayServiceSetting", "config/make_money_dsp/mrpc", "config/make_money_dsp/polaris/AdSeatFeatureID", "config/make_money_dsp/polaris/CreativeFeatureMark", "config/make_money_dsp/polaris/CreativeFilter", "config/make_money_dsp/polaris/DPARule", "config/make_money_dsp/polaris/ElementCache", "config/make_money_dsp/polaris/SearchCreative", "config/make_money_dsp/polaris/SearchRule", "config/make_money_dsp/polaris/TryNew", "config/make_money_dsp/xxtest", "ops/release/make_money_dsp",]
+application = [ "config/make_money_dsp/DataStreamerSetting", "config/make_money_dsp/NPSRankClientSetting", "config/make_money_dsp/RelayDataSetting", "config/make_money_dsp/RelayServiceSetting", "config/make_money_dsp/mrpc", "config/make_money_dsp/polaris/AdSeatFeatureID", "config/make_money_dsp/polaris/CreativeFeatureMark", "config/make_money_dsp/polaris/CreativeFilter", "config/make_money_dsp/polaris/DPARule", "config/make_money_dsp/polaris/ElementCache", "config/make_money_dsp/polaris/SearchCreative", "config/make_money_dsp/polaris/SearchRule", "config/make_money_dsp/polaris/TemplateConf", "config/make_money_dsp/polaris/TryNew", "config/make_money_dsp/xxtest", "ops/release/make_money_dsp",]
 abtesting = [ "abtest/abtest_info",]
 dsp_bidforce = [ "config/mvdsp/BidForce",]
 rtdsp_bidforce = [ "config/dsp-retarget/server/BidForce",]
