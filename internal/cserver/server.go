@@ -138,12 +138,12 @@ func (s *AgolloServer) Watch() {
 					if err == nil {
 						//worker.Run(s.ctx)
 						worker.Run(s.ctx)
-						ccommon.CLogger.Info(ccommon.InitDingType, "will setup worker: ", k.(string))
+						ccommon.CLogger.Info(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" will setup worker: ", k.(string))
 						fmt.Println(time.Now().Format("2006-01-02 15:04:05")+" will setup worker: ", k.(string))
 						s.wg.Add(1)
 						s.runningworkers.Store(k, worker)
 					} else {
-						ccommon.CLogger.Error(ccommon.InitDingType, "create worker failed !!! workerInfo=", v)
+						ccommon.CLogger.Error(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" create worker failed !!! workerInfo=", v)
 					}
 				}
 				return true
@@ -152,8 +152,8 @@ func (s *AgolloServer) Watch() {
 			s.runningworkers.Range(func(k, v interface{}) bool {
 				if _, ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Info(ccommon.InitDingType, "will stop woker: ", k.(string), "wait 3s to envalid  !!!")
-					fmt.Println("will stop worker: ", k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Info(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" will stop woker: ", k.(string), "wait 3s to envalid  !!!")
+					fmt.Println(time.Now().Format("2006-01-02 15:04:05")+" will stop worker: ", k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true

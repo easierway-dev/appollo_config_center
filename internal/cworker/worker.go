@@ -126,11 +126,11 @@ func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
 		}
 	}
 	if dyAgoCfg.ClusterConfig == nil {
-		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
+		ccommon.CLogger.Warn(ccommon.DefaultDingType, "clusterConfig in nil, ccommon.DyAgolloConfiger[", namespace, "]=", dyAgoCfg)
 		return
 	}
 	if dyAgoCfg.ClusterConfig.ClusterMap == nil {
-		ccommon.CLogger.Warn(ccommon.DefaultDingType, "consulAddr get failed ccommon.DyAgolloConfiger.ClusterConfig[", namespace, "]=", dyAgoCfg.ClusterConfig)
+		ccommon.CLogger.Warn(ccommon.DefaultDingType, "clusterMap in nil, ccommon.DyAgolloConfiger.ClusterConfig[", namespace, "]=", dyAgoCfg.ClusterConfig)
 		return
 	}
 	if _, ok := dyAgoCfg.ClusterConfig.ClusterMap[cluster]; !ok {
@@ -142,7 +142,7 @@ func UpdateConsul(appid, namespace, cluster, key, value, mode string) {
 	for _, consulAddr := range consulAddrList {
 		err := cconsul.WriteOne(consulAddr, key, value, mode)
 		if err != nil {
-			ccommon.CLogger.Error(ccommon.DefaultDingType, "consul_addr[", consulAddr, "],key[", key, "], err[", err, "]\n")
+			ccommon.CLogger.Error(ccommon.DefaultDingType, "update consul_addr[", consulAddr, "],key[", key, "], err[", err, "]\n")
 		}
 	}
 	return
@@ -371,11 +371,6 @@ func MergeUpdate(appID, cluster string, updateNewValue, updateOldValue map[strin
 func (cw *CWorker) Run(ctx context.Context) {
 	errorCh := cw.AgolloClient.Start()
 	watchCh := cw.AgolloClient.Watch()
-	var deletedKeys []string
-	updateContent := ""
-	var updatedKeys []string
-	willUpdateConsul := true
-	var modifierList []string
 	go func(cw *CWorker) {
 		for {
 			select {
@@ -392,6 +387,12 @@ func (cw *CWorker) Run(ctx context.Context) {
 					ccommon.CLogger.Info(ccommon.DefaultPollDingType, "Error:", err)
 				}
 			case update := <-watchCh:
+				var deletedKeys []string
+				updateContent := ""
+				var updatedKeys []string
+				willUpdateConsul := true
+				isContain := false
+				var modifierList []string
 				// 全局配置
 				ccommon.Configer = ccommon.InitAppCfgMap(ccommon.AppConfiger, cw.WkInfo.AppID, update.Namespace)
 				fmt.Println("ccommon.Configer=", ccommon.Configer)
@@ -403,14 +404,14 @@ func (cw *CWorker) Run(ctx context.Context) {
 				} else {
 					url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", cw.WkInfo.AppID, cw.WkInfo.Cluster, update.Namespace)
 					nsInfo, _ := capi.GetNamespaceInfo(url, ccommon.Configer.AccessToken)
-					// 除dsp之外的业务线
-					isSuccess := isContainsExceptDsp(cw, update, "write", updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul, nsInfo)
-					if !isSuccess {
+					//需要进行拼接的业务，例如bidforce/abtest
+					updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul, isContain = updateMergeTask(cw, update, nsInfo, "write")
+					if !isContain {
 						// 获取更新的key更新consul
-						updatedKeys, modifierList = getUpdatedKey(cw, update, nsInfo, "write")
+						updatedKeys, modifierList = updatedTask(cw, update, nsInfo, "write")
 						// 删除操作并更新consul
 						if ccommon.Configer.EnDelConsul == 1 {
-							deletedKeys, willUpdateConsul = getDeleteKey(cw, update, "del")
+							deletedKeys, willUpdateConsul = deleteTask(cw, update, "del")
 						}
 					}
 					//只有abtest显示更新内容的详情，其他都只提示变更的key
@@ -421,14 +422,17 @@ func (cw *CWorker) Run(ctx context.Context) {
 					if len(deletedKeys) > 0 {
 						updateContent = fmt.Sprintf("%s\n\ndelelte_key=%s", updateContent, strings.Join(deletedKeys, "#"))
 					}
-					ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
-					isLogUpdateContentToDingDing(cw,willUpdateConsul,update,updateContent,modifierList)
+					updateLog(cw,willUpdateConsul,update,updateContent,modifierList)
 				}
 			}
 		}
 	}(cw)
 }
-func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse, updateContent string, modifierList []string) {
+
+func updateLog(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse, updateContent string, modifierList []string) {
+	#common log每次有更新都会输入
+	ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
+	#enable consul update时同时落log和dingding
 	if willUpdateConsul {
 		if updateContent == "" {
 			updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=%s", string(ccommon.Configer.EnDelConsul), " (1: support)")
@@ -442,7 +446,8 @@ func isLogUpdateContentToDingDing(cw *CWorker, willUpdateConsul bool, update *ag
 		ccommon.CLogger.Warn(cw.WkInfo.AppID, "#", cw.WkInfo.Cluster, "#", update.Namespace, ": !!! invalid config will not update consul !!!")
 	}
 }
-func isContainsExceptDsp(cw *CWorker, update *agollo.ApolloResponse, consulMode string, updateContent string, updatedKeys, deletedKeys, modifierList []string, willUpdateConsul bool, nsInfo *capi.NamespaceInfo) bool {
+
+func updateMergeTask(cw *CWorker, update *agollo.ApolloResponse, nsInfo *capi.NamespaceInfo, consulMode string) (updateContent string, updatedKeys, deletedKeys, modifierList []string, willUpdateConsul, isContain bool) {
 	if strings.Contains(cw.WkInfo.AppID, ccommon.ABTestAppid) || strings.Contains(cw.WkInfo.AppID, ccommon.BidForceAppid) {
 		updateConsulValue := ""
 		path := ""
@@ -456,11 +461,12 @@ func isContainsExceptDsp(cw *CWorker, update *agollo.ApolloResponse, consulMode 
 				deletedKeys = append(deletedKeys, k)
 			}
 		}
-		return true
+		isContain = true
 	}
-	return false
+	return
 }
-func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse, nsInfo *capi.NamespaceInfo, consulMode string) (updatedKeys []string, modifierList []string) {
+
+func updatedTask(cw *CWorker, update *agollo.ApolloResponse, nsInfo *capi.NamespaceInfo, consulMode string) (updatedKeys []string, modifierList []string) {
 	//新增、更新
 	for path, value := range update.NewValue {
 		if oValue, ok := update.OldValue[path]; ok {
@@ -479,7 +485,7 @@ func getUpdatedKey(cw *CWorker, update *agollo.ApolloResponse, nsInfo *capi.Name
 	}
 	return
 }
-func getDeleteKey(cw *CWorker, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string,willUpdateConsul bool) {
+func deleteTask(cw *CWorker, update *agollo.ApolloResponse, consulMode string) (deletedKeys []string,willUpdateConsul bool) {
 	//删除
 	if len(update.NewValue) == 0 {
 		return
