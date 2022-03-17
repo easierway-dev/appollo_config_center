@@ -1,5 +1,5 @@
-ipport = "localhost:18080"
-portalport = "localhost:80"
+ipport = "172.31.22.145:8080"
+portalport = "172.31.22.145:8070"
 appid = "global_config"
 cluster = "default"
 namespace = ["application"]

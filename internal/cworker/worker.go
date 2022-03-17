@@ -430,9 +430,9 @@ func (cw *CWorker) Run(ctx context.Context) {
 }
 
 func updateLog(cw *CWorker, willUpdateConsul bool, update *agollo.ApolloResponse, updateContent string, modifierList []string) {
-	#common log每次有更新都会输入
+	//common log每次有更新都会输入
 	ccommon.CLogger.Info(ccommon.DefaultDingType, "Apollo cluster(", cw.WkInfo.Cluster, ") namespace(", update.Namespace, ") \nold_value:(", update.OldValue, ") \nnew_value:(", update.NewValue, ") \n error:(", update.Error, ")\n")
-	#enable consul update时同时落log和dingding
+	//enable consul update时同时落log和dingding
 	if willUpdateConsul {
 		if updateContent == "" {
 			updateContent = fmt.Sprintf("nothing to update !!!\nisSupportDelete=%s", string(ccommon.Configer.EnDelConsul), " (1: support)")
