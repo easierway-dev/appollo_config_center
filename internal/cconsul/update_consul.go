@@ -6,32 +6,53 @@ import (
 	"github.com/hashicorp/consul/api"
 )
 
-func WriteOne(addr, path, value string) error {
-	client, err := NewClient(addr)
+func WriteOne(addr, path, value , mode string) error {
+	client, pair, err := NewClient(addr, path, value)
 	if err != nil {
 		println(err)
 		os.Exit(-1)
 	}
-	return WriteData(client, path, value)
+	switch mode {
+	case "get":
+	    return GetData(client, pair)
+	case "del":
+	    return DeleteData(client, pair)
+	default:
+	    return WriteData(client, pair)
+	}	
 }
 
-func NewClient(addr string) (*api.Client, error) {
+func NewClient(addr, path, value string) (*api.Client, *api.KVPair, error) {
 	conf := api.DefaultConfig()
 	if addr != "" {
 		conf.Address = addr
 	}
 	client, err := api.NewClient(conf)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return client, nil
-}
-
-func WriteData(client *api.Client, path, value string) error {
-	kv := client.KV()
-	_, err := kv.Put(&api.KVPair{
+	//初始化一个kv
+	pair := &api.KVPair{
 		Key:   path,
 		Value: []byte(value),
-	}, nil)
+	}
+	return client, pair, nil
+}
+
+func WriteData(client *api.Client, pair *api.KVPair) error {
+	kv := client.KV()
+	_, err := kv.Put(pair, nil)
+	return err
+}
+
+func GetData(client *api.Client, pair *api.KVPair) error {
+	kv := client.KV()
+	_,_, err := kv.Get(pair.Key, nil)
+	return err
+}
+
+func DeleteData(client *api.Client, pair *api.KVPair) error {
+	kv := client.KV()
+	_, err := kv.Delete(pair.Key, nil)
 	return err
 }

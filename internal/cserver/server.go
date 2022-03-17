@@ -1,14 +1,14 @@
 package cserver
 
 import (
-	"fmt"
-	"time"
 	"context"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/shima-park/agollo"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cworker"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cworker"
 )
 
 // NewAgolloServer 创建一个新的 AgolloServer
@@ -20,16 +20,16 @@ func NewAgolloServer() *AgolloServer {
 
 // AgolloServer server 服务
 type AgolloServer struct {
-	regworkers sync.Map //map[string]WorkerInfo
+	regworkers     sync.Map //map[string]WorkerInfo
 	runningworkers sync.Map ///map[string]Worker
 
 	gAgollo agollo.Agollo
-	ctx    context.Context
-	cancel context.CancelFunc
-	wg     sync.WaitGroup
+	ctx     context.Context
+	cancel  context.CancelFunc
+	wg      sync.WaitGroup
 }
 
-func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
+func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg) {
 	//clear regworkers
 	s.regworkers.Range(func(k, v interface{}) bool {
 		if k.(string) != "" {
@@ -44,36 +44,36 @@ func (s *AgolloServer) UpdateOne(cfg *ccommon.AppClusterCfg){
 		}
 		for _, cluster := range appclusterinfo.Cluster {
 			wInfo := cworker.WorkInfo{
-				AppID : appid,
-				Cluster : cluster,
-				Namespace : namespace,
+				AppID:     appid,
+				Cluster:   cluster,
+				Namespace: namespace,
 			}
 			key := wInfo.Key()
 			//store regworkers
-		    	s.regworkers.Store(key,wInfo)
+			s.regworkers.Store(key, wInfo)
 		}
 	}
 }
 
-func (s *AgolloServer) BuildGAgollo (agollo agollo.Agollo){
+func (s *AgolloServer) BuildGAgollo(agollo agollo.Agollo) {
 	s.gAgollo = agollo
 }
 
 // 根据globla_config.app_cluster_map注册worker
 func (s *AgolloServer) Update() {
 	for _, ns := range ccommon.AgolloConfiger.Namespace {
-		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)),s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
+		dycfg, err := ccommon.ParseDyConfig(s.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)), s.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Error(ccommon.DefaultDingType,"ParseDyConfig error: ", err.Error())
-				panic(err)
+			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
+			panic(err)
 		}
 		ccommon.DyAgolloConfiger[ns] = dycfg
 
 		cfg, err := ccommon.ParseAppClusterConfig(s.gAgollo.Get("app_cluster_map", agollo.WithNamespace(ns)))
 		if err != nil {
-				ccommon.CLogger.Error(ccommon.DefaultDingType,"ParseAppClusterConfig error: ", err.Error())
-				panic(err)
-		}	
+			ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseAppClusterConfig error: ", err.Error())
+			panic(err)
+		}
 		s.UpdateOne(cfg)
 	}
 	errorCh := s.gAgollo.Start()
@@ -83,17 +83,17 @@ func (s *AgolloServer) Update() {
 		for {
 			select {
 			case <-s.ctx.Done():
-			    ccommon.CLogger.Info(ccommon.DefaultDingType,cluster, "watch quit...")
-			    return
+				ccommon.CLogger.Info(ccommon.DefaultDingType, cluster, "watch quit...")
+				return
 			case err := <-errorCh:
 				if ccommon.AppConfiger.AppConfigMap != nil {
-					if _,ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType];ok {
+					if _, ok := ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType]; ok {
 						ccommon.ChklogRate = ccommon.AppConfiger.AppConfigMap[ccommon.DefaultPollDingType].ChklogRate
 					}
 				}
 				if ccommon.ChklogRamdom < ccommon.ChklogRate {
-					ccommon.CLogger.Info(ccommon.DefaultPollDingType,"Error:", err)
-				}				
+					ccommon.CLogger.Info(ccommon.DefaultPollDingType, "Error:", err)
+				}
 			case update := <-watchCh:
 				clusterCfg := ""
 				appCfg := ""
@@ -105,27 +105,27 @@ func (s *AgolloServer) Update() {
 				}
 				dycfg, err := ccommon.ParseDyConfig(clusterCfg, appCfg)
 				if err != nil {
-						ccommon.CLogger.Error(ccommon.DefaultDingType,"update ParseDyConfig error: ", err.Error())
+					ccommon.CLogger.Error(ccommon.DefaultDingType, "update ParseDyConfig error: ", err.Error())
 				} else {
 					ccommon.DyAgolloConfiger[update.Namespace] = dycfg
 				}
 				if value, ok := update.NewValue["app_cluster_map"]; ok {
 					cfg, err := ccommon.ParseAppClusterConfig(value.(string))
 					if err != nil {
-							ccommon.CLogger.Error(ccommon.DefaultDingType,"update ParseAppClusterConfig error: ", err.Error())
-							panic(err)
+						ccommon.CLogger.Error(ccommon.DefaultDingType, "update ParseAppClusterConfig error: ", err.Error())
+						panic(err)
 					} else {
 						s.UpdateOne(cfg)
 					}
 				}
-				ccommon.CLogger.Info(ccommon.DefaultDingType,"Global Apollo cluster(",cluster,") namespace(",update.Namespace,") old_value:(",update.OldValue,") new_value:(",update.NewValue, ") error:(",update.Error,")")
+				ccommon.CLogger.Info(ccommon.DefaultDingType, "Global Apollo cluster(", cluster, ") namespace(", update.Namespace, ") old_value:(", update.OldValue, ") new_value:(", update.NewValue, ") error:(", update.Error, ")")
 			}
 		}
 	}(ccommon.AgolloConfiger.Cluster)
 }
 
 func (s *AgolloServer) Watch() {
-	t := time.NewTicker(time.Duration(ccommon.AgolloConfiger.CyclePeriod)*time.Second)
+	t := time.NewTicker(time.Duration(ccommon.AgolloConfiger.CyclePeriod) * time.Second)
 	defer t.Stop()
 	for {
 		select {
@@ -133,30 +133,31 @@ func (s *AgolloServer) Watch() {
 			//ccommon.CLogger.Info(ccommon.DefaultDingType,"I am alive and watch change")
 			//start
 			s.regworkers.Range(func(k, v interface{}) bool {
-				if _,ok := s.runningworkers.Load(k); !ok {
-					worker,err := cworker.Setup(v.(cworker.WorkInfo))
+				if _, ok := s.runningworkers.Load(k); !ok {
+					worker, err := cworker.Setup(v.(cworker.WorkInfo))
 					if err == nil {
+						//worker.Run(s.ctx)
 						worker.Run(s.ctx)
-						ccommon.CLogger.Info(ccommon.InitDingType,"will setup worker: ", k.(string))
-						fmt.Println("will setup worker: ", k.(string))
+						ccommon.CLogger.Info(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" will setup worker: ", k.(string))
+						fmt.Println(time.Now().Format("2006-01-02 15:04:05")+" will setup worker: ", k.(string))
 						s.wg.Add(1)
-						s.runningworkers.Store(k,worker)
+						s.runningworkers.Store(k, worker)
 					} else {
-						ccommon.CLogger.Error(ccommon.InitDingType,"create worker failed !!! workerInfo=",v)
+						ccommon.CLogger.Error(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" create worker failed !!! workerInfo=", v)
 					}
 				}
-				return true	
+				return true
 			})
 			//stop
 			s.runningworkers.Range(func(k, v interface{}) bool {
-				if _,ok := s.regworkers.Load(k); !ok {
+				if _, ok := s.regworkers.Load(k); !ok {
 					v.(*cworker.CWorker).Stop()
-					ccommon.CLogger.Info(ccommon.InitDingType,"will stop woker: ",k.(string), "wait 3s to envalid  !!!")
-					fmt.Println("will stop worker: ", k.(string), "wait 3s to envalid  !!!")
+					ccommon.CLogger.Info(ccommon.InitDingType, time.Now().Format("2006-01-02 15:04:05")+" will stop woker: ", k.(string), "wait 3s to envalid  !!!")
+					fmt.Println(time.Now().Format("2006-01-02 15:04:05")+" will stop worker: ", k.(string), "wait 3s to envalid  !!!")
 					s.runningworkers.Delete(k)
 				}
 				return true
-			})			
+			})
 		}
 	}
 }

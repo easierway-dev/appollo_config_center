@@ -1,9 +1,8 @@
 package ccommon
 
 import (
-	"fmt"
 	"errors"
-	
+	"fmt"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cnotify"
 	"gitlab.mobvista.com/voyager/zlog"
 )
@@ -11,8 +10,8 @@ import (
 var CLogger *ccLogger
 
 const (
-	DefaultDingType = ""
-	InitDingType = "init"
+	DefaultDingType     = ""
+	InitDingType        = "init"
 	DefaultPollDingType = "poll"
 )
 
@@ -36,43 +35,30 @@ func NewconfigCenterLogger(logCfg *LogCfg) (*ccLogger, error) {
 	return logger, nil
 }
 
-func GetDingInfo(appid string, itype string) (dingKeys []string,dingusers []string) {
-	if appid == "" && itype == "info"{
-		return dingKeys, dingusers
+func GetDingInfo(appid string, itype string) (dingKeys []string, dingUsers []string, userMap map[string]string, isAtall bool) {
+	if appid == "" && itype == "info" {
+		return
 	}
-
-        namespace := DefaultNamespace
-	dingKeys = AppConfiger.DingKeys
-	dingusers = AppConfiger.DingUsers
-	if AppConfiger.AppConfigMap != nil {
-		if _,ok := AppConfiger.AppConfigMap[appid];ok {
-			dingKeys = AppConfiger.AppConfigMap[appid].DingKeys
-			dingusers = AppConfiger.AppConfigMap[appid].DingUsers
-		} 		
+	//local config
+	//default config
+	isAtallTmp := 0
+	//uniq appid config
+	dingKeys = Configer.DingKeys
+	dingUsers = Configer.DingUsers
+	userMap = Configer.DingUserMap
+	isAtallTmp = Configer.IsAtAll
+	if isAtallTmp == 1 {
+		isAtall = true
 	}
-	if DyAgolloConfiger != nil {
-		if dyAgoCfg,ok := DyAgolloConfiger[namespace];ok {
-			if dyAgoCfg.AppConfig != nil {
-				dingKeys = dyAgoCfg.AppConfig.DingKeys
-				dingusers = dyAgoCfg.AppConfig.DingUsers
-			}
-			if dyAgoCfg.AppConfig.AppConfigMap != nil {
-				if _,ok := dyAgoCfg.AppConfig.AppConfigMap[appid];ok {
-					dingKeys = dyAgoCfg.AppConfig.AppConfigMap[appid].DingKeys
-					dingusers = dyAgoCfg.AppConfig.AppConfigMap[appid].DingUsers
-				} 
-			}
-		}
-        }
-	return dingKeys, dingusers
+	return
 }
 
 func (this *ccLogger) Info(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	//dingkeys,dingusers := GetDingInfo(args[0].(string), "info")
-	//cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+	//dingkeys,dingusers,_,isatall := GetDingInfo(args[0].(string), "info")
+	//cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers,isatall)
 	this.Runtime.Info(args)
 }
 
@@ -80,38 +66,57 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string), "warn")
-	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
-	this.Runtime.Warn(args)
+	if _, ok := interface{}(args[0]).(string); ok {
+		dingkeys, dingusers, _, isatall := GetDingInfo(args[0].(string), "warn")
+
+		cnotify.SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
+		this.Runtime.Warn(args)
+	} else {
+		dingkeys, dingusers, usermap, isatall := GetDingInfo(args[1].(string), "warn")
+		switch t := args[0].(type) {
+		case []string:
+			keyStringValues := []string{}
+			for _, username := range t {
+				if userphone, ok := usermap[username]; ok {
+					keyStringValues = append(keyStringValues, userphone)
+				}
+			}
+			dingusers = append(dingusers, keyStringValues...)
+		default:
+			fmt.Println("dingusers type error , need []string")
+		}
+		cnotify.SendText(dingkeys, fmt.Sprintf("%s", args[1:]), dingusers, isatall)
+		this.Runtime.Warn(args)
+	}
 }
 
 func (this *ccLogger) Error(args ...interface{}) {
 	if this == nil || this.Runtime == nil {
 		return
 	}
-	dingkeys,dingusers := GetDingInfo(args[0].(string), "err")
-	cnotify.SendText(dingkeys,fmt.Sprintf("%s",args),dingusers)
+	dingkeys, dingusers, _, isatall := GetDingInfo(args[0].(string), "err")
+	cnotify.SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
 	this.Runtime.Error(args)
 }
 
-
 func (this *ccLogger) Infof(format string, args ...interface{}) {
-        if this == nil || this.Runtime == nil {
-                return
-        }
-        this.Runtime.Infof(format,args)
+	if this == nil || this.Runtime == nil {
+		return
+	}
+	this.Runtime.Infof(format, args)
 }
 
 func (this *ccLogger) Warnf(format string, args ...interface{}) {
-        if this == nil || this.Runtime == nil {
-                return
-        }
-        this.Runtime.Warnf(format, args)
+	if this == nil || this.Runtime == nil {
+		return
+	}
+	this.Runtime.Warnf(format, args)
 }
 
 func (this *ccLogger) Errorf(format string, args ...interface{}) {
-        if this == nil || this.Runtime == nil {
-                return
-        }
-        this.Runtime.Errorf(format, args)
+	if this == nil || this.Runtime == nil {
+		return
+	}
+	this.Runtime.Errorf(format, args)
 }
+

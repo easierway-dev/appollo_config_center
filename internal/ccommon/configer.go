@@ -11,8 +11,8 @@ import (
 var AgolloConfiger *AgolloCfg
 var DyAgolloConfiger map[string]*DyAgolloCfg
 
-var AppConfiger  *AppCfg
-
+var AppConfiger *AppCfg
+var Configer *ConfigInfo
 var ChklogRamdom float64
 var ChklogRate float64
 
@@ -22,14 +22,13 @@ const (
 )
 
 const (
-	ABTestAppid = "abtest"
-	BidForceAppid = "bidforce"
-	ABTest = "abtesting"
-	BidForceDsp = "dsp"
-	BidForceRtDsp = "rtdsp"
-	BidForcePioneer = "pioneer"
+	ABTestAppid      = "abtest"
+	BidForceAppid    = "bidforce"
+	ABTest           = "abtesting"
+	BidForceDsp      = "dsp"
+	BidForceRtDsp    = "rtdsp"
+	BidForcePioneer  = "pioneer"
 	DefaultNamespace = "application"
-
 )
 
 const (
@@ -39,48 +38,52 @@ const (
 const (
 	AgolloConfig = "agollo.toml"
 	LogConfig    = "log.toml"
-	AppConfig   = "app.toml"
+	AppConfig    = "app.toml"
 )
 
 type BaseConf struct {
 	LogCfg    *LogCfg
 	AgolloCfg *AgolloCfg
-	AppCfg   *AppCfg
+	AppCfg    *AppCfg
 }
 
 type DyAgolloCfg struct {
 	ClusterConfig *ClusterCfg
-	AppConfig *AppCfg
-} 
+	AppConfig     *AppCfg
+}
 
 type AgolloCfg struct {
-	ConfigServerURL string                 `toml:"ipport"`
-	AppID string                 		`toml:"appid"`
-	Cluster string                 		`toml:"cluster"`
-	Namespace []string                 	`toml:"namespace"`
-	CyclePeriod int                		`toml:"cycleperiod"`
+	ConfigServerURL string   `toml:"ipport"`
+	PortalURL       string   `toml:"portalport"`
+	AppID           string   `toml:"appid"`
+	Cluster         string   `toml:"cluster"`
+	Namespace       []string `toml:"namespace"`
+	CyclePeriod     int      `toml:"cycleperiod"`
 }
 
 type AppClusterCfg struct {
-	Namespace	[]string `toml:"namespace"`
-	AppClusterMap   map[string]AppClusterInfo    `toml:"app_cluster_map"`
+	Namespace     []string                  `toml:"namespace"`
+	AppClusterMap map[string]AppClusterInfo `toml:"app_cluster_map"`
 }
 
 type ClusterCfg struct {
-	ClusterMap      map[string]ClusterInfo `toml:"cluster_map"`
+	ClusterMap map[string]ClusterInfo `toml:"cluster_map"`
 }
 
 type AppCfg struct {
-	DingKeys       []string `toml:"ding_keys"`
-	DingUsers	[]string `toml:"ding_users"`
-	EnUpdateConsul	bool `toml:"enable_update_consul"`
-	ChklogRate float64 `toml:"log_rate"`
-	AppConfigMap      map[string]ConfigInfo `toml:"app_config_map"`
+	DingKeys       []string              `toml:"ding_keys"`
+	DingUsers      []string              `toml:"ding_users"`
+	DingUserMap    map[string]string     `toml:"ding_user_map"`
+	IsAtAll        int                   `toml:"is_at_all"`
+	EnUpdateConsul int                   `toml:"enable_update_consul"`
+	EnDelConsul    int                   `toml:"enable_delete_consul"`
+	ChklogRate     float64               `toml:"log_rate"`
+	AppConfigMap   map[string]ConfigInfo `toml:"app_config_map"`
 }
 
 type AppClusterInfo struct {
-        Cluster []string `toml:"cluster"`
-	Namespace       []string `toml:"namespace"`
+	Cluster   []string `toml:"cluster"`
+	Namespace []string `toml:"namespace"`
 }
 
 type ClusterInfo struct {
@@ -88,10 +91,14 @@ type ClusterInfo struct {
 }
 
 type ConfigInfo struct {
-	DingKeys []string `toml:"ding_keys"`
-	DingUsers       []string `toml:"ding_users"`
-	ChklogRate float64 `toml:"log_rate"`
-	EnUpdateConsul	bool `toml:"enable_update_consul"`
+	DingKeys       []string          `toml:"ding_keys"`            //ding token
+	DingUsers      []string          `toml:"ding_users"`           //default ding @list
+	DingUserMap    map[string]string `toml:"ding_user_map"`        //config real editor ding @list
+	IsAtAll        int               `toml:"is_at_all"`            //1: atall 2:not atall
+	EnUpdateConsul int               `toml:"enable_update_consul"` //1: enable update consul 2:not
+	EnDelConsul    int               `toml:"enable_delete_consul"` //1: enable delete consul 2:not
+	ChklogRate     float64           `toml:"log_rate"`
+	AccessToken    string            `toml:"access_token"` //apollo api auth token
 }
 
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
@@ -109,16 +116,14 @@ func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	}
 	cfg.LogCfg = logCfg
 
-        appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
-        if err != nil {
-                return nil, fmt.Errorf("Parse appConfig error, err[%s]", err.Error())
-        }
-        cfg.AppCfg = appCfg
+	appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
+	if err != nil {
+		return nil, fmt.Errorf("Parse appConfig error, err[%s]", err.Error())
+	}
+	cfg.AppCfg = appCfg
 
 	return cfg, nil
 }
-
-
 
 func parseLogConfig(fileName string) (*LogCfg, error) {
 	cfg := &LogCfg{}
@@ -129,11 +134,11 @@ func parseLogConfig(fileName string) (*LogCfg, error) {
 }
 
 func parseBaseAppConfig(fileName string) (*AppCfg, error) {
-        cfg := &AppCfg{}
-        if err := parseTomlConfig(fileName, cfg); err != nil {
-                return cfg, err
-        }
-        return cfg, nil
+	cfg := &AppCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
@@ -145,19 +150,19 @@ func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
 }
 
 func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
-        cfg := &AppClusterCfg{}
-        if err := parseTomlStringConfig(data, cfg); err != nil {
-                return cfg, err
-        }
-        return cfg, nil
+	cfg := &AppClusterCfg{}
+	if err := parseTomlStringConfig(data, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
-        cfg := &DyAgolloCfg{}
+	cfg := &DyAgolloCfg{}
 	if clusterConfig != "" {
 		clusterCfg, err := parseClusterConfig(clusterConfig)
 		if err == nil {
-				cfg.ClusterConfig = clusterCfg
+			cfg.ClusterConfig = clusterCfg
 		} else {
 			return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
 		}
@@ -165,28 +170,28 @@ func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
 	if appConfig != "" {
 		appCfg, err := parseAppConfig(appConfig)
 		if err == nil {
-				cfg.AppConfig = appCfg
+			cfg.AppConfig = appCfg
 		} else {
 			return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
 		}
 	}
-        return cfg, nil
+	return cfg, nil
 }
 
 func parseClusterConfig(data string) (*ClusterCfg, error) {
-        cfg := &ClusterCfg{}
-        if err := parseTomlStringConfig(data, cfg); err != nil {
-                return cfg, err
-        }
-        return cfg, nil
+	cfg := &ClusterCfg{}
+	if err := parseTomlStringConfig(data, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func parseAppConfig(data string) (*AppCfg, error) {
-        cfg := &AppCfg{}
-        if err := parseTomlStringConfig(data, cfg); err != nil {
-                return cfg, err
-        }
-        return cfg, nil
+	cfg := &AppCfg{}
+	if err := parseTomlStringConfig(data, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
 }
 
 func parseTomlConfig(fileName string, config interface{}) (err error) {
@@ -204,9 +209,66 @@ func parseTomlConfig(fileName string, config interface{}) (err error) {
 
 func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
 
-        if _, err = toml.Decode(string(tomlData), config); err != nil {
-                return fmt.Errorf("decode %s, %s", tomlData, err.Error())
-        }
+	if _, err = toml.Decode(string(tomlData), config); err != nil {
+		return fmt.Errorf("decode %s, %s", tomlData, err.Error())
+	}
 
-        return nil
+	return nil
+}
+func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) *ConfigInfo {
+	configInfo := &ConfigInfo{}
+	// 本地配置文件初始化
+	configInfo.InitDyConfigerInfo(appConfig, appid)
+	dyAgoCfg, ok := DyAgolloConfiger[namespace]
+	if !ok {
+		namespace = DefaultNamespace
+		if dyAgoCfg, ok = DyAgolloConfiger[namespace]; !ok {
+			return configInfo
+		}
+	}
+	// Apollo global_config初始化
+	configInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid)
+	return configInfo
+}
+func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string){
+	if appcfg == nil{
+		return
+	}
+	configInfo.DingKeys = appcfg.DingKeys
+	configInfo.DingUsers = appcfg.DingUsers
+	configInfo.DingUserMap = appcfg.DingUserMap
+	configInfo.IsAtAll = appcfg.IsAtAll
+	configInfo.EnUpdateConsul = appcfg.EnUpdateConsul
+	configInfo.EnDelConsul = appcfg.EnDelConsul
+	configInfo.ChklogRate = appcfg.ChklogRate
+	if appcfg.AppConfigMap == nil {
+		return
+	}
+	if _,ok := appcfg.AppConfigMap[appid];!ok{
+		return
+	}
+	if len(appcfg.AppConfigMap[appid].DingKeys) > 0 {
+		configInfo.DingKeys = appcfg.AppConfigMap[appid].DingKeys
+	}
+	if len(appcfg.AppConfigMap[appid].DingUsers) > 0 {
+		configInfo.DingUsers = appcfg.AppConfigMap[appid].DingUsers
+	}
+	for key, value := range appcfg.AppConfigMap[appid].DingUserMap {
+		if configInfo.DingUserMap == nil {
+			configInfo.DingUserMap = make(map[string]string)
+		}
+		configInfo.DingUserMap[key] = value
+	}
+	if appcfg.AppConfigMap[appid].IsAtAll != 0 {
+		configInfo.IsAtAll = appcfg.AppConfigMap[appid].IsAtAll
+	}
+	if appcfg.AppConfigMap[appid].EnUpdateConsul != 0 {
+		configInfo.EnUpdateConsul = appcfg.AppConfigMap[appid].EnUpdateConsul
+	}
+	if appcfg.AppConfigMap[appid].EnDelConsul != 0 {
+		configInfo.EnDelConsul = appcfg.AppConfigMap[appid].EnDelConsul
+	}
+	if appcfg.AppConfigMap[appid].AccessToken != "" {
+		configInfo.AccessToken = appcfg.AppConfigMap[appid].AccessToken
+	}
 }
