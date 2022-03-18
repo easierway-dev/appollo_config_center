@@ -7,7 +7,7 @@ import (
     "net/http"
 )
 
-func HttpGet(url,token string) (resp_body string, err error) {
+func HttpGet(url,token string) (respBody []byte, err error) {
     client := &http.Client{}
     req,_ := http.NewRequest("GET",url,nil)
     //req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -24,7 +24,7 @@ func HttpGet(url,token string) (resp_body string, err error) {
         //result := make(map[string]interface{})
         body, _ := ioutil.ReadAll(resp.Body)
         //_ = json.Unmarshal(body, &result)
-        resp_body = string(body)
+        respBody = body
     }
     return
 }

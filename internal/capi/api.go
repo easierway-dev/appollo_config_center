@@ -51,7 +51,7 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 		fmt.Println("get body err:", err)
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(body), &respBody)
+	err = json.Unmarshal(body, &respBody)
 	//fmt.Println("\nxxdebugresp_body=",resp_body, "\nxxdebugerr=",err)
 	if err != nil {
 		fmt.Println("Unmarshal NamespaceInfo err=", err)
