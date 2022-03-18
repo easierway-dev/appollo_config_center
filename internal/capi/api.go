@@ -47,7 +47,7 @@ type AppInfo struct {
 
 func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 	body, err := chttp.HttpGet(url, token)
-	fmt.Println("body=",body)
+	fmt.Println("body=",string(body))
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
