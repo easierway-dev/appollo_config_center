@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
-func HttpGet(url, token string) (respBody []byte, err error) {
+func HttpGet(url, token string) ([]byte, error) {
+
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	//req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -21,7 +23,7 @@ func HttpGet(url, token string) (respBody []byte, err error) {
 	//'Accept-Encoding':'gzip, deflate, br'
 	resp, err := client.Do(req)
 	if err != nil {
-		return
+		return nil,err
 	}
 	// 是否有 gzip
 	gzipFlag := false
@@ -35,17 +37,18 @@ func HttpGet(url, token string) (respBody []byte, err error) {
 		if gzipFlag {
 			// 创建 gzip.Reader
 			gr, err := gzip.NewReader(resp.Body)
-			defer gr.Close()
 			if err != nil {
 				fmt.Println(err.Error())
-				return
+				return nil,err
 			}
-			respBody, _ = ioutil.ReadAll(gr)
-			return
+			defer gr.Close()
+			respBody, err := ioutil.ReadAll(gr)
+			return respBody,err
 		}
-		respBody, _ = ioutil.ReadAll(resp.Body)
+		respBody, err := ioutil.ReadAll(resp.Body)
+		return respBody,err
 	}
-	return
+	return nil,errors.New("no response")
 }
 
 func HttpPostForm(url, token string, data map[string]interface{}) (resp_body string, err error) {
