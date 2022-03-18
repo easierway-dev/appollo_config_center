@@ -406,6 +406,7 @@ func (cw *CWorker) Run(ctx context.Context) {
 					nsInfo, _ := capi.GetNamespaceInfo(url, ccommon.Configer.AccessToken)
 					//需要进行拼接的业务，例如bidforce/abtest
 					updateContent, updatedKeys, deletedKeys, modifierList, willUpdateConsul, isContain = updateMergeTask(cw, update, nsInfo, "write")
+					willUpdateConsul = true
 					if !isContain {
 						// 获取更新的key更新consul
 						updatedKeys, modifierList = updatedTask(cw, update, nsInfo, "write")
