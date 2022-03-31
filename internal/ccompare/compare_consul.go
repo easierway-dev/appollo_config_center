@@ -51,9 +51,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 		fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
 		for clusterName, namespace := range appIdProperty.NameSpace {
 			kValue := &KValue{}
-			// namespace为空的时候，继续下一次循环
 			for i := 0; i < len(namespace); i++ {
 				//
+				// namespace为空的时候，继续下一次循环
 				if len(namespace[i].Items) == 0 {
 					fmt.Println("namespace is nil:  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
@@ -65,6 +65,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 				}
 				if _, ok := kv["consul_key"]; ok {
 					fmt.Println("content:", "key contain consul_key  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
+					continue
 				}
 				comkey := &CompareKey{}
 				comkey.NotExistKey = make(map[string]*capi.ItemInfo)
