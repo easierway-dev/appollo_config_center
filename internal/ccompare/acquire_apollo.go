@@ -20,7 +20,6 @@ type AppIdProperty struct {
 	NameSpace   map[string][]*capi.NamespaceInfo
 	AccessToken string
 }
-
 // 全部的业务线
 var appID []string
 
@@ -124,7 +123,6 @@ func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*capi.
 	//if apolloProperty.AccessToken == "" {
 	//	return nil, errors.New("AccessToken is nil")
 	//}
-	// 暂时使用默认的accessToken,后面可以修改为apolloProperty.AccessToken
 	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
 	if nSAllInfo == nil {
 		return nil, errors.New("nSAllInfo is nil")
@@ -153,7 +151,7 @@ func GetAppIdsProperty() (err error) {
 // 获取appId对应的accessToken
 func getAccessToken(m map[string]ccommon.ConfigInfo) (map[string]string, error) {
 	if len(m) == 0 {
-		return nil, errors.New("not contain DspToken")
+		return nil, errors.New("config is nil")
 	}
 	appIdAccessToken = make(map[string]string, 6)
 	for key, info := range m {
@@ -161,35 +159,35 @@ func getAccessToken(m map[string]ccommon.ConfigInfo) (map[string]string, error) 
 	}
 	return appIdAccessToken, nil
 }
-
-// 打印测试
-func readConfig() {
+func readCon() {
 	//
 	for _, val := range apolloInfo["dsp"] {
 		//fmt.Println("apolloInfo kv =", kv)
 		fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 		for namespace, keys := range val.NameSpace {
 			fmt.Println("dsp apolloInfo NameSpace =", namespace)
-			fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
-			fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
-			//for k,v:= range keys.NotExistKey{
-			//	fmt.Println("dsp apolloInfo notExistKey =", k)
-			//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			//}
-			//for k,v:= range keys.NotEqualKey{
-			//	fmt.Println("dsp apolloInfo NotEqualKey =", k)
-			//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			//}
+			for k, v := range keys.NotExistKey {
+				fmt.Println("dsp apolloInfo notExistKey =", k)
+				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			}
+			for k, v := range keys.NotEqualKey {
+				fmt.Println("dsp apolloInfo NotEqualKey =", k)
+				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			}
 		}
 	}
 }
-func Start(server *AgolloServer) {
+func Start() {
+	// 初始化配置文件
+	if err := Init(); err != nil {
+		panic(err)
+	}
 	apollo := &ApolloValue{}
 	// 获取全局配置
-	GetApolloGlobalConfig(server)
+	GetApolloGlobalConfig()
 	// 每个业务线的具体信息
 	GetAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
-	readConfig()
+	readCon()
 }

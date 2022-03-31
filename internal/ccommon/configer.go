@@ -149,36 +149,15 @@ func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
 	return cfg, nil
 }
 
-func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
-	cfg := &AppClusterCfg{}
-	if err := parseTomlStringConfig(data, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
+//func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
+//	cfg := &AppClusterCfg{}
+//	if err := parseTomlStringConfig(data, cfg); err != nil {
+//		return cfg, err
+//	}
+//	return cfg, nil
+//}
 
-func ParseDyConfig(clusterConfig, appConfig string) (*DyAgolloCfg, error) {
-	cfg := &DyAgolloCfg{}
-	if clusterConfig != "" {
-		clusterCfg, err := parseClusterConfig(clusterConfig)
-		if err == nil {
-			cfg.ClusterConfig = clusterCfg
-		} else {
-			return nil, fmt.Errorf("ParseClusterConfig error, err[%s]", err.Error())
-		}
-	}
-	if appConfig != "" {
-		appCfg, err := parseAppConfig(appConfig)
-		if err == nil {
-			cfg.AppConfig = appCfg
-		} else {
-			return nil, fmt.Errorf("ParseAppConfig error, err[%s]", err.Error())
-		}
-	}
-	return cfg, nil
-}
-
-func parseClusterConfig(data string) (*ClusterCfg, error) {
+func ParseClusterConfig(data string) (*ClusterCfg, error) {
 	cfg := &ClusterCfg{}
 	if err := parseTomlStringConfig(data, cfg); err != nil {
 		return cfg, err
@@ -186,7 +165,7 @@ func parseClusterConfig(data string) (*ClusterCfg, error) {
 	return cfg, nil
 }
 
-func parseAppConfig(data string) (*AppCfg, error) {
+func ParseAppConfig(data string) (*AppCfg, error) {
 	cfg := &AppCfg{}
 	if err := parseTomlStringConfig(data, cfg); err != nil {
 		return cfg, err
@@ -214,61 +193,4 @@ func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
 	}
 
 	return nil
-}
-func InitAppCfgMap(appConfig *AppCfg, appid ,namespace string) *ConfigInfo {
-	configInfo := &ConfigInfo{}
-	// 本地配置文件初始化
-	configInfo.InitDyConfigerInfo(appConfig, appid)
-	dyAgoCfg, ok := DyAgolloConfiger[namespace]
-	if !ok {
-		namespace = DefaultNamespace
-		if dyAgoCfg, ok = DyAgolloConfiger[namespace]; !ok {
-			return configInfo
-		}
-	}
-	// Apollo global_config初始化
-	configInfo.InitDyConfigerInfo(dyAgoCfg.AppConfig,appid)
-	return configInfo
-}
-func(configInfo *ConfigInfo) InitDyConfigerInfo(appcfg *AppCfg,appid string){
-	if appcfg == nil{
-		return
-	}
-	configInfo.DingKeys = appcfg.DingKeys
-	configInfo.DingUsers = appcfg.DingUsers
-	configInfo.DingUserMap = appcfg.DingUserMap
-	configInfo.IsAtAll = appcfg.IsAtAll
-	configInfo.EnUpdateConsul = appcfg.EnUpdateConsul
-	configInfo.EnDelConsul = appcfg.EnDelConsul
-	configInfo.ChklogRate = appcfg.ChklogRate
-	if appcfg.AppConfigMap == nil {
-		return
-	}
-	if _,ok := appcfg.AppConfigMap[appid];!ok{
-		return
-	}
-	if len(appcfg.AppConfigMap[appid].DingKeys) > 0 {
-		configInfo.DingKeys = appcfg.AppConfigMap[appid].DingKeys
-	}
-	if len(appcfg.AppConfigMap[appid].DingUsers) > 0 {
-		configInfo.DingUsers = appcfg.AppConfigMap[appid].DingUsers
-	}
-	for key, value := range appcfg.AppConfigMap[appid].DingUserMap {
-		if configInfo.DingUserMap == nil {
-			configInfo.DingUserMap = make(map[string]string)
-		}
-		configInfo.DingUserMap[key] = value
-	}
-	if appcfg.AppConfigMap[appid].IsAtAll != 0 {
-		configInfo.IsAtAll = appcfg.AppConfigMap[appid].IsAtAll
-	}
-	if appcfg.AppConfigMap[appid].EnUpdateConsul != 0 {
-		configInfo.EnUpdateConsul = appcfg.AppConfigMap[appid].EnUpdateConsul
-	}
-	if appcfg.AppConfigMap[appid].EnDelConsul != 0 {
-		configInfo.EnDelConsul = appcfg.AppConfigMap[appid].EnDelConsul
-	}
-	if appcfg.AppConfigMap[appid].AccessToken != "" {
-		configInfo.AccessToken = appcfg.AppConfigMap[appid].AccessToken
-	}
 }
