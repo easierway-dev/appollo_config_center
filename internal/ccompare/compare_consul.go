@@ -74,6 +74,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("content:", "key contain consul_key  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 				}
 				comkey := &CompareKey{}
+				comkey.NotExistKey = make(map[string]*ItemInfo)
+				comkey.NotEqualKey = make(map[string]*ItemInfo)
 				for k, v := range kv {
 					consulValue1, err := consulValue.GetValue(client, k)
 					if err != nil || consulValue1.(string) == "" {
