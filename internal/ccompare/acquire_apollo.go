@@ -123,6 +123,7 @@ func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*capi.
 	//if apolloProperty.AccessToken == "" {
 	//	return nil, errors.New("AccessToken is nil")
 	//}
+	// 暂时使用默认的accessToken,后面可以修改为apolloProperty.AccessToken
 	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
 	if nSAllInfo == nil {
 		return nil, errors.New("nSAllInfo is nil")
@@ -166,8 +167,14 @@ func readCon() {
 		fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 		for namespace, keys := range val.NameSpace {
 			fmt.Println("dsp apolloInfo NameSpace =", namespace)
-			fmt.Println("dsp apolloInfo notExistKey =", keys.notExistKey)
-			fmt.Println("dsp apolloInfo notEqualKey =", keys.notEqualKey)
+			for k,v:= range keys.NotExistKey{
+				fmt.Println("dsp apolloInfo notExistKey =", k)
+				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			}
+			for k,v:= range keys.NotEqualKey{
+				fmt.Println("dsp apolloInfo NotEqualKey =", k)
+				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			}
 		}
 	}
 }
@@ -178,6 +185,6 @@ func Start(server *AgolloServer) {
 	// 每个业务线的具体信息
 	GetAppIdsProperty()
 	// 对比
-	apollo.GetValue("")
+	apollo.CompareValue()
 	readCon()
 }
