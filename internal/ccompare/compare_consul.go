@@ -3,6 +3,7 @@ package ccompare
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 )
 
 type Value interface {
@@ -22,16 +23,8 @@ type KValue struct {
 
 //
 type CompareKey struct {
-	NotExistKey map[string]*ItemInfo
-	NotEqualKey map[string]*ItemInfo
-}
-type ItemInfo struct {
-	Key                        string
-	Value                      string
-	DataChangeCreatedBy        string
-	DataChangeLastModifiedBy   string
-	DataChangeCreatedTime      string
-	DataChangeLastModifiedTime string
+	NotExistKey map[string]*capi.ItemInfo
+	NotEqualKey map[string]*capi.ItemInfo
 }
 
 var apolloInfo map[string][]*KValue
@@ -65,17 +58,17 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("namespace is nil:  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				kv := make(map[string]*ItemInfo)
+				kv := make(map[string]*capi.ItemInfo)
 				// 将单个namespace赋值到map中
 				for j := 0; j < len(namespace[i].Items); j++ {
-					kv[namespace[i].Items[j].Key] = &ItemInfo{Value: namespace[i].Items[j].Value}
+					kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
 				}
 				if _, ok := kv["consul_key"]; ok {
 					fmt.Println("content:", "key contain consul_key  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 				}
 				comkey := &CompareKey{}
-				comkey.NotExistKey = make(map[string]*ItemInfo)
-				comkey.NotEqualKey = make(map[string]*ItemInfo)
+				comkey.NotExistKey = make(map[string]*capi.ItemInfo)
+				comkey.NotEqualKey = make(map[string]*capi.ItemInfo)
 				for k, v := range kv {
 					consulValue1, err := consulValue.GetValue(client, k)
 					if err != nil || consulValue1.(string) == "" {
@@ -96,7 +89,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 		apolloInfo[appId] = kValues
 	}
 }
-
+func getItemInfo(item capi.ItemInfo) *capi.ItemInfo {
+	return &capi.ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
+}
 func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (interface{}, error) {
 	value, err := GetConsulKV(client, path)
 	if err != nil {

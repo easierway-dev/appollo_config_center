@@ -167,14 +167,16 @@ func readCon() {
 		fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 		for namespace, keys := range val.NameSpace {
 			fmt.Println("dsp apolloInfo NameSpace =", namespace)
-			for k,v:= range keys.NotExistKey{
-				fmt.Println("dsp apolloInfo notExistKey =", k)
-				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			}
-			for k,v:= range keys.NotEqualKey{
-				fmt.Println("dsp apolloInfo NotEqualKey =", k)
-				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			}
+			fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
+			fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+			//for k,v:= range keys.NotExistKey{
+			//	fmt.Println("dsp apolloInfo notExistKey =", k)
+			//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			//}
+			//for k,v:= range keys.NotEqualKey{
+			//	fmt.Println("dsp apolloInfo NotEqualKey =", k)
+			//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+			//}
 		}
 	}
 }
