@@ -20,6 +20,7 @@ type AppIdProperty struct {
 	NameSpace   map[string][]*capi.NamespaceInfo
 	AccessToken string
 }
+
 // 全部的业务线
 var appID []string
 
@@ -160,7 +161,9 @@ func getAccessToken(m map[string]ccommon.ConfigInfo) (map[string]string, error) 
 	}
 	return appIdAccessToken, nil
 }
-func readCon() {
+
+// 打印测试
+func readConfig() {
 	//
 	for _, val := range apolloInfo["dsp"] {
 		//fmt.Println("apolloInfo kv =", kv)
@@ -188,5 +191,5 @@ func Start(server *AgolloServer) {
 	GetAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
-	readCon()
+	readConfig()
 }

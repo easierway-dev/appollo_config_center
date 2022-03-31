@@ -14,13 +14,11 @@ type KeyInfo interface {
 	GetInfo(key string) map[string]string
 }
 type Key struct{}
-
 // 对比consul_kv之后,记录每个集群名和namesapce下不存在和不相等的key
 type KValue struct {
 	Cluster   string
 	NameSpace map[string]*CompareKey
 }
-
 //
 type CompareKey struct {
 	NotExistKey map[string]*capi.ItemInfo
@@ -30,7 +28,6 @@ type CompareKey struct {
 var apolloInfo map[string][]*KValue
 
 type ApolloValue struct {
-	Items map[string][]*KValue
 }
 type ConsulValue struct {
 }
@@ -39,6 +36,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 	fmt.Println("init consul client")
 	consulValue := &ConsulValue{}
 	apolloInfo = make(map[string][]*KValue)
+	// 这里地址写死了,可以动态获取apollo的值
 	client, _ := NewClient(ADDR)
 	// 每个业务线
 	for appId, appIdProperty := range appIdsProperty {
@@ -73,12 +71,14 @@ func (apolloValue *ApolloValue) CompareValue() {
 				for k, v := range kv {
 					consulValue1, err := consulValue.GetValue(client, k)
 					if err != nil || consulValue1.(string) == "" {
+						// 对比之后不才存在值
 						comkey.NotExistKey[k] = v
 						continue
 					}
 					if consulValue1 == v.Value {
 						continue
 					}
+					// 对比之后不相等值
 					comkey.NotEqualKey[k] = v
 				}
 				kValue.NameSpace = make(map[string]*CompareKey)

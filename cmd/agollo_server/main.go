@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	_ "net/http/pprof"
 )
@@ -27,7 +29,15 @@ func main() {
 	if err = ccompare.Init(server); err != nil {
 		panic(err)
 	}
-	ccompare.Start(server)
+	go ccompare.Start(server)
+	ticker := time.NewTicker(time.Minute * 10)
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Println("10分钟到....")
+			ccompare.Start(server)
+		}
+	}
 	handleKillSignal()
 	//server.GracefulStop()
 }
