@@ -19,7 +19,7 @@ var GlobalConfiger *GlobalConfig
 func GetApolloGlobalConfig() error {
 	GlobalConfiger = &GlobalConfig{}
 
-	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", ccommon.AgolloConfiger.AppID, ccommon.AgolloConfiger.Cluster, ccommon.AgolloConfiger.Namespace)
+	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", ccommon.AgolloConfiger.AppID, ccommon.AgolloConfiger.Cluster, ccommon.AgolloConfiger.Namespace[0])
 	fmt.Println("url=", url)
 	//if apolloProperty.AccessToken == "" {
 	//	return nil, errors.New("AccessToken is nil")

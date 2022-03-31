@@ -47,6 +47,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 	consulValue := &ConsulValue{}
 	apolloInfo = make(map[string][]*KValue)
 	client, _ := NewClient(ADDR)
+	if len(appIdsProperty) == 0 {
+		fmt.Println("not any appIds")
+	}
 	// 每个业务线
 	for appId, appIdProperty := range appIdsProperty {
 		// 暂时跳过dsp_abtest,bidforce
