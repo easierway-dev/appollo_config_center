@@ -36,6 +36,7 @@ func main() {
 		case <-ticker.C:
 			fmt.Println("10分钟到....")
 			ccompare.Start(server)
+		default:
 		}
 	}
 	handleKillSignal()
