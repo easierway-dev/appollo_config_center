@@ -1,7 +1,3 @@
-[app_config_map.init]
-ding_keys=["159041625c744e27df8f5105436f4b40a47dccf55e9515677d14a6a70fb11f27"]
-[app_config_map.poll]
-log_rate = 0.001
 [app_config_map.dsp]
 access_token="6f27190ea9ff6dd9f3819a2df069a3546bcc0928"
 [app_config_map.pioneer]
