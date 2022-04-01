@@ -34,17 +34,17 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 	// index为下标索引，id为具体的业务线
 	appIdsProperty = make(map[string]*AppIdProperty)
 	// 各个业务线
-	for _, id := range AppIdClusters.AppID {
-		envClustersMap := AppIdClusters.EnvClustersInfoMap
-		// 各个业务线下的集群信息
-		for in, _ := range envClustersMap[id] {
-			if envClustersMap[id][in].Env == DEV {
-				appIdProperty = &AppIdProperty{AppId: id, Env: DEV, ClusterName: envClustersMap[id][in].Clusters, AccessToken: appIdAccessToken[id]}
+	envClustersMap := AppIdClusters.EnvClustersInfoMap
+	// 各个业务线下的集群信息
+	for appid, envClusters := range envClustersMap {
+		for i := 0; i < len(envClusters); i++ {
+			if envClusters[i].Env == DEV {
+				appIdProperty = &AppIdProperty{AppId: appid, Env: DEV, ClusterName: envClusters[i].Clusters, AccessToken: appIdAccessToken[appid]}
 				fmt.Println("appIdProperty AppId= ", appIdProperty.AppId)
 				fmt.Println("appIdProperty Env= ", appIdProperty.Env)
 				fmt.Println("appIdProperty ClusterName= ", appIdProperty.ClusterName)
 				// 获取每个业务线的下的每个集群的所有namesapce
-				for id, cluster := range envClustersMap[id][in].Clusters {
+				for id, cluster := range envClusters[i].Clusters {
 					nameSpaceInfo, err := appIdProperty.getNameSpaceInfo(id)
 					// 如果当前集群没有namespace，直接跳过
 					if err != nil || nameSpaceInfo == nil {
@@ -57,7 +57,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 					appIdProperty.NameSpace[cluster] = nameSpaceInfo
 				}
 				fmt.Println("appIdProperty NameSpace= ", appIdProperty.NameSpace)
-				appIdsProperty[id] = appIdProperty
+				appIdsProperty[appid] = appIdProperty
 			} else {
 				return errors.New("not DEV environment")
 			}
