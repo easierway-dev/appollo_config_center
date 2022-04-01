@@ -3,10 +3,12 @@ package ccompare
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"reflect"
 )
 
 type Value interface {
 	CompareValue()
+	Print(id string)
 }
 
 type KeyInfo interface {
@@ -26,21 +28,22 @@ type CompareKey struct {
 	NotEqualKey map[string]*ItemInfo
 }
 
-var apolloInfo map[string][]*KValue
+//var apolloInfo map[string][]*KValue
 
 type ApolloValue struct {
+	ApolloInfo map[string][]*KValue
 }
 type ConsulValue struct {
 }
 
 func (apolloValue *ApolloValue) CompareValue() {
-	fmt.Println("init consul client")
+	fmt.Println("start compare")
 	consulValue := &ConsulValue{}
 	var client []*api.Client
-	apolloInfo = make(map[string][]*KValue)
+	apolloValue.ApolloInfo = make(map[string][]*KValue)
 	// 这里地址写死了,可以动态获取apollo的值
 	// 每个业务线
-	for appId, appIdProperty := range appIdsProperty {
+	for appId, appIdProperty := range Property.AppIdsProperty {
 		// 暂时跳过dsp_abtest,bidforce
 		if appId == "dsp_abtest" || appId == "bidforce" {
 			continue
@@ -58,6 +61,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
 					cli, _ := NewClient(consulAddr.ConsulAddr[i])
 					if cli == nil {
+						fmt.Println("consulAddr:", consulAddr.ConsulAddr[i]+" connect failed")
 						continue
 					}
 					client = append(client, cli)
@@ -82,6 +86,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 				comkey := &CompareKey{}
 				comkey.NotExistKey = make(map[string]*ItemInfo)
 				comkey.NotEqualKey = make(map[string]*ItemInfo)
+				// 某个集群下consulAddr可能有多个
 				for i := 0; i < len(client); i++ {
 					for k, v := range kv {
 						consulKValue, err := consulValue.GetValue(client[i], k)
@@ -103,7 +108,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 			kValue.Cluster = clusterName
 			kValues = append(kValues, kValue)
 		}
-		apolloInfo[appId] = kValues
+		// 每个业务线对应的具体信息
+		apolloValue.ApolloInfo[appId] = kValues
 	}
 }
 func getItemInfo(item ItemInfo) *ItemInfo {
@@ -119,6 +125,52 @@ func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.
 }
 func (consulValue *ConsulValue) CompareValue() {
 }
+func (apolloValue ApolloValue) Print(appId ...interface{}) {
+	switch reflect.TypeOf(appId).Kind() {
+	case reflect.Invalid:
+		PrintAll(apolloValue.ApolloInfo)
+		break
+	case reflect.String:
+		Print(apolloValue.ApolloInfo, appId)
+		break
+	default:
+		break
+	}
+}
+func PrintAll(apolloKV map[string][]*KValue) {
+	for _, value := range apolloKV {
+		for _, val := range value {
+			//fmt.Println("apolloInfo kv =", kv)
+			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
+			for namespace, keys := range val.NameSpace {
+				fmt.Println("dsp apolloInfo NameSpace =", namespace)
+				fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
+				fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+				//for k, v := range keys.NotExistKey {
+				//	fmt.Println("dsp apolloInfo notExistKey =", k)
+				//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+				//}
+				//for k, v := range keys.NotEqualKey {
+				//	fmt.Println("dsp apolloInfo NotEqualKey =", k)
+				//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
+				//}
+			}
+		}
+	}
+}
+func Print(apolloKV map[string][]*KValue, appId ...interface{}) {
+	for _, id := range appId {
+		for _, val := range apolloKV[id.(string)] {
+			//fmt.Println("apolloInfo kv =", kv)
+			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
+			for namespace, keys := range val.NameSpace {
+				fmt.Println("dsp apolloInfo NameSpace =", namespace)
+				fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
+				fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+			}
+		}
+	}
+}
 
 // 获取某个key隶属那个集群和namespace
 func (k *Key) GetInfo(key string) map[string]string {
@@ -127,7 +179,7 @@ func (k *Key) GetInfo(key string) map[string]string {
 	}
 	info := make(map[string]string)
 	// 每个业务线
-	for _, appIdProperty := range appIdsProperty {
+	for _, appIdProperty := range Property.AppIdsProperty {
 		// 每个集群下的nameSpace
 		for clusterName, namespace := range appIdProperty.NameSpace {
 			for i := 0; i < len(namespace); i++ {

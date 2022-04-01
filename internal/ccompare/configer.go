@@ -3,6 +3,7 @@ package ccompare
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 type Config interface {
@@ -12,12 +13,14 @@ type Config interface {
 type GlobalConfig struct {
 	AppConfigMap map[string]ConfigInfo  `toml:"app_config_map"`
 	ClusterMap   map[string]ClusterInfo `toml:"cluster_map"`
+	Timeout      int                    `toml:"timeout"`
 }
 type AppIdClustersInfo struct {
 	// 全部的业务线集群信息
 	EnvClustersInfoMap map[string][]*EnvClustersInfo
 }
 
+const Timeout = 10
 // 全局配置
 var GlobalConfiger *GlobalConfig
 var AppIdClusters *AppIdClustersInfo
@@ -30,6 +33,7 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 	GlobalConfiger = &GlobalConfig{}
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", AgolloConfiger.PortalURL, "DEV", AgolloConfiger.AppID, AgolloConfiger.Cluster, AgolloConfiger.Namespace[0])
 	fmt.Println("url=", url)
+	// 默认的token
 	globalInfo, _ := GetNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
 	if globalInfo == nil {
 		return errors.New("globalInfo is nil")
@@ -43,6 +47,12 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 			appConfig, _ := ParseAppConfig(item.Value)
 			globalConfig.AppConfigMap = appConfig.AppConfigMap
 		}
+		if item.Key == "timeout" {
+			if item.Value == "" {
+				globalConfig.Timeout = Timeout
+			}
+			globalConfig.Timeout, _ = strconv.Atoi(item.Value)
+		}
 	}
 	GlobalConfiger = globalConfig
 	return nil
@@ -50,13 +60,15 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
 	AppIdClusters = &AppIdClustersInfo{}
 	url1 := fmt.Sprintf("http://%s/openapi/v1/apps", AgolloConfiger.PortalURL)
+	// 动态获取业务线的token
 	SetAppIDAccessToken()
 	fmt.Println(AppIdAccessToken)
 	//token, err := getDspToken(globalConfig.AccessToken)
 	if len(AppIdAccessToken) == 0 {
 		return errors.New("appID not correspond AccessToken")
 	}
-	// 只要获取某个业务线的token就可以，这里以dsp的token为例
+	// 只要获取某个业务线的token就可以，这里以dsp的token为例(存在隐患)
+	// 每一个token对应一个业务线
 	appInfo, _ := GetAppInfo(url1, AppIdAccessToken["dsp"])
 	//fmt.Println("url2=", url2)
 	//fmt.Println("appInfo=", appInfo)

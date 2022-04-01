@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccompare"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	_ "net/http/pprof"
 )
 
 // AppVersion 版本信息
@@ -24,7 +23,7 @@ func handleKillSignal() {
 
 func main() {
 	go ccompare.Start()
-	ticker := time.NewTicker(time.Minute * 10)
+	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {
 		select {
 		case <-ticker.C:

@@ -20,7 +20,12 @@ type AppIdProperty struct {
 }
 
 // 各个业务线对应的集群信息
-var appIdsProperty map[string]*AppIdProperty
+
+type Properties struct {
+	AppIdsProperty map[string]*AppIdProperty
+}
+
+var Property *Properties
 
 func New() *AppIdProperty {
 	return &AppIdProperty{}
@@ -29,7 +34,8 @@ func New() *AppIdProperty {
 func (appIdProperty *AppIdProperty) applyProperty() error {
 	//fmt.Println("appId length = ", len(appID))
 	// index为下标索引，id为具体的业务线
-	appIdsProperty = make(map[string]*AppIdProperty)
+
+	Property.AppIdsProperty = make(map[string]*AppIdProperty)
 	// 各个业务线
 	envClustersMap := AppIdClusters.EnvClustersInfoMap
 	// 各个业务线下的集群信息
@@ -53,7 +59,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 					// 每个集群下对应的namespace
 					appIdProperty.NameSpace[cluster] = nameSpaceInfo
 				}
-				appIdsProperty[appid] = appIdProperty
+				Property.AppIdsProperty[appid] = appIdProperty
 			} else {
 				return errors.New("not DEV environment")
 			}
@@ -78,7 +84,7 @@ func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*Names
 	//fmt.Println("nSAllInfo=", nSAllInfo)
 	return nSAllInfo, nil
 }
-func GetAppIdsProperty() (err error) {
+func (property *Properties) getAppIdsProperty() (err error) {
 	// 获取全局AppID
 	appIdClusters := AppIdClustersInfo{}
 	appIdClusters.GetConfigInfo()
@@ -94,40 +100,23 @@ func GetAppIdsProperty() (err error) {
 	}
 	//SetNameSpaceInfo()
 	//readCon()
-	fmt.Println("appIdsProperty=", appIdsProperty)
+	fmt.Println("appIdsProperty=", property.AppIdsProperty)
 	return nil
 }
 
-func readCon() {
-	//
-	for _, val := range apolloInfo["dsp"] {
-		//fmt.Println("apolloInfo kv =", kv)
-		fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
-		for namespace, keys := range val.NameSpace {
-			fmt.Println("dsp apolloInfo NameSpace =", namespace)
-			for k, v := range keys.NotExistKey {
-				fmt.Println("dsp apolloInfo notExistKey =", k)
-				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			}
-			for k, v := range keys.NotEqualKey {
-				fmt.Println("dsp apolloInfo NotEqualKey =", k)
-				fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-			}
-		}
-	}
-}
 func Start() {
 	// 初始化配置文件
 	if err := Init(); err != nil {
 		panic(err)
 	}
 	apollo := &ApolloValue{}
-	globalconfig := &GlobalConfig{}
+	globalConfig := &GlobalConfig{}
+	property := &Properties{}
 	// 获取全局配置
-	globalconfig.GetConfigInfo()
+	globalConfig.GetConfigInfo()
 	// 每个业务线的具体信息
-	GetAppIdsProperty()
+	property.getAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
-	readCon()
+	apollo.Print("dsp")
 }
