@@ -56,6 +56,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 				for i := 0; i < len(consulAddr.ConsulAddr); i++ {
 					fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
 					cli, _ := NewClient(consulAddr.ConsulAddr[i])
+					if cli == nil {
+						continue
+					}
 					client = append(client, cli)
 				}
 			}
