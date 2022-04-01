@@ -8,7 +8,7 @@ import (
 
 type Value interface {
 	CompareValue()
-	Print(id string)
+	Print(id ...interface{})
 }
 
 type KeyInfo interface {
@@ -125,19 +125,19 @@ func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.
 }
 func (consulValue *ConsulValue) CompareValue() {
 }
-func (apolloValue ApolloValue) Print(appId ...interface{}) {
+func (apolloValue *ApolloValue) Print(appId ...interface{}) {
 	switch reflect.TypeOf(appId).Kind() {
 	case reflect.Invalid:
-		PrintAll(apolloValue.ApolloInfo)
+		printAll(apolloValue.ApolloInfo)
 		break
 	case reflect.String:
-		Print(apolloValue.ApolloInfo, appId)
+		printAppId(apolloValue.ApolloInfo, appId)
 		break
 	default:
 		break
 	}
 }
-func PrintAll(apolloKV map[string][]*KValue) {
+func printAll(apolloKV map[string][]*KValue) {
 	for _, value := range apolloKV {
 		for _, val := range value {
 			//fmt.Println("apolloInfo kv =", kv)
@@ -158,7 +158,8 @@ func PrintAll(apolloKV map[string][]*KValue) {
 		}
 	}
 }
-func Print(apolloKV map[string][]*KValue, appId ...interface{}) {
+func printAppId(apolloKV map[string][]*KValue, appId ...interface{}) {
+	fmt.Println("开始")
 	for _, id := range appId {
 		for _, val := range apolloKV[id.(string)] {
 			//fmt.Println("apolloInfo kv =", kv)
