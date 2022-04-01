@@ -13,11 +13,13 @@ type KeyInfo interface {
 	GetInfo(key string) map[string]string
 }
 type Key struct{}
+
 // 对比consul_kv之后,记录每个集群名和namesapce下不存在和不相等的key
 type KValue struct {
 	Cluster   string
 	NameSpace map[string]*CompareKey
 }
+
 //
 type CompareKey struct {
 	NotExistKey map[string]*ItemInfo
@@ -34,9 +36,9 @@ type ConsulValue struct {
 func (apolloValue *ApolloValue) CompareValue() {
 	fmt.Println("init consul client")
 	consulValue := &ConsulValue{}
+	var client []*api.Client
 	apolloInfo = make(map[string][]*KValue)
 	// 这里地址写死了,可以动态获取apollo的值
-	client, _ := NewClient(ADDR)
 	// 每个业务线
 	for appId, appIdProperty := range appIdsProperty {
 		// 暂时跳过dsp_abtest,bidforce
@@ -47,12 +49,22 @@ func (apolloValue *ApolloValue) CompareValue() {
 		// 每个集群下的nameSpace
 		fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
 		for clusterName, namespace := range appIdProperty.NameSpace {
+			if consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]; !ok {
+				fmt.Println("content:", "cluster not correspond consulAddr AppId:", appId, "\tclusterName:", clusterName)
+				continue
+			} else {
+				for i := 0; i < len(consulAddr.ConsulAddr); i++ {
+					fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
+					cli, _ := NewClient(consulAddr.ConsulAddr[i])
+					client = append(client, cli)
+				}
+			}
 			kValue := &KValue{}
 			for i := 0; i < len(namespace); i++ {
 				//
 				// namespace为空的时候，继续下一次循环
 				if len(namespace[i].Items) == 0 {
-					fmt.Println("namespace is nil:  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
+					fmt.Println("namespace is nil AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
 				kv := make(map[string]*ItemInfo)
@@ -61,24 +73,26 @@ func (apolloValue *ApolloValue) CompareValue() {
 					kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
 				}
 				if _, ok := kv["consul_key"]; ok {
-					fmt.Println("content:", "key contain consul_key  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
+					fmt.Println("content:", "key contain consul_key AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
 				comkey := &CompareKey{}
 				comkey.NotExistKey = make(map[string]*ItemInfo)
 				comkey.NotEqualKey = make(map[string]*ItemInfo)
 				for k, v := range kv {
-					consulKValue, err := consulValue.GetValue(client, k)
-					if err != nil || consulKValue == nil {
-						// 对比之后不存在值
-						comkey.NotExistKey[k] = v
-						continue
+					for i := 0; i < len(client); i++ {
+						consulKValue, err := consulValue.GetValue(client[i], k)
+						if err != nil || consulKValue == nil {
+							// 对比之后不存在值
+							comkey.NotExistKey[k] = v
+							continue
+						}
+						if string(consulKValue.Value) == v.Value {
+							continue
+						}
+						// 对比之后不相等值
+						comkey.NotEqualKey[k] = v
 					}
-					if string(consulKValue.Value) == v.Value {
-						continue
-					}
-					// 对比之后不相等值
-					comkey.NotEqualKey[k] = v
 				}
 				kValue.NameSpace = make(map[string]*CompareKey)
 				kValue.NameSpace[namespace[i].NamespaceName] = comkey

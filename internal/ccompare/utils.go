@@ -1,120 +1,148 @@
 package ccompare
 
 import (
-	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+
+	"github.com/BurntSushi/toml"
 )
 
-type Config interface {
-	GetConfigInfo() error
+var AgolloConfiger *AgolloCfg
+var DyAgolloConfiger map[string]*DyAgolloCfg
+
+var AppConfiger *AppCfg
+var Configer *ConfigInfo
+var ChklogRamdom float64
+var ChklogRate float64
+
+const (
+	ServerName    = "mvbjqa"
+	SubServerName = "configCenter"
+)
+
+const (
+	ABTestAppid      = "abtest"
+	BidForceAppid    = "bidforce"
+	ABTest           = "abtesting"
+	BidForceDsp      = "dsp"
+	BidForceRtDsp    = "rtdsp"
+	BidForcePioneer  = "pioneer"
+	DefaultNamespace = "application"
+)
+
+const (
+	DirFlag = "configs"
+)
+
+const (
+	AgolloConfig = "agollo.toml"
+	LogConfig    = "log.toml"
+	AppConfig    = "app.toml"
+)
+
+type BaseConf struct {
+	LogCfg    *LogCfg
+	AgolloCfg *AgolloCfg
+	AppCfg    *AppCfg
 }
 
-type GlobalConfig struct {
-	AppConfigMap map[string]ConfigInfo  `toml:"app_config_map"`
-	ClusterMap   map[string]ClusterInfo `toml:"cluster_map"`
-}
-type AppIdClustersInfo struct {
-	// 全部的业务线
-	AppID []string
-	// 集群信息
-	EnvClustersInfoMap map[string][]*EnvClustersInfo
+type DyAgolloCfg struct {
+	ClusterConfig *ClusterCfg
+	AppConfig     *AppCfg
 }
 
-// 全局配置
-var GlobalConfiger *GlobalConfig
-var AppIdClusters *AppIdClustersInfo
-
-func (globalConfig *GlobalConfig) GetConfigInfo() error {
-	GlobalConfiger = &GlobalConfig{}
-	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", AgolloConfiger.PortalURL, "DEV", AgolloConfiger.AppID, AgolloConfiger.Cluster, AgolloConfiger.Namespace[0])
-	fmt.Println("url=", url)
-	globalInfo, _ := GetNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
-	if globalInfo == nil {
-		return errors.New("globalInfo is nil")
-	}
-	for _, item := range globalInfo.Items {
-		if item.Key == "cluster_map" {
-			clusterConfig, _ := ParseClusterConfig(item.Value)
-			globalConfig.ClusterMap = clusterConfig.ClusterMap
-		}
-		if item.Key == "app_config_map" {
-			appConfig, _ := ParseAppConfig(item.Value)
-			globalConfig.AppConfigMap = appConfig.AppConfigMap
-		}
-	}
-	GlobalConfiger = globalConfig
-	return nil
+type AgolloCfg struct {
+	ConfigServerURL string   `toml:"ipport"`
+	PortalURL       string   `toml:"portalport"`
+	AppID           string   `toml:"appid"`
+	Cluster         string   `toml:"cluster"`
+	Namespace       []string `toml:"namespace"`
+	CyclePeriod     int      `toml:"cycleperiod"`
 }
-func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
-	AppIdClusters = &AppIdClustersInfo{}
-	url1 := fmt.Sprintf("http://%s/openapi/v1/apps", AgolloConfiger.PortalURL)
-	_, err := getAccessToken(GlobalConfiger.AppConfigMap)
-	fmt.Println(appIdAccessToken)
-	//token, err := getDspToken(globalConfig.AccessToken)
+
+func ParseBaseConfig(configDir string) (*BaseConf, error) {
+	cfg := &BaseConf{}
+	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("Parse agoConfig error, err[%s]", err.Error())
 	}
-	// 只要获取某个业务线的token就可以，这里以dsp的token为例
-	appInfo, _ := GetAppInfo(url1, appIdAccessToken["dsp"])
-	//fmt.Println("url2=", url2)
-	//fmt.Println("appInfo=", appInfo)
-	if len(appInfo) == 0 {
-		fmt.Println("appInfo is nil ")
-		return errors.New("appInfo is nil ")
+
+	cfg.AgolloCfg = agolloCfg
+
+	logCfg, err := parseLogConfig(filepath.Join(configDir, LogConfig))
+	if err != nil {
+		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
 	}
-	appIdClustersInfo.EnvClustersInfoMap = make(map[string][]*EnvClustersInfo)
-	for _, v := range appInfo {
-		//appIdClustersInfo.AppID = append(appIdClustersInfo.AppID, v.AppId)
-		url2 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", AgolloConfiger.PortalURL, v.AppId)
-		for _, token := range appIdAccessToken {
-			envClustersInfo, _ := GetEnvClustersInfo(url2, token)
-			appIdClustersInfo.EnvClustersInfoMap[v.AppId] = envClustersInfo
-		}
-		if len(appIdClustersInfo.EnvClustersInfoMap) == 0 {
-			fmt.Println("EnvClustersInfoMap is nil ")
-			return errors.New("EnvClustersInfoMap is nil ")
-		}
-		fmt.Println("ecinfo=", appIdClustersInfo.EnvClustersInfoMap)
+	cfg.LogCfg = logCfg
+
+	appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
+	if err != nil {
+		return nil, fmt.Errorf("Parse appConfig error, err[%s]", err.Error())
 	}
-	AppIdClusters = appIdClustersInfo
+	cfg.AppCfg = appCfg
+
+	return cfg, nil
+}
+
+func parseLogConfig(fileName string) (*LogCfg, error) {
+	cfg := &LogCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func parseBaseAppConfig(fileName string) (*AppCfg, error) {
+	cfg := &AppCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
+	cfg := &AgolloCfg{}
+	if err := parseTomlConfig(fileName, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func ParseClusterConfig(data string) (*ClusterCfg, error) {
+	cfg := &ClusterCfg{}
+	if err := parseTomlStringConfig(data, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func ParseAppConfig(data string) (*AppCfg, error) {
+	cfg := &AppCfg{}
+	if err := parseTomlStringConfig(data, cfg); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func parseTomlConfig(fileName string, config interface{}) (err error) {
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return fmt.Errorf("readFile[%s], %s", fileName, err.Error())
+	}
+
+	if _, err = toml.Decode(string(data), config); err != nil {
+		return fmt.Errorf("decodeFile[%s], %s", fileName, err.Error())
+	}
+
 	return nil
 }
 
-//// 获取所有业务线
-//func getAllAppID() error {
-//	url2 := fmt.Sprintf("http://%s/openapi/v1/apps", AgolloConfiger.PortalURL)
-//	_, err := getAccessToken(GlobalConfiger.AppConfigMap)
-//	fmt.Println(appIdAccessToken)
-//	//token, err := getDspToken(globalConfig.AccessToken)
-//	if err != nil {
-//		return err
-//	}
-//	// 只要获取某个业务线的token就可以，这里以dsp的token为例
-//	appInfo, _ := GetAppInfo(url2, appIdAccessToken["dsp"])
-//	//fmt.Println("url2=", url2)
-//	//fmt.Println("appInfo=", appInfo)
-//	if len(appInfo) == 0 {
-//		fmt.Println("appInfo is nil ")
-//		return errors.New("appInfo is nil ")
-//	}
-//
-//	//fmt.Println("appID=", appID)
-//	return nil
-//}
-//
-//// 获取所有业务线的集群信息
-//func getEnvClustersInfo(appID string) (map[string][]*EnvClustersInfo, error) {
-//	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", AgolloConfiger.PortalURL, appID)
-//	envClustersInfoMap = make(map[string][]*EnvClustersInfo)
-//	for _, token := range appIdAccessToken {
-//		envClustersInfo, _ := GetEnvClustersInfo(url1, token)
-//		envClustersInfoMap[appID] = envClustersInfo
-//	}
-//	if len(envClustersInfoMap) == 0 {
-//		fmt.Println("EnvClustersInfoMap is nil ")
-//		return nil, errors.New("EnvClustersInfoMap is nil ")
-//	}
-//	fmt.Println("ecinfo=", envClustersInfoMap)
-//
-//	return envClustersInfoMap, nil
-//}
+func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
+
+	if _, err = toml.Decode(string(tomlData), config); err != nil {
+		return fmt.Errorf("decode %s, %s", tomlData, err.Error())
+	}
+
+	return nil
+}

@@ -1,148 +1,101 @@
 package ccompare
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-
-	"github.com/BurntSushi/toml"
 )
 
-var AgolloConfiger *AgolloCfg
-var DyAgolloConfiger map[string]*DyAgolloCfg
-
-var AppConfiger *AppCfg
-var Configer *ConfigInfo
-var ChklogRamdom float64
-var ChklogRate float64
-
-const (
-	ServerName    = "mvbjqa"
-	SubServerName = "configCenter"
-)
-
-const (
-	ABTestAppid      = "abtest"
-	BidForceAppid    = "bidforce"
-	ABTest           = "abtesting"
-	BidForceDsp      = "dsp"
-	BidForceRtDsp    = "rtdsp"
-	BidForcePioneer  = "pioneer"
-	DefaultNamespace = "application"
-)
-
-const (
-	DirFlag = "configs"
-)
-
-const (
-	AgolloConfig = "agollo.toml"
-	LogConfig    = "log.toml"
-	AppConfig    = "app.toml"
-)
-
-type BaseConf struct {
-	LogCfg    *LogCfg
-	AgolloCfg *AgolloCfg
-	AppCfg    *AppCfg
+type Config interface {
+	GetConfigInfo() error
 }
 
-type DyAgolloCfg struct {
-	ClusterConfig *ClusterCfg
-	AppConfig     *AppCfg
+type GlobalConfig struct {
+	AppConfigMap map[string]ConfigInfo  `toml:"app_config_map"`
+	ClusterMap   map[string]ClusterInfo `toml:"cluster_map"`
+}
+type AppIdClustersInfo struct {
+	// 全部的业务线集群信息
+	EnvClustersInfoMap map[string][]*EnvClustersInfo
 }
 
-type AgolloCfg struct {
-	ConfigServerURL string   `toml:"ipport"`
-	PortalURL       string   `toml:"portalport"`
-	AppID           string   `toml:"appid"`
-	Cluster         string   `toml:"cluster"`
-	Namespace       []string `toml:"namespace"`
-	CyclePeriod     int      `toml:"cycleperiod"`
+// 全局配置
+var GlobalConfiger *GlobalConfig
+var AppIdClusters *AppIdClustersInfo
+
+// 各个业务线对应的token
+var AppIdAccessToken map[string]string
+
+// 获取global_config的配置
+func (globalConfig *GlobalConfig) GetConfigInfo() error {
+	GlobalConfiger = &GlobalConfig{}
+	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", AgolloConfiger.PortalURL, "DEV", AgolloConfiger.AppID, AgolloConfiger.Cluster, AgolloConfiger.Namespace[0])
+	fmt.Println("url=", url)
+	globalInfo, _ := GetNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
+	if globalInfo == nil {
+		return errors.New("globalInfo is nil")
+	}
+	for _, item := range globalInfo.Items {
+		if item.Key == "cluster_map" {
+			clusterConfig, _ := ParseClusterConfig(item.Value)
+			globalConfig.ClusterMap = clusterConfig.ClusterMap
+		}
+		if item.Key == "app_config_map" {
+			appConfig, _ := ParseAppConfig(item.Value)
+			globalConfig.AppConfigMap = appConfig.AppConfigMap
+		}
+	}
+	GlobalConfiger = globalConfig
+	return nil
 }
-
-func ParseBaseConfig(configDir string) (*BaseConf, error) {
-	cfg := &BaseConf{}
-	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
-	if err != nil {
-		return nil, fmt.Errorf("Parse agoConfig error, err[%s]", err.Error())
+func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
+	AppIdClusters = &AppIdClustersInfo{}
+	url1 := fmt.Sprintf("http://%s/openapi/v1/apps", AgolloConfiger.PortalURL)
+	SetAppIDAccessToken()
+	fmt.Println(AppIdAccessToken)
+	//token, err := getDspToken(globalConfig.AccessToken)
+	if len(AppIdAccessToken) == 0 {
+		return errors.New("appID not correspond AccessToken")
 	}
-
-	cfg.AgolloCfg = agolloCfg
-
-	logCfg, err := parseLogConfig(filepath.Join(configDir, LogConfig))
-	if err != nil {
-		return nil, fmt.Errorf("Parse logConfig error, err[%s]", err.Error())
+	// 只要获取某个业务线的token就可以，这里以dsp的token为例
+	appInfo, _ := GetAppInfo(url1, AppIdAccessToken["dsp"])
+	//fmt.Println("url2=", url2)
+	//fmt.Println("appInfo=", appInfo)
+	if len(appInfo) == 0 {
+		fmt.Println("appInfo is nil ")
+		return errors.New("appInfo is nil ")
 	}
-	cfg.LogCfg = logCfg
-
-	appCfg, err := parseBaseAppConfig(filepath.Join(configDir, AppConfig))
-	if err != nil {
-		return nil, fmt.Errorf("Parse appConfig error, err[%s]", err.Error())
+	appIdClustersInfo.EnvClustersInfoMap = make(map[string][]*EnvClustersInfo)
+	for _, v := range appInfo {
+		//appIdClustersInfo.AppID = append(appIdClustersInfo.AppID, v.AppId)
+		url2 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", AgolloConfiger.PortalURL, v.AppId)
+		for _, token := range AppIdAccessToken {
+			envClustersInfo, _ := GetEnvClustersInfo(url2, token)
+			appIdClustersInfo.EnvClustersInfoMap[v.AppId] = envClustersInfo
+		}
+		if len(appIdClustersInfo.EnvClustersInfoMap) == 0 {
+			fmt.Println("EnvClustersInfoMap is nil ")
+			return errors.New("EnvClustersInfoMap is nil ")
+		}
+		fmt.Println("ecinfo=", appIdClustersInfo.EnvClustersInfoMap)
 	}
-	cfg.AppCfg = appCfg
-
-	return cfg, nil
-}
-
-func parseLogConfig(fileName string) (*LogCfg, error) {
-	cfg := &LogCfg{}
-	if err := parseTomlConfig(fileName, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
-
-func parseBaseAppConfig(fileName string) (*AppCfg, error) {
-	cfg := &AppCfg{}
-	if err := parseTomlConfig(fileName, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
-
-func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
-	cfg := &AgolloCfg{}
-	if err := parseTomlConfig(fileName, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
-
-func ParseClusterConfig(data string) (*ClusterCfg, error) {
-	cfg := &ClusterCfg{}
-	if err := parseTomlStringConfig(data, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
-
-func ParseAppConfig(data string) (*AppCfg, error) {
-	cfg := &AppCfg{}
-	if err := parseTomlStringConfig(data, cfg); err != nil {
-		return cfg, err
-	}
-	return cfg, nil
-}
-
-func parseTomlConfig(fileName string, config interface{}) (err error) {
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return fmt.Errorf("readFile[%s], %s", fileName, err.Error())
-	}
-
-	if _, err = toml.Decode(string(data), config); err != nil {
-		return fmt.Errorf("decodeFile[%s], %s", fileName, err.Error())
-	}
-
+	AppIdClusters = appIdClustersInfo
 	return nil
 }
 
-func parseTomlStringConfig(tomlData string, config interface{}) (err error) {
-
-	if _, err = toml.Decode(string(tomlData), config); err != nil {
-		return fmt.Errorf("decode %s, %s", tomlData, err.Error())
+// 获取appId对应的accessToken
+func SetAppIDAccessToken() {
+	AppIdAccessToken = make(map[string]string, 6)
+	// 配置文件里的token
+	for key, config := range AppConfiger.AppConfigMap {
+		AppIdAccessToken[key] = config.AccessToken
 	}
-
-	return nil
+	// 动态获取的token
+	for key, config := range GlobalConfiger.AppConfigMap {
+		// 有就替换为新的token
+		if _, ok := AppIdAccessToken[key]; ok {
+			AppIdAccessToken[key] = config.AccessToken
+		} else {
+			AppIdAccessToken[key] = config.AccessToken
+		}
+	}
 }

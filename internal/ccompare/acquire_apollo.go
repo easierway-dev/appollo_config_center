@@ -19,9 +19,6 @@ type AppIdProperty struct {
 	AccessToken string
 }
 
-// 各个业务线对应的token
-var appIdAccessToken map[string]string
-
 // 各个业务线对应的集群信息
 var appIdsProperty map[string]*AppIdProperty
 
@@ -39,7 +36,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 	for appid, envClusters := range envClustersMap {
 		for i := 0; i < len(envClusters); i++ {
 			if envClusters[i].Env == DEV {
-				appIdProperty = &AppIdProperty{AppId: appid, Env: DEV, ClusterName: envClusters[i].Clusters, AccessToken: appIdAccessToken[appid]}
+				appIdProperty = &AppIdProperty{AppId: appid, Env: DEV, ClusterName: envClusters[i].Clusters, AccessToken: AppIdAccessToken[appid]}
 				fmt.Println("appIdProperty AppId= ", appIdProperty.AppId)
 				fmt.Println("appIdProperty Env= ", appIdProperty.Env)
 				fmt.Println("appIdProperty ClusterName= ", appIdProperty.ClusterName)
@@ -56,7 +53,6 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 					// 每个集群下对应的namespace
 					appIdProperty.NameSpace[cluster] = nameSpaceInfo
 				}
-				fmt.Println("appIdProperty NameSpace= ", appIdProperty.NameSpace)
 				appIdsProperty[appid] = appIdProperty
 			} else {
 				return errors.New("not DEV environment")
@@ -102,17 +98,6 @@ func GetAppIdsProperty() (err error) {
 	return nil
 }
 
-// 获取appId对应的accessToken
-func getAccessToken(m map[string]ConfigInfo) (map[string]string, error) {
-	if len(m) == 0 {
-		return nil, errors.New("config is nil")
-	}
-	appIdAccessToken = make(map[string]string, 6)
-	for key, info := range m {
-		appIdAccessToken[key] = info.AccessToken
-	}
-	return appIdAccessToken, nil
-}
 func readCon() {
 	//
 	for _, val := range apolloInfo["dsp"] {
