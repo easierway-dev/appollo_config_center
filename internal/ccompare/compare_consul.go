@@ -3,7 +3,6 @@ package ccompare
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 )
 
 type Value interface {
@@ -14,20 +13,31 @@ type KeyInfo interface {
 	GetInfo(key string) map[string]string
 }
 type Key struct{}
+
 // 对比consul_kv之后,记录每个集群名和namesapce下不存在和不相等的key
 type KValue struct {
 	Cluster   string
 	NameSpace map[string]*CompareKey
 }
+
 //
 type CompareKey struct {
-	NotExistKey map[string]*capi.ItemInfo
-	NotEqualKey map[string]*capi.ItemInfo
+	NotExistKey map[string]*ItemInfo
+	NotEqualKey map[string]*ItemInfo
+}
+type ItemInfo struct {
+	Key                        string
+	Value                      string
+	DataChangeCreatedBy        string
+	DataChangeLastModifiedBy   string
+	DataChangeCreatedTime      string
+	DataChangeLastModifiedTime string
 }
 
 var apolloInfo map[string][]*KValue
 
 type ApolloValue struct {
+	Items map[string][]*KValue
 }
 type ConsulValue struct {
 }
@@ -36,8 +46,10 @@ func (apolloValue *ApolloValue) CompareValue() {
 	fmt.Println("init consul client")
 	consulValue := &ConsulValue{}
 	apolloInfo = make(map[string][]*KValue)
-	// 这里地址写死了,可以动态获取apollo的值
 	client, _ := NewClient(ADDR)
+	if len(appIdsProperty) == 0 {
+		fmt.Println("not any appIds")
+	}
 	// 每个业务线
 	for appId, appIdProperty := range appIdsProperty {
 		// 暂时跳过dsp_abtest,bidforce
@@ -49,36 +61,31 @@ func (apolloValue *ApolloValue) CompareValue() {
 		fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
 		for clusterName, namespace := range appIdProperty.NameSpace {
 			kValue := &KValue{}
+			// namespace为空的时候，继续下一次循环
 			for i := 0; i < len(namespace); i++ {
 				//
-				// namespace为空的时候，继续下一次循环
 				if len(namespace[i].Items) == 0 {
 					fmt.Println("namespace is nil:  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				kv := make(map[string]*capi.ItemInfo)
+				kv := make(map[string]*ItemInfo)
 				// 将单个namespace赋值到map中
 				for j := 0; j < len(namespace[i].Items); j++ {
-					kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
+					kv[namespace[i].Items[j].Key] = &ItemInfo{Value: namespace[i].Items[j].Value}
 				}
 				if _, ok := kv["consul_key"]; ok {
 					fmt.Println("content:", "key contain consul_key  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
-					continue
 				}
 				comkey := &CompareKey{}
-				comkey.NotExistKey = make(map[string]*capi.ItemInfo)
-				comkey.NotEqualKey = make(map[string]*capi.ItemInfo)
 				for k, v := range kv {
 					consulValue1, err := consulValue.GetValue(client, k)
 					if err != nil || consulValue1.(string) == "" {
-						// 对比之后不才存在值
 						comkey.NotExistKey[k] = v
 						continue
 					}
 					if consulValue1 == v.Value {
 						continue
 					}
-					// 对比之后不相等值
 					comkey.NotEqualKey[k] = v
 				}
 				kValue.NameSpace = make(map[string]*CompareKey)
@@ -90,9 +97,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 		apolloInfo[appId] = kValues
 	}
 }
-func getItemInfo(item capi.ItemInfo) *capi.ItemInfo {
-	return &capi.ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
-}
+
 func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (interface{}, error) {
 	value, err := GetConsulKV(client, path)
 	if err != nil {
