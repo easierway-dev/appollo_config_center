@@ -111,11 +111,11 @@ func Start() {
 	}
 	apollo := &ApolloValue{}
 	globalConfig := &GlobalConfig{}
-	property := &Properties{}
+	Property = &Properties{}
 	// 获取全局配置
 	globalConfig.GetConfigInfo()
 	// 每个业务线的具体信息
-	property.getAppIdsProperty()
+	Property.getAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
 	apollo.Print("dsp")
