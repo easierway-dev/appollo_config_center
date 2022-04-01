@@ -3,7 +3,6 @@ package ccompare
 import (
 	"errors"
 	"fmt"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/cnotify"
 	"gitlab.mobvista.com/voyager/zlog"
 )
 
@@ -69,7 +68,7 @@ func (this *ccLogger) Warn(args ...interface{}) {
 	if _, ok := interface{}(args[0]).(string); ok {
 		dingkeys, dingusers, _, isatall := GetDingInfo(args[0].(string), "warn")
 
-		cnotify.SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
+		SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
 		this.Runtime.Warn(args)
 	} else {
 		dingkeys, dingusers, usermap, isatall := GetDingInfo(args[1].(string), "warn")
@@ -85,7 +84,7 @@ func (this *ccLogger) Warn(args ...interface{}) {
 		default:
 			fmt.Println("dingusers type error , need []string")
 		}
-		cnotify.SendText(dingkeys, fmt.Sprintf("%s", args[1:]), dingusers, isatall)
+		SendText(dingkeys, fmt.Sprintf("%s", args[1:]), dingusers, isatall)
 		this.Runtime.Warn(args)
 	}
 }
@@ -95,7 +94,7 @@ func (this *ccLogger) Error(args ...interface{}) {
 		return
 	}
 	dingkeys, dingusers, _, isatall := GetDingInfo(args[0].(string), "err")
-	cnotify.SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
+	SendText(dingkeys, fmt.Sprintf("%s", args), dingusers, isatall)
 	this.Runtime.Error(args)
 }
 

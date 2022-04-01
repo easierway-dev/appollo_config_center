@@ -1,4 +1,4 @@
-package cnotify
+package ccompare
 
 import (
 	"fmt"
