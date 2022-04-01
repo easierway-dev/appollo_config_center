@@ -23,19 +23,13 @@ func handleKillSignal() {
 }
 
 func main() {
-	var server *ccompare.AgolloServer
-	var err error
-	server = ccompare.NewAgolloServer()
-	if err = ccompare.Init(server); err != nil {
-		panic(err)
-	}
-	go ccompare.Start(server)
+	go ccompare.Start()
 	ticker := time.NewTicker(time.Minute * 10)
 	for {
 		select {
 		case <-ticker.C:
 			fmt.Println("10分钟到....")
-			ccompare.Start(server)
+			ccompare.Start()
 		default:
 		}
 	}

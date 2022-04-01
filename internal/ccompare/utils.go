@@ -1,7 +1,9 @@
 package ccompare
 
 import (
-	"github.com/shima-park/agollo"
+	"errors"
+	"fmt"
+	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
 
@@ -14,16 +16,24 @@ type GlobalConfig struct {
 var GlobalConfiger *GlobalConfig
 
 // 获取全局配置
-func GetApolloGlobalConfig(server *AgolloServer) {
+func GetApolloGlobalConfig() error {
 	GlobalConfiger = &GlobalConfig{}
-	for _, ns := range ccommon.AgolloConfiger.Namespace {
-		dyCfg, err := ccommon.ParseDyConfig(server.gAgollo.Get("cluster_map", agollo.WithNamespace(ns)), server.gAgollo.Get("app_config_map", agollo.WithNamespace(ns)))
-		if err != nil {
-			//ccommon.CLogger.Error(ccommon.DefaultDingType, "ParseDyConfig error: ", err.Error())
-			panic(err)
-		}
-		GlobalConfiger.AppConfigMap = dyCfg.AppConfig.AppConfigMap
-		GlobalConfiger.ClusterMap = dyCfg.ClusterConfig.ClusterMap
+
+	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", ccommon.AgolloConfiger.PortalURL, "DEV", ccommon.AgolloConfiger.AppID, ccommon.AgolloConfiger.Cluster, ccommon.AgolloConfiger.Namespace)
+	fmt.Println("url=", url)
+	globalInfo, _ := capi.GetNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
+	if globalInfo == nil {
+		return errors.New("globalInfo is nil")
 	}
-	return
+	for _, item := range globalInfo.Items {
+		if item.Key == "cluster_map" {
+			clusterConfig, _ := ccommon.ParseClusterConfig(item.Value)
+			GlobalConfiger.ClusterMap = clusterConfig.ClusterMap
+		}
+		if item.Key == "app_config_map" {
+			appConfig, _ := ccommon.ParseAppConfig(item.Value)
+			GlobalConfiger.AppConfigMap = appConfig.AppConfigMap
+		}
+	}
+	return nil
 }
