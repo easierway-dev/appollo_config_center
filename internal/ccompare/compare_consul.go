@@ -126,6 +126,7 @@ func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.
 func (consulValue *ConsulValue) CompareValue() {
 }
 func (apolloValue *ApolloValue) Print(appId ...interface{}) {
+	fmt.Println("start.....")
 	switch reflect.TypeOf(appId).Kind() {
 	case reflect.Invalid:
 		printAll(apolloValue.ApolloInfo)
