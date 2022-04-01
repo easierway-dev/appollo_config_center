@@ -1,4 +1,4 @@
-package ccommon
+package ccompare
 
 import (
 	"errors"

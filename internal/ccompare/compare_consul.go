@@ -3,7 +3,6 @@ package ccompare
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
 )
 
 type Value interface {
@@ -21,8 +20,8 @@ type KValue struct {
 }
 //
 type CompareKey struct {
-	NotExistKey map[string]*capi.ItemInfo
-	NotEqualKey map[string]*capi.ItemInfo
+	NotExistKey map[string]*ItemInfo
+	NotEqualKey map[string]*ItemInfo
 }
 
 var apolloInfo map[string][]*KValue
@@ -56,7 +55,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("namespace is nil:  ", "AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				kv := make(map[string]*capi.ItemInfo)
+				kv := make(map[string]*ItemInfo)
 				// 将单个namespace赋值到map中
 				for j := 0; j < len(namespace[i].Items); j++ {
 					kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
@@ -66,8 +65,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 					continue
 				}
 				comkey := &CompareKey{}
-				comkey.NotExistKey = make(map[string]*capi.ItemInfo)
-				comkey.NotEqualKey = make(map[string]*capi.ItemInfo)
+				comkey.NotExistKey = make(map[string]*ItemInfo)
+				comkey.NotEqualKey = make(map[string]*ItemInfo)
 				for k, v := range kv {
 					consulKValue, err := consulValue.GetValue(client, k)
 					if err != nil || consulKValue == nil {
@@ -90,8 +89,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 		apolloInfo[appId] = kValues
 	}
 }
-func getItemInfo(item capi.ItemInfo) *capi.ItemInfo {
-	return &capi.ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
+func getItemInfo(item ItemInfo) *ItemInfo {
+	return &ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
 }
 func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.KVPair, error) {
 	kv := client.KV()

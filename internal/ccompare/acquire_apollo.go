@@ -3,8 +3,6 @@ package ccompare
 import (
 	"errors"
 	"fmt"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/capi"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 )
 
 const (
@@ -17,14 +15,9 @@ type AppIdProperty struct {
 	AppId       string
 	Env         string
 	ClusterName []string
-	NameSpace   map[string][]*capi.NamespaceInfo
+	NameSpace   map[string][]*NamespaceInfo
 	AccessToken string
 }
-// 全部的业务线
-var appID []string
-
-// 集群信息
-var envClustersInfoMap map[string][]*capi.EnvClustersInfo
 
 // 各个业务线对应的token
 var appIdAccessToken map[string]string
@@ -36,54 +29,13 @@ func New() *AppIdProperty {
 	return &AppIdProperty{}
 }
 
-// 获取所有业务线
-func getAllAppID() error {
-	url2 := fmt.Sprintf("http://%s/openapi/v1/apps", ccommon.AgolloConfiger.PortalURL)
-	_, err := getAccessToken(GlobalConfiger.AppConfigMap)
-	fmt.Println(appIdAccessToken)
-	//token, err := getDspToken(globalConfig.AccessToken)
-	if err != nil {
-		return err
-	}
-	// 只要获取某个业务线的token就可以，这里以dsp的token为例
-	appInfo, _ := capi.GetAppInfo(url2, appIdAccessToken["dsp"])
-	//fmt.Println("url2=", url2)
-	//fmt.Println("appInfo=", appInfo)
-	if len(appInfo) == 0 {
-		fmt.Println("appInfo is nil ")
-		return errors.New("appInfo is nil ")
-	}
-	for _, v := range appInfo {
-		appID = append(appID, v.AppId)
-	}
-	//fmt.Println("appID=", appID)
-	return nil
-}
-
-// 获取所有业务线的集群信息
-func getEnvClustersInfo(appID string) (map[string][]*capi.EnvClustersInfo, error) {
-	url1 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", ccommon.AgolloConfiger.PortalURL, appID)
-	envClustersInfoMap = make(map[string][]*capi.EnvClustersInfo)
-	for _, token := range appIdAccessToken {
-		envClustersInfo, _ := capi.GetEnvClustersInfo(url1, token)
-		envClustersInfoMap[appID] = envClustersInfo
-	}
-	if len(envClustersInfoMap) == 0 {
-		fmt.Println("EnvClustersInfoMap is nil ")
-		return nil, errors.New("EnvClustersInfoMap is nil ")
-	}
-	fmt.Println("ecinfo=", envClustersInfoMap)
-
-	return envClustersInfoMap, nil
-}
-
 func (appIdProperty *AppIdProperty) applyProperty() error {
 	//fmt.Println("appId length = ", len(appID))
 	// index为下标索引，id为具体的业务线
 	appIdsProperty = make(map[string]*AppIdProperty)
 	// 各个业务线
-	for _, id := range appID {
-		envClustersMap, _ := getEnvClustersInfo(id)
+	for _, id := range AppIdClusters.AppID {
+		envClustersMap := AppIdClusters.EnvClustersInfoMap
 		// 各个业务线下的集群信息
 		for in, _ := range envClustersMap[id] {
 			if envClustersMap[id][in].Env == DEV {
@@ -99,7 +51,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 						continue
 					}
 					if len(appIdProperty.NameSpace) == 0 {
-						appIdProperty.NameSpace = map[string][]*capi.NamespaceInfo{}
+						appIdProperty.NameSpace = map[string][]*NamespaceInfo{}
 					}
 					// 每个集群下对应的namespace
 					appIdProperty.NameSpace[cluster] = nameSpaceInfo
@@ -117,13 +69,13 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 // 通过全局的appIdsProperty
 // 循环获取Clusters的Namespace
 // 通过集群名，appID，namespace查找对应的信息：获取集群下所有Namespace信息接口，在进行细分每一个namespace
-func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*capi.NamespaceInfo, err error) {
-	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", ccommon.AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppId, apolloProperty.ClusterName[id])
+func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*NamespaceInfo, err error) {
+	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppId, apolloProperty.ClusterName[id])
 	//fmt.Println("url=", url)
 	//if apolloProperty.AccessToken == "" {
 	//	return nil, errors.New("AccessToken is nil")
 	//}
-	nSAllInfo, _ := capi.GetAllNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
+	nSAllInfo, _ := GetAllNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
 	if nSAllInfo == nil {
 		return nil, errors.New("nSAllInfo is nil")
 	}
@@ -132,7 +84,9 @@ func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*capi.
 }
 func GetAppIdsProperty() (err error) {
 	// 获取全局AppID
-	err = getAllAppID()
+	appIdClusters := AppIdClustersInfo{}
+	appIdClusters.GetConfigInfo()
+	//err = getAllAppID()
 	if err != nil {
 		return err
 	}
@@ -149,7 +103,7 @@ func GetAppIdsProperty() (err error) {
 }
 
 // 获取appId对应的accessToken
-func getAccessToken(m map[string]ccommon.ConfigInfo) (map[string]string, error) {
+func getAccessToken(m map[string]ConfigInfo) (map[string]string, error) {
 	if len(m) == 0 {
 		return nil, errors.New("config is nil")
 	}
@@ -183,8 +137,9 @@ func Start() {
 		panic(err)
 	}
 	apollo := &ApolloValue{}
+	globalconfig := &GlobalConfig{}
 	// 获取全局配置
-	GetApolloGlobalConfig()
+	globalconfig.GetConfigInfo()
 	// 每个业务线的具体信息
 	GetAppIdsProperty()
 	// 对比

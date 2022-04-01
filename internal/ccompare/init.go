@@ -2,30 +2,29 @@ package ccompare
 
 import (
 	"fmt"
-	"gitlab.mobvista.com/mvbjqa/appollo_config_center/internal/ccommon"
 	"math/rand"
 )
 
 func Init() error {
 	//init config
-	cfg, err := ccommon.ParseBaseConfig(ccommon.DirFlag)
+	cfg, err := ParseBaseConfig(DirFlag)
 	if err != nil {
 		fmt.Println("ParseConfig error: %s\n", err.Error())
 		return err
 	}
-	ccommon.AgolloConfiger = cfg.AgolloCfg
-	ccommon.AppConfiger = cfg.AppCfg
-	ccommon.ChklogRamdom = rand.Float64()
-	ccommon.ChklogRate = ccommon.AppConfiger.ChklogRate
+	AgolloConfiger = cfg.AgolloCfg
+	AppConfiger = cfg.AppCfg
+	ChklogRamdom = rand.Float64()
+	ChklogRate = AppConfiger.ChklogRate
 	// init log
-	cl, err := ccommon.NewconfigCenterLogger(cfg.LogCfg)
+	cl, err := NewconfigCenterLogger(cfg.LogCfg)
 	if err != nil {
 		fmt.Println("Load Logger err: ", err)
 		return err
 	}
-	ccommon.CLogger = cl
-	ccommon.CLogger.Info(ccommon.DefaultDingType, "Config=", ccommon.AgolloConfiger)
-	ccommon.DyAgolloConfiger = make(map[string]*ccommon.DyAgolloCfg)
+	CLogger = cl
+	CLogger.Info(DefaultDingType, "Config=", AgolloConfiger)
+	DyAgolloConfiger = make(map[string]*DyAgolloCfg)
 	//get global_config
 	//return BuildGlobalAgollo(ccommon.AgolloConfiger, server)
 	return nil

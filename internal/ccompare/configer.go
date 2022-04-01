@@ -1,4 +1,4 @@
-package ccommon
+package ccompare
 
 import (
 	"fmt"
@@ -61,46 +61,6 @@ type AgolloCfg struct {
 	CyclePeriod     int      `toml:"cycleperiod"`
 }
 
-type AppClusterCfg struct {
-	Namespace     []string                  `toml:"namespace"`
-	AppClusterMap map[string]AppClusterInfo `toml:"app_cluster_map"`
-}
-
-type ClusterCfg struct {
-	ClusterMap map[string]ClusterInfo `toml:"cluster_map"`
-}
-
-type AppCfg struct {
-	DingKeys       []string              `toml:"ding_keys"`
-	DingUsers      []string              `toml:"ding_users"`
-	DingUserMap    map[string]string     `toml:"ding_user_map"`
-	IsAtAll        int                   `toml:"is_at_all"`
-	EnUpdateConsul int                   `toml:"enable_update_consul"`
-	EnDelConsul    int                   `toml:"enable_delete_consul"`
-	ChklogRate     float64               `toml:"log_rate"`
-	AppConfigMap   map[string]ConfigInfo `toml:"app_config_map"`
-}
-
-type AppClusterInfo struct {
-	Cluster   []string `toml:"cluster"`
-	Namespace []string `toml:"namespace"`
-}
-
-type ClusterInfo struct {
-	ConsulAddr []string `toml:"consul_addr"`
-}
-
-type ConfigInfo struct {
-	DingKeys       []string          `toml:"ding_keys"`            //ding token
-	DingUsers      []string          `toml:"ding_users"`           //default ding @list
-	DingUserMap    map[string]string `toml:"ding_user_map"`        //config real editor ding @list
-	IsAtAll        int               `toml:"is_at_all"`            //1: atall 2:not atall
-	EnUpdateConsul int               `toml:"enable_update_consul"` //1: enable update consul 2:not
-	EnDelConsul    int               `toml:"enable_delete_consul"` //1: enable delete consul 2:not
-	ChklogRate     float64           `toml:"log_rate"`
-	AccessToken    string            `toml:"access_token"` //apollo api auth token
-}
-
 func ParseBaseConfig(configDir string) (*BaseConf, error) {
 	cfg := &BaseConf{}
 	agolloCfg, err := ParseAgolloConfig(filepath.Join(configDir, AgolloConfig))
@@ -148,14 +108,6 @@ func ParseAgolloConfig(fileName string) (*AgolloCfg, error) {
 	}
 	return cfg, nil
 }
-
-//func ParseAppClusterConfig(data string) (*AppClusterCfg, error) {
-//	cfg := &AppClusterCfg{}
-//	if err := parseTomlStringConfig(data, cfg); err != nil {
-//		return cfg, err
-//	}
-//	return cfg, nil
-//}
 
 func ParseClusterConfig(data string) (*ClusterCfg, error) {
 	cfg := &ClusterCfg{}
