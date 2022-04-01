@@ -49,6 +49,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 		// 每个集群下的nameSpace
 		fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
 		for clusterName, namespace := range appIdProperty.NameSpace {
+			kValue := &KValue{}
 			if consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]; !ok {
 				fmt.Println("content:", "cluster not correspond consulAddr AppId:", appId, "\tclusterName:", clusterName)
 				continue
@@ -62,7 +63,6 @@ func (apolloValue *ApolloValue) CompareValue() {
 					client = append(client, cli)
 				}
 			}
-			kValue := &KValue{}
 			for i := 0; i < len(namespace); i++ {
 				//
 				// namespace为空的时候，继续下一次循环
@@ -82,8 +82,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 				comkey := &CompareKey{}
 				comkey.NotExistKey = make(map[string]*ItemInfo)
 				comkey.NotEqualKey = make(map[string]*ItemInfo)
-				for k, v := range kv {
-					for i := 0; i < len(client); i++ {
+				for i := 0; i < len(client); i++ {
+					for k, v := range kv {
 						consulKValue, err := consulValue.GetValue(client[i], k)
 						if err != nil || consulKValue == nil {
 							// 对比之后不存在值
