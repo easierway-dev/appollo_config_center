@@ -69,13 +69,13 @@ func (apolloValue *ApolloValue) CompareValue() {
 				comkey.NotExistKey = make(map[string]*capi.ItemInfo)
 				comkey.NotEqualKey = make(map[string]*capi.ItemInfo)
 				for k, v := range kv {
-					consulValue1, err := consulValue.GetValue(client, k)
-					if err != nil || consulValue1.(string) == "" {
-						// 对比之后不才存在值
+					consulKValue, err := consulValue.GetValue(client, k)
+					if err != nil || consulKValue == nil {
+						// 对比之后不存在值
 						comkey.NotExistKey[k] = v
 						continue
 					}
-					if consulValue1 == v.Value {
+					if string(consulKValue.Value) == v.Value {
 						continue
 					}
 					// 对比之后不相等值
@@ -93,12 +93,13 @@ func (apolloValue *ApolloValue) CompareValue() {
 func getItemInfo(item capi.ItemInfo) *capi.ItemInfo {
 	return &capi.ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
 }
-func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (interface{}, error) {
-	value, err := GetConsulKV(client, path)
+func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.KVPair, error) {
+	kv := client.KV()
+	KVPair, _, err := kv.Get(path, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return value, nil
+	return KVPair, nil
 }
 func (consulValue *ConsulValue) CompareValue() {
 }
