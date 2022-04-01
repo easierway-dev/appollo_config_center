@@ -62,10 +62,10 @@ func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
 		fmt.Println("appInfo is nil ")
 		return errors.New("appInfo is nil ")
 	}
+	appIdClustersInfo.EnvClustersInfoMap = make(map[string][]*EnvClustersInfo)
 	for _, v := range appInfo {
 		//appIdClustersInfo.AppID = append(appIdClustersInfo.AppID, v.AppId)
 		url2 := fmt.Sprintf("http://%s/openapi/v1/apps/%s/envclusters", AgolloConfiger.PortalURL, v.AppId)
-		appIdClustersInfo.EnvClustersInfoMap = make(map[string][]*EnvClustersInfo)
 		for _, token := range appIdAccessToken {
 			envClustersInfo, _ := GetEnvClustersInfo(url2, token)
 			appIdClustersInfo.EnvClustersInfoMap[v.AppId] = envClustersInfo
