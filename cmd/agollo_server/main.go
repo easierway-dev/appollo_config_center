@@ -22,7 +22,7 @@ func handleKillSignal() {
 }
 
 func main() {
-	go ccompare.Start()
+	ccompare.Start()
 	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {
 		select {
