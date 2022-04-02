@@ -22,10 +22,14 @@ func handleKillSignal() {
 }
 
 func main() {
+	// 初始化配置文件
+	if err := ccompare.Init(); err != nil {
+		panic(err)
+	}
 	globalConfig := &ccompare.GlobalConfig{}
 	// 获取全局配置
 	globalConfig.GetConfigInfo()
-	ccompare.Start()
+	go ccompare.Start()
 	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {
 		select {

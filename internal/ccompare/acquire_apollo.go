@@ -105,10 +105,6 @@ func (property *Properties) getAppIdsProperty() (err error) {
 }
 
 func Start() {
-	// 初始化配置文件
-	if err := Init(); err != nil {
-		panic(err)
-	}
 	apollo := &ApolloValue{}
 	Property = &Properties{}
 	// 每个业务线的具体信息
