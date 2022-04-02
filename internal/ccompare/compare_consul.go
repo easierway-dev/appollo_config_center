@@ -23,11 +23,10 @@ type KValue struct {
 
 //
 type CompareKey struct {
+	ConsulAddr  string
 	NotExistKey map[string]*ItemInfo
 	NotEqualKey map[string]*ItemInfo
 }
-
-//var apolloInfo map[string][]*KValue
 
 type ApolloValue struct {
 	ApolloInfo map[string][]*KValue
@@ -38,7 +37,7 @@ type ConsulValue struct {
 func (apolloValue *ApolloValue) CompareValue() {
 	fmt.Println("start compare")
 	consulValue := &ConsulValue{}
-	var client []*api.Client
+	client := make(map[string]*api.Client)
 	apolloValue.ApolloInfo = make(map[string][]*KValue)
 	// 这里地址写死了,可以动态获取apollo的值
 	// 每个业务线
@@ -52,29 +51,32 @@ func (apolloValue *ApolloValue) CompareValue() {
 		fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
 		for clusterName, namespace := range appIdProperty.NameSpace {
 			kValue := &KValue{}
-			if consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]; !ok {
-				fmt.Println("content:", "cluster not correspond consulAddr AppId:", appId, "\tclusterName:", clusterName)
-				continue
-			} else {
-				for i := 0; i < len(consulAddr.ConsulAddr); i++ {
-					fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
-					cli, _ := NewClient(consulAddr.ConsulAddr[i])
-					if cli == nil {
-						fmt.Println("consulAddr:", consulAddr.ConsulAddr[i]+" connect failed")
-						continue
-					}
-					client = append(client, cli)
-				}
-			}
 			for i := 0; i < len(namespace); i++ {
-				//
 				// namespace为空的时候，继续下一次循环
 				if len(namespace[i].Items) == 0 {
 					fmt.Println("namespace is nil AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
+				if consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]; !ok {
+					fmt.Println("content:", "cluster not correspond consulAddr AppId:", appId, "\tclusterName:", clusterName)
+					continue
+				} else {
+					for i := 0; i < len(consulAddr.ConsulAddr); i++ {
+						if _, ok := client[consulAddr.ConsulAddr[i]]; ok {
+							continue
+						}
+						fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
+						cli, _ := NewClient(consulAddr.ConsulAddr[i])
+						if cli == nil {
+							fmt.Println("consulAddr:", consulAddr.ConsulAddr[i]+" connect failed")
+							continue
+						}
+						// 每个集群对应一个client
+						client[consulAddr.ConsulAddr[i]] = cli
+					}
+				}
 				kv := make(map[string]*ItemInfo)
-				// 将单个namespace赋值到map中
+				// 将单个namespace中的key,value赋值到map中
 				for j := 0; j < len(namespace[i].Items); j++ {
 					kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
 				}
@@ -86,9 +88,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 				comkey.NotExistKey = make(map[string]*ItemInfo)
 				comkey.NotEqualKey = make(map[string]*ItemInfo)
 				// 某个集群下consulAddr可能有多个
-				for i := 0; i < len(client); i++ {
+				for addr, cli := range client {
 					for k, v := range kv {
-						consulKValue, err := consulValue.GetValue(client[i], k)
+						consulKValue, err := consulValue.GetValue(cli, k)
 						if err != nil || consulKValue == nil {
 							// 对比之后不存在值
 							comkey.NotExistKey[k] = v
@@ -100,6 +102,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 						// 对比之后不相等值
 						comkey.NotEqualKey[k] = v
 					}
+					comkey.ConsulAddr = addr
 				}
 				kValue.NameSpace = make(map[string]*CompareKey)
 				kValue.NameSpace[namespace[i].NamespaceName] = comkey
