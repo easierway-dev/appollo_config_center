@@ -3,7 +3,6 @@ package ccompare
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
-	"reflect"
 )
 
 type Value interface {
@@ -127,15 +126,13 @@ func (consulValue *ConsulValue) CompareValue() {
 }
 func (apolloValue *ApolloValue) Print(appId ...interface{}) {
 	fmt.Println("start.....")
-	switch reflect.TypeOf(appId).Kind() {
-	case reflect.Invalid:
-		printAll(apolloValue.ApolloInfo)
-		break
-	case reflect.String:
-		printAppId(apolloValue.ApolloInfo, appId)
-		break
-	default:
-		break
+	for _, value := range appId {
+		if value == nil {
+			printAll(apolloValue.ApolloInfo)
+			break
+		} else {
+			printAppId(apolloValue.ApolloInfo, value)
+		}
 	}
 }
 func printAll(apolloKV map[string][]*KValue) {
