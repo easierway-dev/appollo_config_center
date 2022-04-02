@@ -20,7 +20,13 @@ type AppIdClustersInfo struct {
 	EnvClustersInfoMap map[string][]*EnvClustersInfo
 }
 
-const Timeout = 10
+const (
+	ClusterMap   = "cluster_map"
+	AppConfigMap = "app_config_map"
+	Timeout      = "timeout"
+	LoopTime     = 10
+)
+
 // 全局配置
 var GlobalConfiger *GlobalConfig
 var AppIdClusters *AppIdClustersInfo
@@ -39,20 +45,28 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 		return errors.New("globalInfo is nil")
 	}
 	for _, item := range globalInfo.Items {
-		if item.Key == "cluster_map" {
+
+		switch item.Key {
+		case ClusterMap:
 			clusterConfig, _ := ParseClusterConfig(item.Value)
 			globalConfig.ClusterMap = clusterConfig.ClusterMap
-		}
-		if item.Key == "app_config_map" {
+			break
+		case AppConfigMap:
 			appConfig, _ := ParseAppConfig(item.Value)
 			globalConfig.AppConfigMap = appConfig.AppConfigMap
-		}
-		if item.Key == "timeout" {
+			break
+		case Timeout:
 			if item.Value == "" {
-				globalConfig.Timeout = Timeout
+				globalConfig.Timeout = LoopTime
 			}
 			globalConfig.Timeout, _ = strconv.Atoi(item.Value)
+			break
+		default:
+			break
 		}
+	}
+	if globalConfig.Timeout == 0 {
+		globalConfig.Timeout = LoopTime
 	}
 	GlobalConfiger = globalConfig
 	return nil
