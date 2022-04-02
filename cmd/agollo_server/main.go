@@ -25,7 +25,7 @@ func main() {
 	globalConfig := &ccompare.GlobalConfig{}
 	// 获取全局配置
 	globalConfig.GetConfigInfo()
-	go ccompare.Start()
+	ccompare.Start()
 	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {
 		select {
