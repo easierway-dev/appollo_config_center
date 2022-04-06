@@ -45,7 +45,6 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 		return errors.New("globalInfo is nil")
 	}
 	for _, item := range globalInfo.Items {
-
 		switch item.Key {
 		case ClusterMap:
 			clusterConfig, _ := ParseClusterConfig(item.Value)

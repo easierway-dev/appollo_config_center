@@ -77,7 +77,7 @@ func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*Names
 	//if apolloProperty.AccessToken == "" {
 	//	return nil, errors.New("AccessToken is nil")
 	//}
-	nSAllInfo, _ := GetAllNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
+	nSAllInfo, _ := GetAllNamespaceInfo(url, apolloProperty.AccessToken)
 	if nSAllInfo == nil {
 		return nil, errors.New("nSAllInfo is nil")
 	}
