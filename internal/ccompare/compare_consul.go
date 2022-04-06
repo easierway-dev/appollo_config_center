@@ -145,16 +145,10 @@ func printAll(apolloKV map[string][]*KValue) {
 			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 			for namespace, keys := range val.NameSpace {
 				fmt.Println("dsp apolloInfo NameSpace =", namespace)
-				fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
-				fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
-				//for k, v := range keys.NotExistKey {
-				//	fmt.Println("dsp apolloInfo notExistKey =", k)
-				//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-				//}
-				//for k, v := range keys.NotEqualKey {
-				//	fmt.Println("dsp apolloInfo NotEqualKey =", k)
-				//	fmt.Println("dsp apolloInfo DataChangeLastModifiedBy =", v.DataChangeLastModifiedBy)
-				//}
+				for i := 0; i < len(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr); i++ {
+					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo notExistKey =", keys.NotExistKey)
+					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+				}
 			}
 		}
 	}
@@ -168,8 +162,8 @@ func printAppId(apolloKV map[string][]*KValue, appId ...interface{}) {
 			for namespace, keys := range val.NameSpace {
 				fmt.Println("dsp apolloInfo NameSpace =", namespace)
 				for i := 0; i < len(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr); i++ {
-					fmt.Println(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr, " dsp apolloInfo notExistKey =", keys.NotExistKey)
-					fmt.Println(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr, " dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo notExistKey =", keys.NotExistKey)
+					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
 				}
 			}
 		}
