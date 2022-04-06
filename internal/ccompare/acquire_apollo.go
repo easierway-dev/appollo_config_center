@@ -111,5 +111,5 @@ func Start() {
 	Property.getAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
-	apollo.Print("dsp")
+	apollo.Print(nil)
 }

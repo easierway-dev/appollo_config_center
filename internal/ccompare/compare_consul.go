@@ -157,6 +157,9 @@ func printAppId(apolloKV map[string][]*KValue, appId ...interface{}) {
 	fmt.Println("开始")
 	for _, id := range appId {
 		for _, val := range apolloKV[id.(string)] {
+			if val == nil {
+				return
+			}
 			//fmt.Println("apolloInfo kv =", kv)
 			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 			for namespace, keys := range val.NameSpace {
