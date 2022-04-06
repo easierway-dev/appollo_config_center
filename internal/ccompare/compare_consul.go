@@ -85,10 +85,10 @@ func (apolloValue *ApolloValue) CompareValue() {
 					continue
 				}
 				comkey := &CompareKey{}
-				comkey.NotExistKey = make(map[string]*ItemInfo)
-				comkey.NotEqualKey = make(map[string]*ItemInfo)
 				// 某个集群下consulAddr可能有多个
 				for addr, cli := range client {
+					comkey.NotExistKey = make(map[string]*ItemInfo)
+					comkey.NotEqualKey = make(map[string]*ItemInfo)
 					for k, v := range kv {
 						consulKValue, err := consulValue.GetValue(cli, k)
 						if err != nil || consulKValue == nil {
@@ -167,8 +167,10 @@ func printAppId(apolloKV map[string][]*KValue, appId ...interface{}) {
 			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 			for namespace, keys := range val.NameSpace {
 				fmt.Println("dsp apolloInfo NameSpace =", namespace)
-				fmt.Println("dsp apolloInfo notExistKey =", keys.NotExistKey)
-				fmt.Println("dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+				for i := 0; i < len(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr); i++ {
+					fmt.Println(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr, " dsp apolloInfo notExistKey =", keys.NotExistKey)
+					fmt.Println(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr, " dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+				}
 			}
 		}
 	}
