@@ -109,9 +109,12 @@ func (property *Properties) getAppIdsProperty() (err error) {
 func Start() {
 	apollo := &ApolloValue{}
 	Property = &Properties{}
+	consul := &ConsulValue{}
 	// 每个业务线的具体信息
 	Property.getAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
 	apollo.Print(nil)
+	consul.Print(nil)
+
 }

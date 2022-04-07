@@ -32,6 +32,7 @@ type ApolloValue struct {
 	ApolloInfo map[string][]*KValue
 }
 type ConsulValue struct {
+	ConsulInfo map[string]*ApolloValue
 }
 
 func (apolloValue *ApolloValue) CompareValue() {
@@ -39,6 +40,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 	consulValue := &ConsulValue{}
 	client := make(map[string]*api.Client)
 	apolloValue.ApolloInfo = make(map[string][]*KValue)
+	consulValue.ConsulInfo = make(map[string]*ApolloValue)
 	// 这里地址写死了,可以动态获取apollo的值
 	// 每个业务线
 	for appId, appIdProperty := range Property.AppIdsProperty {
@@ -84,14 +86,14 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("content:", "key contain consul_key AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				comkey := &CompareKey{}
 				// 某个集群下consulAddr可能有多个
 				for addr, cli := range client {
+					comkey := &CompareKey{}
 					comkey.NotExistKey = make(map[string]*ItemInfo)
 					comkey.NotEqualKey = make(map[string]*ItemInfo)
 					for k, v := range kv {
 						consulKValue, err := consulValue.GetValue(cli, k)
-						if err != nil || consulKValue == nil {
+						if consulKValue == nil || err != nil {
 							// 对比之后不存在值
 							comkey.NotExistKey[k] = v
 							continue
@@ -102,16 +104,17 @@ func (apolloValue *ApolloValue) CompareValue() {
 						// 对比之后不相等值
 						comkey.NotEqualKey[k] = v
 					}
-					comkey.ConsulAddr = addr
+					//comkey.ConsulAddr = addr
+					kValue.NameSpace = make(map[string]*CompareKey)
+					kValue.NameSpace[namespace[i].NamespaceName] = comkey
+					kValue.Cluster = clusterName
+					kValues = append(kValues, kValue)
+					// 每个业务线对应的具体信息
+					apolloValue.ApolloInfo[appId] = kValues
+					consulValue.ConsulInfo[addr] = apolloValue
 				}
-				kValue.NameSpace = make(map[string]*CompareKey)
-				kValue.NameSpace[namespace[i].NamespaceName] = comkey
 			}
-			kValue.Cluster = clusterName
-			kValues = append(kValues, kValue)
 		}
-		// 每个业务线对应的具体信息
-		apolloValue.ApolloInfo[appId] = kValues
 	}
 }
 func getItemInfo(item ItemInfo) *ItemInfo {
@@ -128,13 +131,21 @@ func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.
 func (consulValue *ConsulValue) CompareValue() {
 }
 func (apolloValue *ApolloValue) Print(appId ...interface{}) {
-	fmt.Println("start.....")
+	fmt.Println("start apolloValue.....")
 	for _, value := range appId {
 		if value == nil {
 			printAll(apolloValue.ApolloInfo)
 			break
 		} else {
 			printAppId(apolloValue.ApolloInfo, value)
+		}
+	}
+}
+func (consulValue *ConsulValue) Print(appId ...interface{}) {
+	fmt.Println("start consulValue.....")
+	for _, value := range appId {
+		if value == nil {
+			fmt.Println("consulValue.ConsulInfo = ", consulValue.ConsulInfo)
 		}
 	}
 }
