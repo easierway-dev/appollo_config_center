@@ -46,11 +46,13 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 				fmt.Println("appIdProperty AppId= ", appIdProperty.AppId)
 				fmt.Println("appIdProperty Env= ", appIdProperty.Env)
 				fmt.Println("appIdProperty ClusterName= ", appIdProperty.ClusterName)
+				fmt.Println("appIdProperty AccessToken= ", appIdProperty.AccessToken)
 				// 获取每个业务线的下的每个集群的所有namesapce
 				for id, cluster := range envClusters[i].Clusters {
 					nameSpaceInfo, err := appIdProperty.getNameSpaceInfo(id)
 					// 如果当前集群没有namespace，直接跳过
 					if err != nil || nameSpaceInfo == nil {
+						fmt.Println("APPID:", appid, "\tclusterName:", cluster, "\terr:", err)
 						continue
 					}
 					if len(appIdProperty.NameSpace) == 0 {
@@ -73,10 +75,10 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 // 通过集群名，appID，namespace查找对应的信息：获取集群下所有Namespace信息接口，在进行细分每一个namespace
 func (apolloProperty *AppIdProperty) getNameSpaceInfo(id int) (respBody []*NamespaceInfo, err error) {
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces", AgolloConfiger.PortalURL, apolloProperty.Env, apolloProperty.AppId, apolloProperty.ClusterName[id])
-	//fmt.Println("url=", url)
-	//if apolloProperty.AccessToken == "" {
-	//	return nil, errors.New("AccessToken is nil")
-	//}
+	fmt.Println("url=", url)
+	if apolloProperty.AccessToken == "" {
+		return nil, errors.New("AccessToken is nil")
+	}
 	nSAllInfo, _ := GetAllNamespaceInfo(url, apolloProperty.AccessToken)
 	if nSAllInfo == nil {
 		return nil, errors.New("nSAllInfo is nil")
