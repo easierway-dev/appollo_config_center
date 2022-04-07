@@ -62,7 +62,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("namespace is nil AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				if consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]; !ok {
+				consulAddr, ok := GlobalConfiger.ClusterMap[clusterName]
+				if !ok {
 					fmt.Println("content:", "cluster not correspond consulAddr AppId:", appId, "\tclusterName:", clusterName)
 					continue
 				} else {
@@ -89,38 +90,38 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("content:", "key contain consul_key AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				if _, ok := client[clusterName]; ok {
+				// 当前集群的consul地址检测
+				for i := 0; i < len(consulAddr.ConsulAddr); i++ {
+					cli := client[consulAddr.ConsulAddr[i]]
 					// 某个集群下consulAddr可能有多个
-					for addr, cli := range client {
-						fmt.Println("client len:", len(client))
-						comkey := &CompareKey{}
-						comkey.NotExistKey = make(map[string]*ItemInfo)
-						comkey.NotEqualKey = make(map[string]*ItemInfo)
-						for k, v := range kv {
-							consulKValue, err := consulValue.GetValue(cli, k)
-							if consulKValue == nil || err != nil {
-								// 对比之后不存在值
-								comkey.NotExistKey[k] = v
-								continue
-							}
-							if string(consulKValue.Value) == v.Value {
-								continue
-							}
-							// 对比之后不相等值
-							comkey.NotEqualKey[k] = v
+					comkey := &CompareKey{}
+					comkey.NotExistKey = make(map[string]*ItemInfo)
+					comkey.NotEqualKey = make(map[string]*ItemInfo)
+					for k, v := range kv {
+						consulKValue, err := consulValue.GetValue(cli, k)
+						if consulKValue == nil || err != nil {
+							// 对比之后不存在值
+							comkey.NotExistKey[k] = v
+							continue
 						}
-						//comkey.ConsulAddr = addr
-						kValue.NameSpace = make(map[string]*CompareKey)
-						kValue.Cluster = clusterName
-						fmt.Println("nameSpace =", namespace[i].NamespaceName)
-						kValue.NameSpace[namespace[i].NamespaceName] = comkey
-						kValues = append(kValues, kValue)
-						// 每个业务线对应的具体信息
-						apolloValue.ApolloInfo[appId] = kValues
-						apolloValue.Print(nil)
-						consulValue.ConsulInfo[addr] = apolloValue
-						Consul = consulValue
+						if string(consulKValue.Value) == v.Value {
+							continue
+						}
+						// 对比之后不相等值
+						comkey.NotEqualKey[k] = v
 					}
+					//comkey.ConsulAddr = addr
+					kValue.NameSpace = make(map[string]*CompareKey)
+					kValue.Cluster = clusterName
+					fmt.Println("nameSpace =", namespace[i].NamespaceName)
+					kValue.NameSpace[namespace[i].NamespaceName] = comkey
+					kValues = append(kValues, kValue)
+					// 每个业务线对应的具体信息
+					apolloValue.ApolloInfo[appId] = kValues
+					apolloValue.Print(nil)
+					consulValue.ConsulInfo[consulAddr.ConsulAddr[i]] = apolloValue
+					Consul = consulValue
+
 				}
 			}
 		}
