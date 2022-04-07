@@ -109,8 +109,8 @@ func (apolloValue *ApolloValue) CompareValue() {
 					}
 					//comkey.ConsulAddr = addr
 					kValue.NameSpace = make(map[string]*CompareKey)
-					kValue.NameSpace[namespace[i].NamespaceName] = comkey
 					kValue.Cluster = clusterName
+					kValue.NameSpace[namespace[i].NamespaceName] = comkey
 					kValues = append(kValues, kValue)
 					// 每个业务线对应的具体信息
 					apolloValue.ApolloInfo[appId] = kValues
@@ -157,6 +157,7 @@ func printAll(apolloKV map[string][]*KValue) {
 	for appid, value := range apolloKV {
 		for _, val := range value {
 			for namespace, keys := range val.NameSpace {
+				fmt.Println("nameSpace =", namespace)
 				for i := 0; i < len(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr); i++ {
 					fmt.Println("appid =", appid, "\tapolloInfo Cluster =", val.Cluster, "\tapolloInfo NameSpace =", namespace,
 						"\tconsulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], "  apolloInfo notExistKey =", keys.NotExistKey)
