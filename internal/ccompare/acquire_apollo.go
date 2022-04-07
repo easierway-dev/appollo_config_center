@@ -113,6 +113,6 @@ func Start() {
 	Property.getAppIdsProperty()
 	// 对比
 	apollo.CompareValue()
-	apollo.Print(nil)
+	//apollo.Print(nil)
 	Consul.Print(nil)
 }
