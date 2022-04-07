@@ -90,9 +90,9 @@ func (apolloValue *ApolloValue) CompareValue() {
 					fmt.Println("content:", "key contain consul_key AppId", appId, "\tclusterName", clusterName, "\tnamespace:", namespace[i].NamespaceName)
 					continue
 				}
-				// 当前集群的consul地址检测
-				for i := 0; i < len(consulAddr.ConsulAddr); i++ {
-					cli := client[consulAddr.ConsulAddr[i]]
+				// 当前集群的consul地址检
+				for j := 0; j < len(consulAddr.ConsulAddr); j++ {
+					cli := client[consulAddr.ConsulAddr[j]]
 					// 某个集群下consulAddr可能有多个
 					comkey := &CompareKey{}
 					comkey.NotExistKey = make(map[string]*ItemInfo)
@@ -118,8 +118,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 					kValues = append(kValues, kValue)
 					// 每个业务线对应的具体信息
 					apolloValue.ApolloInfo[appId] = kValues
-					apolloValue.Print(nil)
-					consulValue.ConsulInfo[consulAddr.ConsulAddr[i]] = apolloValue
+					consulValue.ConsulInfo[consulAddr.ConsulAddr[j]] = apolloValue
 					Consul = consulValue
 
 				}
