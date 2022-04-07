@@ -21,6 +21,8 @@ type AppIdClustersInfo struct {
 }
 
 const (
+	Default      = "default"
+	ConsulAdd    = "47.252.4.203:8500"
 	ClusterMap   = "cluster_map"
 	AppConfigMap = "app_config_map"
 	Timeout      = "timeout"
@@ -64,10 +66,17 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 			break
 		}
 	}
+	if len(globalConfig.ClusterMap) == 0 {
+		info := ClusterInfo{ConsulAddr: []string{ConsulAdd}}
+		m := map[string]ClusterInfo{}
+		m[Default] = info
+		globalConfig.ClusterMap = m
+	}
 	if globalConfig.Timeout == 0 {
 		globalConfig.Timeout = LoopTime
 	}
 	GlobalConfiger = globalConfig
+	fmt.Println("GlobalConfiger.ClusterMap = ", GlobalConfiger.ClusterMap)
 	return nil
 }
 func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
