@@ -20,7 +20,7 @@ func GetNamespaceInfo(url, token string) (respBody *NamespaceInfo, err error) {
 }
 func GetAllNamespaceInfo(url, token string) (respBody []*NamespaceInfo, err error) {
 	body, err := HttpGet(url, token)
-	fmt.Println("body = ", string(body))
+	//fmt.Println("body = ", string(body))
 	if err != nil {
 		fmt.Println("get body err:", err)
 		return nil, err
