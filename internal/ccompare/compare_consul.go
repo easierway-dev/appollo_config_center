@@ -35,9 +35,12 @@ type ConsulValue struct {
 	ConsulInfo map[string]*ApolloValue
 }
 
+var Consul *ConsulValue
+
 func (apolloValue *ApolloValue) CompareValue() {
 	fmt.Println("start compare")
 	consulValue := &ConsulValue{}
+	Consul = &ConsulValue{}
 	client := make(map[string]*api.Client)
 	apolloValue.ApolloInfo = make(map[string][]*KValue)
 	consulValue.ConsulInfo = make(map[string]*ApolloValue)
@@ -112,6 +115,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 					// 每个业务线对应的具体信息
 					apolloValue.ApolloInfo[appId] = kValues
 					consulValue.ConsulInfo[addr] = apolloValue
+					Consul = consulValue
 				}
 			}
 		}
