@@ -139,15 +139,14 @@ func (apolloValue *ApolloValue) Print(appId ...interface{}) {
 	}
 }
 func printAll(apolloKV map[string][]*KValue) {
-	for _, value := range apolloKV {
+	for appid, value := range apolloKV {
 		for _, val := range value {
-			//fmt.Println("apolloInfo kv =", kv)
-			fmt.Println("dsp apolloInfo Cluster =", val.Cluster)
 			for namespace, keys := range val.NameSpace {
-				fmt.Println("dsp apolloInfo NameSpace =", namespace)
 				for i := 0; i < len(GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr); i++ {
-					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo notExistKey =", keys.NotExistKey)
-					fmt.Println("consulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], " dsp apolloInfo NotEqualKey =", keys.NotEqualKey)
+					fmt.Println("appid =", appid, "\tapolloInfo Cluster =", val.Cluster, "\tapolloInfo NameSpace =", namespace,
+						"\tconsulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], "  apolloInfo notExistKey =", keys.NotExistKey)
+					fmt.Println("appid =", appid, "\tapolloInfo Cluster =", val.Cluster, "\tapolloInfo NameSpace =", namespace,
+						"\tconsulAddr: ", GlobalConfiger.ClusterMap[val.Cluster].ConsulAddr[i], "  apolloInfo NotEqualKey =", keys.NotEqualKey)
 				}
 			}
 		}
