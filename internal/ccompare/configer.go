@@ -3,6 +3,7 @@ package ccompare
 import (
 	"errors"
 	"fmt"
+	"github.com/hashicorp/consul/api"
 	"strconv"
 )
 
@@ -35,6 +36,7 @@ var AppIdClusters *AppIdClustersInfo
 
 // 各个业务线对应的token
 var AppIdAccessToken map[string]string
+var ConsulClient map[string]*api.Client
 
 // 获取global_config的配置
 func (globalConfig *GlobalConfig) GetConfigInfo() error {
@@ -133,6 +135,24 @@ func SetAppIDAccessToken() {
 			AppIdAccessToken[key] = config.AccessToken
 		} else {
 			AppIdAccessToken[key] = config.AccessToken
+		}
+	}
+}
+func GetConsulClient() {
+	ConsulClient = make(map[string]*api.Client)
+	for _, consulAddr := range GlobalConfiger.ClusterMap {
+		for i := 0; i < len(consulAddr.ConsulAddr); i++ {
+			if _, ok := ConsulClient[consulAddr.ConsulAddr[i]]; ok {
+				continue
+			}
+			fmt.Println("consulAddr:", consulAddr.ConsulAddr[i])
+			cli, _ := NewClient(consulAddr.ConsulAddr[i])
+			if cli == nil {
+				fmt.Println("consulAddr:", consulAddr.ConsulAddr[i]+" connect failed")
+				continue
+			}
+			// 每个集群对应一个client
+			ConsulClient[consulAddr.ConsulAddr[i]] = cli
 		}
 	}
 }
