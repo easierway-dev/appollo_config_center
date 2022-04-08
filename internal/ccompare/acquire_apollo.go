@@ -7,10 +7,8 @@ import (
 
 const (
 	DEV      = "DEV"
-	DSPALIVG = "dsp_ali_vg"
-	DSP      = "dsp"
 )
-
+// 每一个APPID的属性
 type AppIdProperty struct {
 	AppId       string
 	Env         string
@@ -46,6 +44,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 				fmt.Println("appIdProperty AppId= ", appIdProperty.AppId)
 				fmt.Println("appIdProperty Env= ", appIdProperty.Env)
 				fmt.Println("appIdProperty ClusterName= ", appIdProperty.ClusterName)
+				appIdProperty.AccessToken = "99648d96fe042df1b2280d6e7fe2278a08ff55b5"
 				fmt.Println("appIdProperty AccessToken= ", appIdProperty.AccessToken)
 				// 获取每个业务线的下的每个集群的所有namesapce
 				for id, cluster := range envClusters[i].Clusters {
