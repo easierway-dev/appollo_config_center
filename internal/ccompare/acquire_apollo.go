@@ -43,7 +43,7 @@ func (appIdProperty *AppIdProperty) applyProperty() error {
 				fmt.Println("appIdProperty AppId= ", appIdProperty.AppId)
 				fmt.Println("appIdProperty Env= ", appIdProperty.Env)
 				fmt.Println("appIdProperty ClusterName= ", appIdProperty.ClusterName)
-				appIdProperty.AccessToken = "99648d96fe042df1b2280d6e7fe2278a08ff55b5"
+				appIdProperty.AccessToken = "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5"
 				fmt.Println("appIdProperty AccessToken= ", appIdProperty.AccessToken)
 				// 获取每个业务线的下的每个集群的所有namesapce
 				for id, cluster := range envClusters[i].Clusters {

@@ -44,7 +44,7 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 	url := fmt.Sprintf("http://%s/openapi/v1/envs/%s/apps/%s/clusters/%s/namespaces/%s", AgolloConfiger.PortalURL, "DEV", AgolloConfiger.AppID, AgolloConfiger.Cluster, AgolloConfiger.Namespace[0])
 	fmt.Println("url=", url)
 	// 默认的token
-	globalInfo, _ := GetNamespaceInfo(url, "99648d96fe042df1b2280d6e7fe2278a08ff55b5")
+	globalInfo, _ := GetNamespaceInfo(url, "280c6b92cd8ee4f1c5833b4bd22dfe44a4778ab5")
 	if globalInfo == nil {
 		return errors.New("globalInfo is nil")
 	}
@@ -68,12 +68,14 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 			break
 		}
 	}
+	// 如果获取不到consul地址，给一个默认的
 	if len(globalConfig.ClusterMap) == 0 {
 		info := ClusterInfo{ConsulAddr: []string{ConsulAdd}}
 		m := map[string]ClusterInfo{}
 		m[Default] = info
 		globalConfig.ClusterMap = m
 	}
+	// 没有配置定时时间，默认10分钟
 	if globalConfig.Timeout == 0 {
 		globalConfig.Timeout = LoopTime
 	}
@@ -84,7 +86,7 @@ func (globalConfig *GlobalConfig) GetConfigInfo() error {
 func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
 	AppIdClusters = &AppIdClustersInfo{}
 	url1 := fmt.Sprintf("http://%s/openapi/v1/apps", AgolloConfiger.PortalURL)
-	// 动态获取业务线的token
+	// 动态获取业务线的token,这里是配置文件和动态加载的结果，可以最终设置一个最终的token来进行管理，可以不进行设置
 	SetAppIDAccessToken()
 	fmt.Println(AppIdAccessToken)
 	//token, err := getDspToken(globalConfig.AccessToken)
@@ -115,8 +117,8 @@ func (appIdClustersInfo *AppIdClustersInfo) GetConfigInfo() error {
 			fmt.Println("EnvClustersInfoMap is nil ")
 			return errors.New("EnvClustersInfoMap is nil ")
 		}
-		fmt.Println("ecinfo=", appIdClustersInfo.EnvClustersInfoMap)
 	}
+	fmt.Println("ecinfo=", appIdClustersInfo.EnvClustersInfoMap)
 	AppIdClusters = appIdClustersInfo
 	return nil
 }
@@ -138,6 +140,8 @@ func SetAppIDAccessToken() {
 		}
 	}
 }
+
+// 首先初始化consul配置
 func GetConsulClient() {
 	ConsulClient = make(map[string]*api.Client)
 	for _, consulAddr := range GlobalConfiger.ClusterMap {

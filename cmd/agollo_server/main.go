@@ -27,7 +27,6 @@ func main() {
 		panic(err)
 	}
 	ccompare.Start()
-	fmt.Println("timeout = ", ccompare.GlobalConfiger.Timeout)
 	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {
 		select {

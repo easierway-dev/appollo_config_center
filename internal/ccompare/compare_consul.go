@@ -9,28 +9,25 @@ type Value interface {
 	CompareValue()
 	Print(id ...interface{})
 }
-
 type KeyInfo interface {
 	GetInfo(key string) map[string]string
 }
 type Key struct{}
-
 // 对比consul_kv之后,记录每个集群名和namesapce下不存在和不相等的key
 type KValue struct {
 	Cluster   string
 	NameSpace map[string]*CompareKey
 }
-
-//
 type CompareKey struct {
-	ConsulAddr  string
 	NotExistKey map[string]*ItemInfo
 	NotEqualKey map[string]*ItemInfo
 }
-
+// apollo具体值
 type ApolloValue struct {
 	ApolloInfo map[string][]*KValue
 }
+
+// consul具体值
 type ConsulValue struct {
 	ConsulInfo map[string]*ApolloValue
 }
@@ -44,19 +41,20 @@ func (apolloValue *ApolloValue) CompareValue() {
 	//client := make(map[string]*api.Client)
 	apolloValue.ApolloInfo = make(map[string][]*KValue)
 	consulValue.ConsulInfo = make(map[string]*ApolloValue)
-	// 这里地址写死了,可以动态获取apollo的值
-	// 每个业务线
 	// 获取consul连接
 	GetConsulClient()
+	// 这里每个consul地址，然后进行每个业务线的遍历，最后每个地址下对应一个apollo配置
 	for consulAddress, client := range ConsulClient {
+		// 遍历每一个业务线
 		for appId, appIdProperty := range Property.AppIdsProperty {
-			// 暂时跳过dsp_abtest,bidforce
+			// 暂时跳过dsp_abtest,bidforce,key中含有consul_key
 			if appId == "dsp_abtest" || appId == "bidforce" {
 				continue
 			}
 			var kValues []*KValue
 			// 每个集群下的nameSpace
 			fmt.Println("appid ==", appId, "appIdProperty.NameSpace = ", appIdProperty.NameSpace)
+			// 遍历每一个业务线的集群信息
 			for clusterName, namespace := range appIdProperty.NameSpace {
 				for i := 0; i < len(namespace); i++ {
 					kValue := &KValue{}
@@ -66,7 +64,7 @@ func (apolloValue *ApolloValue) CompareValue() {
 						continue
 					}
 					kv := make(map[string]*ItemInfo)
-					// 将单个namespace中的key,value赋值到map中
+					// 将单个namespace中的key,value赋值到map中，为了判断key中是否包含consul_key
 					for j := 0; j < len(namespace[i].Items); j++ {
 						kv[namespace[i].Items[j].Key] = getItemInfo(namespace[i].Items[j])
 					}
@@ -76,12 +74,11 @@ func (apolloValue *ApolloValue) CompareValue() {
 					}
 					// 具体集群对应的consul地址
 					consulAddr := GlobalConfiger.ClusterMap[clusterName]
-					// 当前集群的consul地址检
+					// 当前集群的consul地址检测
 					for j := 0; j < len(consulAddr.ConsulAddr); j++ {
 						if consulAddr.ConsulAddr[j] != consulAddress {
 							continue
 						}
-						// 某个集群下consulAddr可能有多个
 						comkey := &CompareKey{}
 						comkey.NotExistKey = make(map[string]*ItemInfo)
 						comkey.NotEqualKey = make(map[string]*ItemInfo)
@@ -104,19 +101,24 @@ func (apolloValue *ApolloValue) CompareValue() {
 						fmt.Println("nameSpace =", namespace[i].NamespaceName)
 						kValue.NameSpace[namespace[i].NamespaceName] = comkey
 						kValues = append(kValues, kValue)
-						// 每个业务线对应的具体信息
 					}
 				}
 			}
+			// 每个业务线对应的具体信息
 			apolloValue.ApolloInfo[appId] = kValues
 		}
+		// 每个consul地址对应的的apollo信息
 		consulValue.ConsulInfo[consulAddress] = apolloValue
 		Consul = consulValue
 	}
 }
+
+// 获取具体某个key的信息
 func getItemInfo(item ItemInfo) *ItemInfo {
 	return &ItemInfo{Value: item.Value, DataChangeLastModifiedBy: item.DataChangeLastModifiedBy}
 }
+
+// 获取consul的key的值
 func (consulValue *ConsulValue) GetValue(client *api.Client, path string) (*api.KVPair, error) {
 	kv := client.KV()
 	KVPair, _, err := kv.Get(path, nil)
@@ -138,6 +140,7 @@ func (apolloValue *ApolloValue) Print(appId ...interface{}) {
 		}
 	}
 }
+
 func (consulValue *ConsulValue) Print(appId ...interface{}) {
 	fmt.Println("start consulValue.....")
 	for _, value := range appId {
@@ -146,6 +149,8 @@ func (consulValue *ConsulValue) Print(appId ...interface{}) {
 		}
 	}
 }
+
+// 当apolloKV == nil，打印所有信息
 func printAll(apolloKV map[string][]*KValue) {
 	for appid, value := range apolloKV {
 		for _, val := range value {
@@ -160,8 +165,9 @@ func printAll(apolloKV map[string][]*KValue) {
 		}
 	}
 }
+
+// 打印具体某个业务线信息，例如dsp
 func printAppId(apolloKV map[string][]*KValue, appId ...interface{}) {
-	fmt.Println("开始")
 	for _, id := range appId {
 		for _, val := range apolloKV[id.(string)] {
 			if val == nil {
