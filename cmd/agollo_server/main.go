@@ -26,10 +26,7 @@ func main() {
 	if err := ccompare.Init(); err != nil {
 		panic(err)
 	}
-	globalConfig := &ccompare.GlobalConfig{}
-	// 获取全局配置
-	globalConfig.GetConfigInfo()
-	go ccompare.Start()
+	ccompare.Start()
 	fmt.Println("timeout = ", ccompare.GlobalConfiger.Timeout)
 	ticker := time.NewTicker(time.Minute * time.Duration(ccompare.GlobalConfiger.Timeout))
 	for {

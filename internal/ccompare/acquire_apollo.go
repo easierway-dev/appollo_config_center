@@ -18,7 +18,6 @@ type AppIdProperty struct {
 }
 
 // 各个业务线对应的集群信息
-
 type Properties struct {
 	AppIdsProperty map[string]*AppIdProperty
 }
@@ -106,6 +105,9 @@ func (property *Properties) getAppIdsProperty() (err error) {
 }
 
 func Start() {
+	globalConfig := &GlobalConfig{}
+	// 获取全局配置
+	globalConfig.GetConfigInfo()
 	apollo := &ApolloValue{}
 	Property = &Properties{}
 	// 每个业务线的具体信息
